@@ -47,15 +47,23 @@
 					
 					LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath libs;
 
-					dotnet = (with pkgs.dotnetCorePackages; combinePackages [
-						sdk_9_0-bin
-					]);
+					# dotnet = (with pkgs.dotnetCorePackages; combinePackages [
+					# 	sdk_9_0-bin
+					# ]);
+					dotnet = pkgs.dotnetCorePackages.sdk_9_0_2xx;
 
 					nativeBuildInputs = with pkgs; [
 						dotnet
 
+						godot-mono
+
 						# debugging
 						renderdoc
+
+						gcc
+						cmake
+						ninja
+						gnumake
 					];
 
 					buildInputs = with pkgs; [
@@ -63,7 +71,7 @@
 					];
 					
 					shellHook = ''
-						export DOTNET_ROOT="${dotnet}"
+						export DOTNET_ROOT="${dotnet}/share/dotnet"
 					'';
 				}));
 		};

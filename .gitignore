@@ -488,6 +488,9 @@ $RECYCLE.BIN/
 .profile/
 .nix-profile/
 
+# Godot
+*/.godot/
+
 # To delete
 planetes/
 terrain/
