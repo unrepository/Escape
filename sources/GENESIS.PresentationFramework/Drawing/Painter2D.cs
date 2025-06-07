@@ -7,15 +7,15 @@ using Hexa.NET.ImGui;
 
 namespace GENESIS.PresentationFramework.Drawing {
 	
-	public abstract class Painter3D : IPainter {
+	public abstract class Painter2D : IPainter {
 
 		protected List<DrawList> DrawLists { get; } = [];
 		protected int CurrentDrawList { get; set; } = -1;
 		protected string? CurrentModel { get; set; } = null;
 
-		public Painter3D() {
+		public Painter2D() {
 		#if DEBUG
-			var id = $"Painter3D#{GetHashCode()}";
+			var id = $"Painter2D#{GetHashCode()}";
 			
 			DebugScene.DebugInfoSlots[id] = delta => {
 				if(ImGui.TreeNode("Graphs")) {
@@ -99,27 +99,9 @@ namespace GENESIS.PresentationFramework.Drawing {
 			CurrentModel = DrawLists[index].Model;
 			return true;
 		}
-
-		public void AddCube(Vector3 position, Vector3 rotation, Vector3 scale, Color color) {
-			Debug.Assert(CurrentDrawList != -1, "AddCube() called outside a draw list");
-			Debug.Assert(CurrentModel is null or "cube", "Only a single model can be drawn per draw list");
-
-			var drawList = DrawLists[CurrentDrawList];
-
-			if(CurrentModel is null) {
-				CurrentModel = "cube";
-				drawList.Model = CurrentModel;
-				drawList.Vertices.AddRange(Models.Cube);
-			}
-			
-			drawList.Colors.Add(color.ToVector4());
-			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
-				* Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
-				* Matrix4x4.CreateTranslation(position));
-		}
 		
-		public void AddPlane(Vector3 position, Vector3 rotation, Vector3 scale, Color color) {
-			Debug.Assert(CurrentDrawList != -1, "AddPlane() called outside a draw list");
+		public void AddQuad(Vector2 position, float rotation, Vector2 scale, Color color) {
+			Debug.Assert(CurrentDrawList != -1, "AddQuad() called outside a draw list");
 			Debug.Assert(CurrentModel is null or "quad", "Only a single model can be drawn per draw list");
 
 			var drawList = DrawLists[CurrentDrawList];
@@ -131,12 +113,12 @@ namespace GENESIS.PresentationFramework.Drawing {
 			}
 			
 			drawList.Colors.Add(color.ToVector4());
-			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
-			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
-			                      * Matrix4x4.CreateTranslation(position));
+			drawList.Matrices.Add(Matrix4x4.CreateScale(new Vector3(scale.X, scale.Y, 1))
+			                      * Matrix4x4.CreateFromYawPitchRoll(0, 0, rotation)
+			                      * Matrix4x4.CreateTranslation(new Vector3(position.X, position.Y, 0)));
 		}
 
-		public void AddObject(string modelName, Vector3 position, Vector3 rotation, Vector3 scale, Color color) {
+		public void AddObject(string modelName, Vector2 position, float rotation, Vector2 scale, Color color) {
 			Debug.Assert(CurrentDrawList != -1, "AddObject() called outside a draw list");
 			Debug.Assert(CurrentModel is null || CurrentModel == modelName, "Only a single model can be drawn per draw list");
 
@@ -151,9 +133,9 @@ namespace GENESIS.PresentationFramework.Drawing {
 			}
 			
 			drawList.Colors.Add(color.ToVector4());
-			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
-			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
-			                      * Matrix4x4.CreateTranslation(position));
+			drawList.Matrices.Add(Matrix4x4.CreateScale(new Vector3(scale.X, scale.Y, 1))
+			                      * Matrix4x4.CreateFromYawPitchRoll(0, 0, rotation)
+			                      * Matrix4x4.CreateTranslation(new Vector3(position.X, position.Y, 0)));
 		}
 
 		public abstract void Paint();

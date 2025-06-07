@@ -25,18 +25,22 @@ namespace GENESIS.PresentationFramework.Camera {
 
 		protected ShaderData<CameraData> ShaderData;
 
-		protected CameraBase(Window window, IShader shader) {
-			Width = window.Base.FramebufferSize.X;
-			Height = window.Base.FramebufferSize.Y;
-			
-			RecalculateProjectionMatrix();
-
+		protected CameraBase(Window window, IShader shader)
+			: this(window.Base.FramebufferSize.X, window.Base.FramebufferSize.Y, shader)
+		{
 			window.Base.FramebufferResize += size => {
 				Width = size.X;
 				Height = size.Y;
 				
 				RecalculateProjectionMatrix();
 			};
+		}
+
+		protected CameraBase(int width, int height, IShader shader) {
+			Width = width;
+			Height = height;
+			
+			RecalculateProjectionMatrix();
 
 			unsafe {
 				ShaderData = new ShaderData<CameraData> {

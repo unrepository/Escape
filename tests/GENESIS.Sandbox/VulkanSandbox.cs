@@ -8,7 +8,7 @@ namespace GENESIS.Sandbox {
 		
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-		public static void Main(string[] args) {
+		public static void Start(string[] args) {
 			var platform = new VulkanPlatform(new VulkanPlatform.Options() {
 				Headless = false
 			});

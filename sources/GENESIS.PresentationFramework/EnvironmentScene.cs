@@ -17,13 +17,24 @@ namespace GENESIS.PresentationFramework {
 
 		protected IShader PrimaryShader => ShaderProgram.Shaders[0];
 
+		[Obsolete]
 		public EnvironmentScene(GLPlatform platform, Type type, string id) : base(default, id) {
 			ShaderProgram = type switch {
-				Type.ThreeDimensional => IShaderProgram.Create(platform, GetDefault3DShaderSet(platform)),
+				Type.ThreeDimensional => IShaderProgram.Create(platform, GetDefaultShaderSet(platform)),
 				_ => throw new NotImplementedException()
 			};
 
 			Painter = new Painter {
+				XY = new GLPainter2D(platform, ShaderProgram, PrimaryShader),
+				XYZ = new GLPainter3D(platform, ShaderProgram, PrimaryShader)
+			};
+		}
+		
+		public EnvironmentScene(GLPlatform platform, string id) : base(default, id) {
+			ShaderProgram = IShaderProgram.Create(platform, GetDefaultShaderSet(platform));
+
+			Painter = new Painter {
+				XY = new GLPainter2D(platform, ShaderProgram, PrimaryShader),
 				XYZ = new GLPainter3D(platform, ShaderProgram, PrimaryShader)
 			};
 		}
@@ -33,17 +44,18 @@ namespace GENESIS.PresentationFramework {
 			
 			Camera?.Update();
 			Painter.XYZ.Paint();
+			Painter.XY.Paint(); // TODO merging 2D and 3D painters would also mean that we can easily manipulate the drawing order
 		}
 
-		public static GLShader[] GetDefault3DShaderSet(GLPlatform platform)
+		public static GLShader[] GetDefaultShaderSet(GLPlatform platform)
 			=> [
 				new GLShader(platform, ShaderType.VertexShader,
 					Assembly.GetExecutingAssembly().ReadTextResource(
-						"GENESIS.PresentationFramework.Resources.Shaders.OpenGL.environment3d.vert"
+						"GENESIS.PresentationFramework.Resources.Shaders.OpenGL.environment.vert"
 				)),
 				new GLShader(platform, ShaderType.FragmentShader,
 					Assembly.GetExecutingAssembly().ReadTextResource(
-						"GENESIS.PresentationFramework.Resources.Shaders.OpenGL.environment3d.frag"
+						"GENESIS.PresentationFramework.Resources.Shaders.OpenGL.environment.frag"
 				))
 			];
 

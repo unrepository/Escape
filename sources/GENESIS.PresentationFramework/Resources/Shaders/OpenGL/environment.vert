@@ -12,7 +12,6 @@ layout(std430, binding = 0) readonly buffer CameraBuffer {
 
 struct Vertex {
 	vec3 position;
-	//vec4 color;
 	vec3 normal;
 };
 
@@ -28,6 +27,7 @@ layout(std430, binding = 12) readonly buffer SSBO4 {
 	mat4 objectMatrices[];
 };
 
+out Vertex vertex;
 out vec4 vColor;
 
 void main() {
@@ -35,5 +35,7 @@ void main() {
 	
 	gl_Position = cameraData.projection * cameraData.view * objectMatrices[gl_InstanceID]
 		* vec4(v.position, 1.0);
+
+	vertex = v;
 	vColor = objectColors[gl_InstanceID];
 }

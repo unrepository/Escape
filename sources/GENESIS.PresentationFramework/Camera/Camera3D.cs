@@ -38,14 +38,15 @@ namespace GENESIS.PresentationFramework.Camera {
 		public Vector3 Front = Vector3.UnitZ;
 		public Vector3 Up = Vector3.UnitY;
 
-		protected Camera3D(Window window, IShader shader) : base(window, shader) {}
+		protected Camera3D(Window window, IShader shader) : base(window, shader) { }
+		protected Camera3D(int width, int height, IShader shader) : base(width, height, shader) { }
 
-		public void MoveUp(float amount) => Position += Up = Vector3.Multiply(ViewMatrix.PositiveY(), amount);
+		/*public void MoveUp(float amount) => Position += Up = Vector3.Multiply(ViewMatrix.PositiveY(), amount);
 		public void MoveDown(float amount) => Position -= Up = Vector3.Multiply(ViewMatrix.PositiveY(), amount);
 		public void MoveLeft(float amount) => Position -= Vector3.Multiply(ViewMatrix.PositiveX(), amount);
 		public void MoveRight(float amount) => Position += Vector3.Multiply(ViewMatrix.PositiveX(), amount);
 		public void MoveForward(float amount) => Position -= Direction = Vector3.Multiply(ViewMatrix.PositiveZ(), amount);
-		public void MoveBackward(float amount) => Position += Direction = Vector3.Multiply(ViewMatrix.PositiveZ(), amount);
+		public void MoveBackward(float amount) => Position += Direction = Vector3.Multiply(ViewMatrix.PositiveZ(), amount);*/
 
 		public void LookAt(Vector3 target) {
 			Direction = target - Position;

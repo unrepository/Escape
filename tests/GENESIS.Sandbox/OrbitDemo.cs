@@ -1,6 +1,5 @@
 using System.Drawing;
 using System.Numerics;
-using GENESIS.GPU;
 using GENESIS.GPU.OpenGL;
 using GENESIS.GPU.Shader;
 using GENESIS.LanguageExtensions;
@@ -8,8 +7,50 @@ using GENESIS.PresentationFramework;
 using GENESIS.PresentationFramework.Camera;
 using GENESIS.PresentationFramework.Drawing;
 using GENESIS.PresentationFramework.Extensions;
+using Silk.NET.Maths;
+using Silk.NET.OpenGL;
+using Silk.NET.Windowing;
+using Monitor = Silk.NET.Windowing.Monitor;
+using Window = GENESIS.GPU.Window;
 
 namespace GENESIS.Sandbox {
+
+	public static class OrbitDemoProgram {
+
+		public static void Start(string[] args) {
+			Silk.NET.Windowing.Window.PrioritizeGlfw();
+
+			var platformOptions = new GLPlatform.Options();
+			platformOptions.ParseCommandLine(args);
+
+			var platform = new GLPlatform(platformOptions);
+			var windowOptions = WindowOptions.Default;
+
+			var monitorCenter = Monitor.GetMainMonitor(null).Bounds.Center;
+					
+			windowOptions.Position = new Vector2D<int>(
+				monitorCenter.X - windowOptions.Size.X / 2,
+				monitorCenter.Y - windowOptions.Size.Y / 2
+			);
+
+			var window = Window.Create(platform, windowOptions);
+
+			platform.Initialize();
+			window.Initialize();
+			
+			var scene = new OrbitDemo(platform);
+			window.PushScene(scene);
+
+			window.PushScene(new DebugScene());
+
+			while(!window.Base.IsClosing) {
+				window.RenderFrame(_ => {
+					platform.API.Enable(EnableCap.DepthTest);
+					platform.API.Enable(EnableCap.CullFace);
+				});
+			}
+		}
+	}
 	
 	public class OrbitDemo : EnvironmentScene {
 
@@ -45,10 +86,6 @@ namespace GENESIS.Sandbox {
 
 			_orbitCamera = new OrbitCamera3D(c3d, window);
 		}
-
-		private float _x = 0.0f;
-		private float _y = 0.0f;
-		private float _z = 0.0f;
 		
 		private OrbitCamera3D _orbitCamera;
 		
@@ -66,19 +103,13 @@ namespace GENESIS.Sandbox {
 			_orbitCamera.Update(delta);
 		}
 
-		private List<Vector3> _offsets = [];
-		private List<Vector3> _positions = [];
-		private List<Vector3> _rotations = [];
-		private List<Color> _colors = [];
-		private int _cubes = 1000;
-
 		protected override void Paint(double delta) {
 			Painter.XYZ.Clear();
 			
 			Painter.XYZ.BeginDrawList();
 			for(int i = 0; i < OBJECT_COUNT; i++) {
 				var obj = _orbitalObjects[i];
-				Painter.XYZ.AddCube(obj.GetPosition((float) Window!.Base.Time), obj.Rotation, Vector3.One, obj.Color);
+				Painter.XYZ.AddCube(obj.GetPosition((float) Window!.Base.Time), obj.Rotation, obj.Scale, obj.Color);
 			}
 			Painter.XYZ.EndDrawList();
 			
@@ -98,9 +129,6 @@ namespace GENESIS.Sandbox {
 			public Vector3 Axis1;
 			public Vector3 Axis2;
 
-			public float Rand1;
-			public float Rand2;
-
 			public OrbitalObject(Vector3 initialPosition, float radius, float speed, Random r) {
 				InitialPosition = Vector3.Normalize(initialPosition);
 				Radius = radius;
@@ -108,9 +136,6 @@ namespace GENESIS.Sandbox {
 
 				Scale = new Vector3(5) * (1 - initialPosition.Length() / SPHERE_RADIUS);
 				Color = Color.White.Randomize();
-
-				Rand1 = r.NextSingle() * 0.5f;
-				Rand2 = r.NextSingle() * 2;
 
 				var up = Vector3.UnitZ;
 				if(MathF.Abs(Vector3.Dot(InitialPosition, up)) > 0.99f) {
