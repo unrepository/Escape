@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Silk.NET.Core.Contexts;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
@@ -49,6 +50,8 @@ namespace GENESIS.GPU.OpenGL {
 					GLPlatform._sharedApi = Base.CreateOpenGL();
 					GLPlatform._sharedContext = Base.GLContext;
 				}
+
+				Input = Base.CreateInput();
 			};
 
 			Base.FramebufferResize += size => {

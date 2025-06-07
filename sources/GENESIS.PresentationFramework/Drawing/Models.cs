@@ -5,15 +5,44 @@ namespace GENESIS.PresentationFramework.Drawing {
 	
 	public static class Models {
 
+		public const int CUBE_ID = 0;
 		public static readonly Vertex[] Cube = [
-			new Vertex { Position = new Vector3(-1, -1, -1) }, // 0
-			new Vertex { Position = new Vector3(1, -1, -1) },  // 1
-			new Vertex { Position = new Vector3(1, 1, -1) },   // 2
-			new Vertex { Position = new Vector3(-1, 1, -1) },  // 3
-			new Vertex { Position = new Vector3(-1, -1, 1) },  // 4
-			new Vertex { Position = new Vector3(1, -1, 1) },   // 5
-			new Vertex { Position = new Vector3(1, 1, 1) },    // 6
-			new Vertex { Position = new Vector3(-1, 1, 1) },   // 7
+			    new Vertex { Position = new Vector3(-1.0f, -1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f, -1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f,  1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f,  1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f, -1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f,  1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f, -1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f, -1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f, -1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f,  1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f, -1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f, -1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f, -1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f,  1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f,  1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f, -1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f, -1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f, -1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f,  1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f, -1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f, -1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f,  1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f, -1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f,  1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f, -1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f,  1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f, -1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f,  1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f,  1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f,  1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f,  1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f,  1.0f, -1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f,  1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f,  1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3(-1.0f,  1.0f,  1.0f) },
+			    new Vertex { Position = new Vector3( 1.0f, -1.0f,  1.0f) }
 		];
 	}
 }

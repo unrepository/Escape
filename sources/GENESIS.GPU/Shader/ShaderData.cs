@@ -10,26 +10,21 @@ namespace GENESIS.GPU.Shader {
 		public uint Id { get; internal set; }
 		public uint Binding { get; set; }
 
+		/// <summary>
+		/// Whether to automatically push data changes to the owner shader
+		/// </summary>
+		public bool AutoUpdate { get; set; } = true;
+
 		public T Data {
-			get {
-				if(MappedMemory is null) {
-					return InnerData;
-				}
-		
-				return *MappedMemory;
-			}
+			get => InnerData;
 			set {
-				if(MappedMemory is null) {
-					InnerData = value;
-					return;
-				}
-				
-				Unsafe.CopyBlockUnaligned(MappedMemory, &value, Size);
+				InnerData = value;
+				if(AutoUpdate) Owner?.UpdateData(this);
 			}
 		}
 
 		//public T Data;
-		public uint Size { get; init; }
+		public uint Size { get; set; }
 
 		internal T* MappedMemory { get; set; }
 		internal T InnerData;

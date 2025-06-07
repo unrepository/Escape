@@ -63,44 +63,70 @@ namespace GENESIS.GPU.OpenGL {
 		}
 
 		public unsafe void PushData<T>(ShaderData<T> data) {
-			if(data.Owner != this) {
+			if(data.Owner != this && data.Owner is not null) {
 				throw new InvalidOperationException("ShaderData is already assigned to an existing shader");
 			}
 			
 			data.Owner = this;
 
+			if(data.Id != 0) {
+				throw new InvalidOperationException("ShaderData already pushed to shader");
+			}
+			
+			data.Id = _platform.API.CreateBuffer();
+
+			if(data.Data is null) {
+				// only allocate
+				_platform.API.NamedBufferData(data.Id, data.Size, null, VertexBufferObjectUsage.DynamicDraw);
+			} else {
+				if(data is ShaderArrayData<T> arrayData) {
+					if(arrayData.InnerData.Length == 0) {
+						_platform.API.NamedBufferData(data.Id, data.Size, null, VertexBufferObjectUsage.DynamicDraw);
+					} else {
+						fixed(void* dataPtr = &arrayData.InnerData[0]) {
+							_platform.API.NamedBufferData(data.Id, data.Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
+						}
+					}
+				} else {
+					fixed(void* dataPtr = &data.InnerData) {
+						_platform.API.NamedBufferData(data.Id, data.Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
+					}
+				}
+			}
+
+			_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, data.Binding, data.Id);
+		}
+
+		public unsafe void UpdateData<T>(ShaderData<T> data) {
+			if(data.Owner != this) {
+				throw new InvalidOperationException("ShaderData is not bound to this shader");
+			}
+
 			if(data.Id == 0) {
-				data.Id = _platform.API.GenBuffer();
+				throw new InvalidOperationException("ShaderData does not yet exist");
 			}
 			
-			if(data.MappedMemory is not null) {
-				return;
-			}
-			
-			_platform.API.BindBuffer(BufferTargetARB.ShaderStorageBuffer, data.Id);
-			
-			//if(data.MappedMemory is null) {
 			if(data is ShaderArrayData<T> arrayData) {
-				fixed(void* dataPtr = &arrayData.InnerData[0]) {
-					//_platform.API.NamedBufferStorage(data.Id, data.Size, dataPtr, BufferStorageMask.DynamicStorageBit);
-					_platform.API.BufferData(BufferTargetARB.ShaderStorageBuffer, data.Size, dataPtr, BufferUsageARB.StaticDraw);
+				if(arrayData.InnerData.Length == 0) {
+					_platform.API.NamedBufferSubData(data.Id, 0, data.Size, null);
+					//_platform.API.NamedBufferData(data.Id, data.Size, null, VertexBufferObjectUsage.DynamicDraw);
+				} else {
+					fixed(void* dataPtr = &arrayData.InnerData[0]) {
+						_platform.API.NamedBufferSubData(data.Id, 0, data.Size, dataPtr);
+						//_platform.API.NamedBufferData(data.Id, data.Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
+					}
 				}
 			} else {
 				fixed(void* dataPtr = &data.InnerData) {
-					//_platform.API.NamedBufferStorage(data.Id, data.Size, dataPtr, BufferStorageMask.DynamicStorageBit);
-					_platform.API.BufferData(BufferTargetARB.ShaderStorageBuffer, data.Size, dataPtr, BufferUsageARB.StaticDraw);
+					_platform.API.NamedBufferSubData(data.Id, 0, data.Size, dataPtr);
+					//_platform.API.NamedBufferData(data.Id, data.Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
 				}
 			}
-			
-			_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, data.Binding, data.Id);
-			
-			data.MappedMemory = (T*) _platform.API.MapBuffer(BufferTargetARB.ShaderStorageBuffer, BufferAccessARB.ReadWrite);
-			/*} else {
-				fixed(void* dataPtr = &data.Data) {
-					Unsafe.CopyBlockUnaligned(data.MappedMemory, dataPtr, data.Size);
-				}
-			}*/
 		}
+
+		// private unsafe void _SetBufferData<T>(ShaderData<T> data) {
+		// 	
+		// }
 
 		public unsafe void ReadData<T>(ref ShaderData<T> data) {
 			Debug.Assert(data.MappedMemory is not null);

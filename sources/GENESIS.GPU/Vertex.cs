@@ -10,5 +10,9 @@ namespace GENESIS.GPU {
 		//[FieldOffset(16)] public Vector4 Color = Vector4.One;
 		[FieldOffset(16)] public Vector3 Normal = Vector3.Zero;
 		[FieldOffset(28)] private float _padding0 = 0;
+
+		public override string ToString() {
+			return $"[Position={Position}, Normal={Normal}]";
+		}
 	}
 }

@@ -12,6 +12,9 @@ namespace GENESIS.PresentationFramework.Extensions {
 
 		private static readonly Dictionary<Window, ImGuiContextPtr> _windowContexts = [];
 
+		public static bool HasImGuiContext(this Window window) 
+			=> _windowContexts.ContainsKey(window);
+
 		public static ImGuiContextPtr CreateImGui(this Window window) {
 			if(_windowContexts.TryGetValue(window, out var ctx)) {
 				return ctx;
@@ -55,6 +58,8 @@ namespace GENESIS.PresentationFramework.Extensions {
 			};
 			
 			var end = (double _) => {
+				ImGui.SetCurrentContext(window.CreateImGui());
+				
 				ImGui.Render();
 				ImGui.EndFrame();
 		

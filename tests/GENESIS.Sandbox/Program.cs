@@ -5,10 +5,11 @@ using System.Runtime.InteropServices;
 using GENESIS.GPU;
 using GENESIS.GPU.OpenGL;
 using GENESIS.GPU.Shader;
-using GENESIS.Planetes;
+using GENESIS.PresentationFramework;
 using GENESIS.PresentationFramework.Drawing;
 using GENESIS.PresentationFramework.Drawing.OpenGL;
 using GENESIS.PresentationFramework.Extensions;
+using GENESIS.Sandbox;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGui.Backends.GLFW;
 using Hexa.NET.ImGui.Backends.OpenGL3;
@@ -39,8 +40,7 @@ var window = Window.Create(platform, windowOptions);
 platform.Initialize();
 window.Initialize();
 
-var test = new TestScene(new Painter {
-	XY = new GLPainter2D(),
+/*var test = new TestScene(new Painter {
 	XYZ = new GLPainter3D()
 });
 window.PushScene(test);
@@ -51,7 +51,6 @@ var vertexShader = IShader.Create(platform, ShaderType.VertexShader,
 	
 	struct Vertex {
 	    vec3 position;
-	    vec4 color;
 	    vec3 normal;
 	};
 	
@@ -63,7 +62,7 @@ var vertexShader = IShader.Create(platform, ShaderType.VertexShader,
 	
 	void main() {
 	    gl_Position = vec4(vertices[gl_VertexID].position, 1.0);
-	    vColor = vertices[gl_VertexID].color;
+	    vColor = vec4(1.0, 0.5, 0.25, 1.0);
 	}
 	""");
 
@@ -80,9 +79,9 @@ var fragShader = IShader.Create(platform, ShaderType.FragmentShader,
 	""");
 
 Vertex[] vertices = new Vertex[] {
-	new Vertex { Position = new Vector3(-0.5f, -0.5f, 0), Color = new Vector4(1f, 0f, 0f, 1) },
-	new Vertex { Position = new Vector3( 0.5f, -0.5f, 0), Color = new Vector4(0f, 1f, 0f, 1) },
-	new Vertex { Position = new Vector3( 0.0f,  0.5f, 0), Color = new Vector4(0f, 0f, 1f, 1) },
+	new Vertex { Position = new Vector3(-0.5f, -0.5f, 0) },
+	new Vertex { Position = new Vector3( 0.5f, -0.5f, 0) },
+	new Vertex { Position = new Vector3( 0.0f,  0.5f, 0) },
 };
 
 ShaderArrayData<Vertex> shaderData;
@@ -101,12 +100,19 @@ fragShader.Compile();
 var program = IShaderProgram.Create(platform, fragShader, vertexShader);
 program.Build();
 
-vertexShader.PushData(shaderData);
+vertexShader.PushData(shaderData);*/
+
+var test3d = new OrbitDemo(platform);
+window.PushScene(test3d);
+
+window.PushScene(new DebugScene());
 
 while(!window.Base.IsClosing) {
 	window.RenderFrame(delta => {
-		program.Bind();
-		platform.API.DrawArrays(GLEnum.Triangles, 0, 3);
+		//program.Bind();
+		// /platform.API.DrawArrays(GLEnum.Triangles, 0, 3);
+		
+		platform.API.Enable(EnableCap.DepthTest);
 	});
 }
 

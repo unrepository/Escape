@@ -29,11 +29,14 @@ namespace GENESIS.GPU.OpenGL {
 
 			foreach(var shader in Shaders) {
 				foreach(var id in shader.DeallocatedDataObjects) {
-					_platform.API.BindBuffer(BufferTargetARB.ShaderStorageBuffer, id);
-					_platform.API.UnmapBuffer(BufferTargetARB.ShaderStorageBuffer);
-					_platform.API.BindBuffer(BufferTargetARB.ShaderStorageBuffer, 0);
+					//_platform.API.BindBuffer(BufferTargetARB.ShaderStorageBuffer, id);
+					//_platform.API.UnmapBuffer(BufferTargetARB.ShaderStorageBuffer);
+					//_platform.API.UnmapNamedBuffer(id);
+					//_platform.API.BindBuffer(BufferTargetARB.ShaderStorageBuffer, 0);
 					_platform.API.DeleteBuffer(id);
 				}
+				
+				shader.DeallocatedDataObjects.Clear();
 			}
 		}
 

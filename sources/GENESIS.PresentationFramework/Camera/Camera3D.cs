@@ -17,9 +17,9 @@ namespace GENESIS.PresentationFramework.Camera {
 			get => Rotation.Y;
 			set {
 				Rotation.Y = value;
-				_direction.X = MathF.Cos(Rotation.Y.ToRadians()) * MathF.Cos(Rotation.X.ToRadians());
-				_direction.Z = MathF.Sin(Rotation.Y.ToRadians()) * MathF.Cos(Rotation.X.ToRadians());
-				_front = Vector3.Normalize(_direction);
+				Direction.X = MathF.Cos(Rotation.Y.ToRadians()) * MathF.Cos(Rotation.X.ToRadians());
+				Direction.Z = MathF.Sin(Rotation.Y.ToRadians()) * MathF.Cos(Rotation.X.ToRadians());
+				Front = Vector3.Normalize(Direction);
 			}
 		}
 		
@@ -27,31 +27,36 @@ namespace GENESIS.PresentationFramework.Camera {
 			get => Rotation.X;
 			set {
 				Rotation.X = value;
-				_direction.X = MathF.Cos(Rotation.Y.ToRadians()) * MathF.Cos(Rotation.X.ToRadians());
-				_direction.Y = MathF.Sin(Rotation.X.ToRadians());
-				_direction.Z = MathF.Sin(Rotation.Y.ToRadians()) * MathF.Cos(Rotation.X.ToRadians());
-				_front = Vector3.Normalize(_direction);
+				Direction.X = MathF.Cos(Rotation.Y.ToRadians()) * MathF.Cos(Rotation.X.ToRadians());
+				Direction.Y = MathF.Sin(Rotation.X.ToRadians());
+				Direction.Z = MathF.Sin(Rotation.Y.ToRadians()) * MathF.Cos(Rotation.X.ToRadians());
+				Front = Vector3.Normalize(Direction);
 			}
 		}
 		
-		private Vector3 _direction = Vector3.Zero;
-		private Vector3 _front = Vector3.UnitZ;
-		private Vector3 _up = Vector3.UnitY;
+		public Vector3 Direction = Vector3.Zero;
+		public Vector3 Front = Vector3.UnitZ;
+		public Vector3 Up = Vector3.UnitY;
 
-		protected Camera3D(Window window, IShader shader) : base(window, shader) { }
+		protected Camera3D(Window window, IShader shader) : base(window, shader) {}
 
-		public void MoveUp(float amount) => Position += _up = Vector3.Multiply(ViewMatrix.PositiveY(), amount);
-		public void MoveDown(float amount) => Position -= _up = Vector3.Multiply(ViewMatrix.PositiveY(), amount);
+		public void MoveUp(float amount) => Position += Up = Vector3.Multiply(ViewMatrix.PositiveY(), amount);
+		public void MoveDown(float amount) => Position -= Up = Vector3.Multiply(ViewMatrix.PositiveY(), amount);
 		public void MoveLeft(float amount) => Position -= Vector3.Multiply(ViewMatrix.PositiveX(), amount);
 		public void MoveRight(float amount) => Position += Vector3.Multiply(ViewMatrix.PositiveX(), amount);
-		public void MoveForward(float amount) => Position -= _direction = Vector3.Multiply(ViewMatrix.PositiveZ(), amount);
-		public void MoveBackward(float amount) => Position += _direction = Vector3.Multiply(ViewMatrix.PositiveZ(), amount);
+		public void MoveForward(float amount) => Position -= Direction = Vector3.Multiply(ViewMatrix.PositiveZ(), amount);
+		public void MoveBackward(float amount) => Position += Direction = Vector3.Multiply(ViewMatrix.PositiveZ(), amount);
 
+		public void LookAt(Vector3 target) {
+			Direction = target - Position;
+			Front = Vector3.Normalize(Direction);
+		}
+		
 		protected override void RecalculateViewMatrix() {
 			ViewMatrix = Matrix4x4.CreateLookAt(
 				Position,
-				Position + _front,
-				_up
+				Position + Front,
+				Up
 			);
 			
 			Matrix4x4.Invert(ViewMatrix, out var ivm);

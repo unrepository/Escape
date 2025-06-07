@@ -12,7 +12,7 @@ namespace GENESIS.PresentationFramework {
 		protected ImGuiContextPtr ImContext { get; private set; }
 		protected ImGuiIOPtr ImIO { get; private set; }
 
-		protected ImGuiScene(Painter painter, string id) : base(painter, id) { }
+		protected ImGuiScene(string id) : base(default, id) {}
 
 		public override void Initialize(Window window) {
 			base.Initialize(window);
@@ -23,11 +23,8 @@ namespace GENESIS.PresentationFramework {
 		}
 
 		public override void Render(double delta) {
-			if(ImGui.Begin(Id)) {
-				Paint(delta);
-			}
-			
-			ImGui.End();
+			ImGui.SetCurrentContext(ImContext);
+			Paint(delta);
 		}
 	}
 }

@@ -11,14 +11,14 @@ namespace GENESIS.PresentationFramework.Camera {
 
 		public Matrix4x4 InverseProjectionMatrix { get; protected set; }
 		public Matrix4x4 InverseViewMatrix { get; protected set; }
-		
+
 		public float FieldOfView {
 			get => field;
 			set {
 				field = value;
 				RecalculateProjectionMatrix();
 			}
-		}
+		} = 1;
 		
 		protected float Width { get; private set; }
 		protected float Height { get; private set; }
@@ -30,7 +30,6 @@ namespace GENESIS.PresentationFramework.Camera {
 			Height = window.Base.FramebufferSize.Y;
 			
 			RecalculateProjectionMatrix();
-			RecalculateViewMatrix();
 
 			window.Base.FramebufferResize += size => {
 				Width = size.X;
@@ -38,9 +37,14 @@ namespace GENESIS.PresentationFramework.Camera {
 				
 				RecalculateProjectionMatrix();
 			};
+
+			unsafe {
+				ShaderData = new ShaderData<CameraData> {
+					Size = (uint) sizeof(CameraData)
+				};
+			}
 			
-			ShaderData = new();
-			ShaderData.Data = new();
+			Update();
 			
 			shader.PushData(ShaderData);
 		}

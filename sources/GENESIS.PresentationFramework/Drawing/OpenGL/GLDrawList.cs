@@ -7,29 +7,36 @@ namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 	
 	public class GLDrawList : DrawList {
 
-		private ShaderArrayData<Vertex[]> _objectsData = new();
-		private ShaderArrayData<uint> _objectIndicesData = new();
-		private ShaderArrayData<Vector4> _colorsData = new();
-		private ShaderArrayData<Matrix4x4> _matricesData = new();
+		private ShaderArrayData<Vertex> _verticesData = new() { Binding = 10 };
+		//private ShaderArrayData<uint> _objectIndicesData = new();
+		private ShaderArrayData<Vector4> _colorsData = new() { Binding = 11 };
+		private ShaderArrayData<Matrix4x4> _matricesData = new() { Binding = 12 };
 		
-		public override void Render(IShader shader) {
-			_objectsData.Data = Objects.ToArrayNoCopy();
-			_objectIndicesData.Data = ObjectIndices.ToArrayNoCopy();
-			_colorsData.Data = Colors.ToArrayNoCopy();
-			_matricesData.Data = Matrices.ToArrayNoCopy();
+		public unsafe override void Push(IShader shader) {
+			_verticesData.Size = (uint) Vertices.Count * (uint) sizeof(Vertex);
+			_colorsData.Size = (uint) Colors.Count * (uint) sizeof(Vector4);
+			_matricesData.Size = (uint) Matrices.Count * (uint) sizeof(Matrix4x4);
+
+			_verticesData.Data = Vertices.ToArray();
+			_colorsData.Data = Colors.ToArray();
+			_matricesData.Data = Matrices.ToArray();
 			
-			// TODO need to resize too :(
-			
-			shader.PushData(_objectsData);
-			shader.PushData(_objectIndicesData);
-			shader.PushData(_colorsData);
-			shader.PushData(_matricesData);
+			if(_verticesData.Owner is null) shader.PushData(_verticesData);
+			if(_colorsData.Owner is null) shader.PushData(_colorsData);
+			if(_matricesData.Owner is null) shader.PushData(_matricesData);
+		}
+
+		public override void Clear() {
+			Vertices.Clear();
+			Colors.Clear();
+			Matrices.Clear();
 		}
 
 		public override void Dispose() {
 			GC.SuppressFinalize(this);
-			_objectsData.Dispose();
-			_objectIndicesData.Dispose();
+			Clear();
+			
+			_verticesData.Dispose();
 			_colorsData.Dispose();
 			_matricesData.Dispose();
 		}

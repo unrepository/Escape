@@ -15,6 +15,7 @@ namespace GENESIS.GPU.Shader {
 		public uint Compile();
 
 		public void PushData<T>(ShaderData<T> data);
+		public void UpdateData<T>(ShaderData<T> data);
 		public void ReadData<T>(ref ShaderData<T> data);
 
 		/*public static IShader Create<TAPI, TDevice>(IPlatform<TAPI, TDevice> platform, ShaderType type, string code)

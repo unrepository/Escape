@@ -3,30 +3,36 @@ using GENESIS.GPU;
 using GENESIS.GPU.OpenGL;
 using GENESIS.GPU.Shader;
 using GENESIS.LanguageExtensions;
+using GENESIS.PresentationFramework.Camera;
 using GENESIS.PresentationFramework.Drawing;
+using GENESIS.PresentationFramework.Drawing.OpenGL;
 using Silk.NET.OpenGL;
 
 namespace GENESIS.PresentationFramework {
 	
 	public abstract class EnvironmentScene : Scene {
 		
-		public IShaderProgram ShaderProgram { get; set; }
+		public IShaderProgram ShaderProgram { get; protected set; }
+		public CameraBase? Camera { get; protected set; }
 
-		public EnvironmentScene(GLPlatform platform, Painter painter, Type type, string id) : base(painter, id) {
-			switch(type) {
-				case Type.ThreeDimensional:
-					ShaderProgram = IShaderProgram.Create(platform, GetDefault3DShaderSet(platform));
-					break;
-				default:
-					throw new NotImplementedException();
-					break;
-			}
+		protected IShader PrimaryShader => ShaderProgram.Shaders[0];
+
+		public EnvironmentScene(GLPlatform platform, Type type, string id) : base(default, id) {
+			ShaderProgram = type switch {
+				Type.ThreeDimensional => IShaderProgram.Create(platform, GetDefault3DShaderSet(platform)),
+				_ => throw new NotImplementedException()
+			};
+
+			Painter = new Painter {
+				XYZ = new GLPainter3D(platform, ShaderProgram, PrimaryShader)
+			};
 		}
 
-		public override void Initialize(Window window) {
-			base.Initialize(window);
+		protected override void Paint(double delta) {
+			ShaderProgram.Bind();
 			
-			// initialize camera
+			Camera?.Update();
+			Painter.XYZ.Paint();
 		}
 
 		public static GLShader[] GetDefault3DShaderSet(GLPlatform platform)

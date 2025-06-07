@@ -1,4 +1,5 @@
 using GENESIS.GPU.OpenGL;
+using Silk.NET.Input;
 using Silk.NET.Windowing;
 
 namespace GENESIS.GPU {
@@ -8,6 +9,8 @@ namespace GENESIS.GPU {
 		public abstract string Title { get; set; }
 		public abstract uint Width { get; set; }
 		public abstract uint Height { get; set; }
+		
+		public IInputContext? Input { get; protected set; }
 		
 		public bool IsInitialized { get; set; }
 		public double FrameDeltaTime { get; protected set; }
