@@ -23,6 +23,7 @@ namespace GENESIS.PresentationFramework {
 
 			Painter = platform switch {
 				GLPlatform glPlatform => new Painter {
+					Platform = platform,
 					XY = new GLPainter2D(glPlatform, ShaderProgram, PrimaryShader),
 					XYZ = new GLPainter3D(glPlatform, ShaderProgram, PrimaryShader)
 				},

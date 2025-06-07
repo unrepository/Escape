@@ -8,9 +8,14 @@ namespace GENESIS.GPU {
 		public uint Handle { get; protected set; }
 		public Vector2D<uint> Size { get; protected init; }
 
+		protected List<Texture> TextureAttachments { get; } = [];
+
 		protected Framebuffer(Vector2D<uint> size) {
 			Size = size;
 		}
+
+		public IReadOnlyList<Texture> GetTextureAttachments()
+			=> TextureAttachments;
 		
 		public abstract void Bind();
 		public abstract void Unbind();
@@ -18,6 +23,8 @@ namespace GENESIS.GPU {
 		public abstract void AttachTexture(Texture texture);
 		public abstract void Resize(Vector2D<int> size);
 
+		public abstract byte[] Read(int attachment = 0, Rectangle<uint>? area = null);
+		
 		public abstract void Dispose();
 
 		public static Framebuffer Create(IPlatform platform,

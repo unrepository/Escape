@@ -46,11 +46,11 @@ namespace GENESIS.PresentationFramework.Drawing {
 
 		public static readonly Vertex[] Quad = [
 			new() { Position = new Vector3(-1, -1, 0) },
-			new() { Position = new Vector3(-1, 1, 0) },
-			new() { Position = new Vector3(1, 1, 0) },
-			new() { Position = new Vector3(1, 1, 0) },
 			new() { Position = new Vector3(1, -1, 0) },
-			new() { Position = new Vector3(-1, -1, 0) },
+			new() { Position = new Vector3(-1, 1, 0) },
+			new() { Position = new Vector3(-1, 1, 0) },
+			new() { Position = new Vector3(1, -1, 0) },
+			new() { Position = new Vector3(1, 1, 0) },
 		];
 	}
 }

@@ -8,7 +8,6 @@ namespace GENESIS.GPU.OpenGL {
 	public class GLFramebuffer : Framebuffer {
 
 		private readonly GLPlatform _platform;
-		private List<Texture> _textureAttachments = [];
 		
 		public GLFramebuffer(GLPlatform platform, Vector2D<uint> size, GLTexture? baseTexture = null) : base(size) {
 			_platform = platform;
@@ -43,31 +42,50 @@ namespace GENESIS.GPU.OpenGL {
 				throw new ArgumentException("Not a GL texture", nameof(texture));
 			}
 			
-			Debug.Assert(_textureAttachments.Count < 32);
+			Debug.Assert(TextureAttachments.Count < 32);
 
 			Bind();
 			_platform.API.FramebufferTexture2D(
 				FramebufferTarget.Framebuffer,
-				FramebufferAttachment.ColorAttachment0 + _textureAttachments.Count,
+				FramebufferAttachment.ColorAttachment0 + TextureAttachments.Count,
 				TextureTarget.Texture2D,
 				texture.Handle,
 				0
 			);
 			
-			_textureAttachments.Add(texture);
+			TextureAttachments.Add(texture);
 		}
 
 		public override void Resize(Vector2D<int> size) {
 			throw new NotImplementedException();
 		}
-		
+
+		public unsafe override byte[] Read(int attachment = 0, Rectangle<uint>? area = null) {
+			Bind();
+			_platform.API.ReadBuffer(ReadBufferMode.ColorAttachment0 + attachment);
+
+			area ??= new Rectangle<uint>(0, 0, Size);
+			byte[] pixels = new byte[area.Value.Size.X * area.Value.Size.Y * 4]; // Rgba8
+
+			fixed(void* ptr = &pixels[0]) {
+				_platform.API.ReadPixels(
+					(int) area.Value.Origin.X, (int) area.Value.Origin.Y,
+					area.Value.Size.X, area.Value.Size.Y,
+					PixelFormat.Rgba, PixelType.UnsignedByte,
+					ptr
+				);
+			}
+
+			return pixels;
+		}
+
 		public override void Dispose() {
 			GC.SuppressFinalize(this);
 			Debug.Assert(Handle != 0);
 			
 			_platform.API.DeleteFramebuffer(Handle);
 			
-			foreach(var texture in _textureAttachments) {
+			foreach(var texture in TextureAttachments) {
 				texture.Dispose();
 			}
 

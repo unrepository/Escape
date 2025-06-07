@@ -30,7 +30,7 @@ namespace GENESIS.GPU.OpenGL {
 
 		public unsafe void Initialize() {
 			Debug.Assert(!IsInitialized);
-			Debug.Assert(_sharedApi is not null && _sharedContext is not null, "A Window must be created first");
+			Debug.Assert(_sharedApi is not null && _sharedContext is not null, "A Window must be created first"); // TODO
 
 			API = _sharedApi;
 

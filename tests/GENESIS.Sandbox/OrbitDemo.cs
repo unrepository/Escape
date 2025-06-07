@@ -42,7 +42,7 @@ namespace GENESIS.Sandbox {
 			var scene = new OrbitDemo(platform);
 			window.PushScene(scene);
 
-			window.PushScene(new DebugScene());
+			window.PushScene(new DebugScene(platform));
 
 			while(!window.Base.IsClosing) {
 				window.RenderFrame(_ => {

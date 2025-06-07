@@ -52,6 +52,7 @@ namespace GENESIS.GPU.OpenGL {
 			return Handle;
 		}
 
+		// TODO can this be done outside of a shader? because i dont think buffer upload depends on the current shader
 		public unsafe override void PushData<T>(ShaderData<T> data) {
 			if(data.Owner != this && data.Owner is not null) {
 				throw new InvalidOperationException("ShaderData is already assigned to an existing shader");

@@ -1,4 +1,5 @@
 using System.Numerics;
+using GENESIS.GPU;
 using GENESIS.PresentationFramework.Drawing;
 using Hexa.NET.ImGui;
 
@@ -8,7 +9,7 @@ namespace GENESIS.PresentationFramework {
 
 		public static Dictionary<string, Action<double>> DebugInfoSlots = [];
 		
-		public DebugScene() : base("PresentationFramework/debug") { }
+		public DebugScene(IPlatform platform) : base(platform, "PresentationFramework/debug") { }
 
 		public override void Render(double delta) {
 		#if DEBUG

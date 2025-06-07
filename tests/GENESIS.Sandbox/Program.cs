@@ -1,3 +1,3 @@
 using GENESIS.Sandbox;
 
-ShaderRenderDemoProgram.Start(args);
+ShaderComputeImGuiDemoProgram.Start(args);
