@@ -5,21 +5,16 @@ using Silk.NET.OpenGL;
 
 namespace GENESIS.GPU.OpenGL {
 	
-	public class GLShaderProgram : IShaderProgram {
-		
-		public IShader[] Shaders { get; }
-		
-		public uint Id { get; private set; }
+	public class GLShaderProgram : ShaderProgram {
 		
 		private readonly GLPlatform _platform;
 		private static uint _emptyVao = 0;
 		
-		public GLShaderProgram(GLPlatform platform, params IShader[] shaders) {
-			Shaders = shaders;
+		public GLShaderProgram(GLPlatform platform, params Shader.Shader[] shaders) : base(shaders) {
 			_platform = platform;
 		}
 
-		public void Bind() {
+		public override void Bind() {
 			if(Id == 0) Build();
 			
 			if(_emptyVao == 0) _emptyVao = _platform.API.GenVertexArray();
@@ -40,7 +35,7 @@ namespace GENESIS.GPU.OpenGL {
 			}
 		}
 
-		public uint Build() {
+		public override uint Build() {
 			Debug.Assert(Id == 0);
 			
 			if(Shaders.Length == 0) {
@@ -54,11 +49,11 @@ namespace GENESIS.GPU.OpenGL {
 			}
 
 			foreach(var shader in Shaders) {
-				if(shader.Id == 0) {
+				if(shader.Handle == 0) {
 					shader.Compile();
 				}
 				
-				_platform.API.AttachShader(Id, shader.Id);
+				_platform.API.AttachShader(Id, shader.Handle);
 			}
 			
 			_platform.API.LinkProgram(Id);
@@ -69,14 +64,14 @@ namespace GENESIS.GPU.OpenGL {
 			
 			// cleanup
 			foreach(var shader in Shaders) {
-				_platform.API.DetachShader(Id, shader.Id);
+				_platform.API.DetachShader(Id, shader.Handle);
 				shader.Dispose();
 			}
 
 			return Id;
 		}
 		
-		public void Dispose() {
+		public override void Dispose() {
 			GC.SuppressFinalize(this);
 			_platform.API.DeleteProgram(Id);
 			Id = 0;

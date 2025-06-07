@@ -5,23 +5,19 @@ using Silk.NET.OpenGL;
 
 namespace GENESIS.GPU.OpenGL {
 	
-	public class GLFramebuffer : IFramebuffer {
-
-		public uint Handle { get; private set; }
-		public Vector2D<uint> Size { get; private set; }
+	public class GLFramebuffer : Framebuffer {
 
 		private readonly GLPlatform _platform;
-		private List<ITexture> _textureAttachments = [];
+		private List<Texture> _textureAttachments = [];
 		
-		public GLFramebuffer(GLPlatform platform, Vector2D<uint> size, GLTexture? baseTexture = null) {
+		public GLFramebuffer(GLPlatform platform, Vector2D<uint> size, GLTexture? baseTexture = null) : base(size) {
 			_platform = platform;
-			Size = size;
 
 			Handle = platform.API.GenFramebuffer();
 			Bind();
 			
 			// create and attach 2d texture
-			baseTexture ??= new GLTexture(platform, size);
+			baseTexture ??= new GLTexture(platform, size, Texture.Filter.Nearest, Texture.WrapMode.Clamp);
 			AttachTexture(baseTexture);
 			
 			// check completeness
@@ -32,17 +28,17 @@ namespace GENESIS.GPU.OpenGL {
 			Unbind();
 		}
 		
-		public void Bind() {
+		public override void Bind() {
 			Debug.Assert(Handle != 0);
 			_platform.API.BindFramebuffer(FramebufferTarget.Framebuffer, Handle);
 			_platform.API.Viewport(0, 0, Size.X, Size.Y);
 		}
 		
-		public void Unbind() {
+		public override void Unbind() {
 			_platform.API.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 		}
 
-		public void AttachTexture(ITexture texture) {
+		public override void AttachTexture(Texture texture) {
 			if(texture is not GLTexture) {
 				throw new ArgumentException("Not a GL texture", nameof(texture));
 			}
@@ -61,11 +57,11 @@ namespace GENESIS.GPU.OpenGL {
 			_textureAttachments.Add(texture);
 		}
 
-		public void Resize(Vector2D<int> size) {
+		public override void Resize(Vector2D<int> size) {
 			throw new NotImplementedException();
 		}
 		
-		public void Dispose() {
+		public override void Dispose() {
 			GC.SuppressFinalize(this);
 			Debug.Assert(Handle != 0);
 			

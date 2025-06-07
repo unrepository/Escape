@@ -7,42 +7,32 @@ using Silk.NET.OpenGL;
 
 namespace GENESIS.GPU.OpenGL {
 	
-	public class GLShader : IShader {
-
-		public ShaderType Type { get; }
-		public string Code { get; }
-		
-		public uint Id { get; private set; }
-
-		public List<uint> DeallocatedDataObjects { get; } = [];
+	public class GLShader : Shader.Shader {
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		private readonly GLPlatform _platform;
 
-		public GLShader(GLPlatform platform, ShaderType type, string code) {
-			Type = type;
-			Code = code;
-			
+		public GLShader(GLPlatform platform, ShaderType type, string code) : base(type, code) {
 			_platform = platform;
 		}
 		
-		public uint Compile() {
-			Debug.Assert(Id == 0);
+		public override uint Compile() {
+			Debug.Assert(Handle == 0);
 			
 			if(string.IsNullOrEmpty(Code)) {
 				throw new ArgumentNullException(nameof(Code), "Cannot compile an empty shader!");
 			}
 
-			Id = _platform.API.CreateShader(Type);
+			Handle = _platform.API.CreateShader(Type);
 
-			if(Id == 0) {
+			if(Handle == 0) {
 				throw new PlatformException("Failed to create a GL shader");
 			}
 			
-			_platform.API.ShaderSource(Id, Code);
-			_platform.API.CompileShader(Id);
+			_platform.API.ShaderSource(Handle, Code);
+			_platform.API.CompileShader(Handle);
 
-			if(_platform.API.GetShader(Id, GLEnum.CompileStatus) == 0) {
+			if(_platform.API.GetShader(Handle, GLEnum.CompileStatus) == 0) {
 				_logger.Fatal("Exception occurred while compiling shader");
 				_logger.Fatal("=== SHADER CODE BEGIN ===");
 
@@ -59,10 +49,10 @@ namespace GENESIS.GPU.OpenGL {
 				throw new PlatformException("Shader compilation failed");
 			}
 
-			return Id;
+			return Handle;
 		}
 
-		public unsafe void PushData<T>(ShaderData<T> data) {
+		public unsafe override void PushData<T>(ShaderData<T> data) {
 			if(data.Owner != this && data.Owner is not null) {
 				throw new InvalidOperationException("ShaderData is already assigned to an existing shader");
 			}
@@ -97,7 +87,7 @@ namespace GENESIS.GPU.OpenGL {
 			_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, data.Binding, data.Id);
 		}
 
-		public unsafe void UpdateData<T>(ShaderData<T> data) {
+		public unsafe override void UpdateData<T>(ShaderData<T> data) {
 			if(data.Owner != this) {
 				throw new InvalidOperationException("ShaderData is not bound to this shader");
 			}
@@ -124,19 +114,15 @@ namespace GENESIS.GPU.OpenGL {
 			}
 		}
 
-		// private unsafe void _SetBufferData<T>(ShaderData<T> data) {
-		// 	
-		// }
-
-		public unsafe void ReadData<T>(ref ShaderData<T> data) {
+		public unsafe override void ReadData<T>(ref ShaderData<T> data) {
 			Debug.Assert(data.MappedMemory is not null);
 			data.Data = *data.MappedMemory;
 		}
 
-		public void Dispose() {
+		public override void Dispose() {
 			GC.SuppressFinalize(this);
-			_platform.API.DeleteShader(Id);
-			Id = 0;
+			_platform.API.DeleteShader(Handle);
+			Handle = 0;
 		}
 	}
 }

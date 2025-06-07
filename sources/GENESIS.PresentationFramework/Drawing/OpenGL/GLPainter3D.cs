@@ -2,16 +2,17 @@ using System.Diagnostics;
 using GENESIS.GPU.OpenGL;
 using GENESIS.GPU.Shader;
 using Silk.NET.OpenGL;
+using Shader = GENESIS.GPU.Shader.Shader;
 
 namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 	
 	public class GLPainter3D : Painter3D {
 
 		private GLPlatform _platform;
-		private IShaderProgram _targetShaderProgram;
-		private IShader _targetShader;
+		private ShaderProgram _targetShaderProgram;
+		private Shader _targetShader;
 
-		public GLPainter3D(GLPlatform platform, IShaderProgram targetShaderProgram, IShader targetShader) {
+		public GLPainter3D(GLPlatform platform, ShaderProgram targetShaderProgram, Shader targetShader) {
 			_platform = platform;
 			_targetShaderProgram = targetShaderProgram;
 			_targetShader = targetShader;

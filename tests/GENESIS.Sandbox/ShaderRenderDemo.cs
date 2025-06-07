@@ -12,7 +12,9 @@ using GENESIS.PresentationFramework.Extensions;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using Framebuffer = GENESIS.GPU.Framebuffer;
 using Monitor = Silk.NET.Windowing.Monitor;
+using Shader = GENESIS.GPU.Shader.Shader;
 using Window = GENESIS.GPU.Window;
 
 namespace GENESIS.Sandbox {
@@ -57,13 +59,13 @@ namespace GENESIS.Sandbox {
 	public class ShaderRenderDemo : EnvironmentScene {
 
 		private readonly Vector2D<uint> _framebufferSize = new Vector2D<uint>(512, 512);
-		private IFramebuffer _framebuffer;
+		private readonly Framebuffer _framebuffer;
 
-		public ShaderRenderDemo(GLPlatform platform) : base(platform, "shader_render") {
-			ShaderProgram.Shaders[1] = IShader.Create(platform, ShaderType.FragmentShader,
+		public ShaderRenderDemo(Platform platform) : base(platform, "shader_render") {
+			ShaderProgram.Shaders[1] = Shader.Create(platform, ShaderType.FragmentShader,
 				Assembly.GetExecutingAssembly().ReadTextResource("GENESIS.Sandbox.Resources.Shaders.demo.frag"));
 			
-			_framebuffer = IFramebuffer.Create(platform, _framebufferSize);
+			_framebuffer = Framebuffer.Create(platform, _framebufferSize);
 		}
 
 		public override void Initialize(Window window) {

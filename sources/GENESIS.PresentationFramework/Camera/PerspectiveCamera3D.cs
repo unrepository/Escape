@@ -7,7 +7,7 @@ namespace GENESIS.PresentationFramework.Camera {
 	
 	public class PerspectiveCamera3D : Camera3D {
 
-		public PerspectiveCamera3D(Window window, IShader shader) : base(window, shader) { }
+		public PerspectiveCamera3D(Window window, Shader shader) : base(window, shader) { }
 		
 		protected override void RecalculateProjectionMatrix() {
 			ProjectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(

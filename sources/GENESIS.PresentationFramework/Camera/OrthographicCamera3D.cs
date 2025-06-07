@@ -6,7 +6,7 @@ namespace GENESIS.PresentationFramework.Camera {
 	
 	public class OrthographicCamera3D : Camera3D {
 
-		public OrthographicCamera3D(Window window, IShader shader) : base(window, shader) { }
+		public OrthographicCamera3D(Window window, Shader shader) : base(window, shader) { }
 		
 		protected override void RecalculateProjectionMatrix() {
 			ProjectionMatrix = Matrix4x4.CreateOrthographic(

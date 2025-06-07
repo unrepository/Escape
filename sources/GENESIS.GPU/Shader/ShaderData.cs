@@ -5,7 +5,7 @@ namespace GENESIS.GPU.Shader {
 	
 	public unsafe class ShaderData<T> : IDisposable {
 		
-		public IShader? Owner { get; internal set; }
+		public Shader? Owner { get; internal set; }
 		
 		public uint Id { get; internal set; }
 		public uint Binding { get; set; }

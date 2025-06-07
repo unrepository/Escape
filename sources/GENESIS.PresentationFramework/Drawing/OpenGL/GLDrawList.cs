@@ -12,7 +12,7 @@ namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 		private ShaderArrayData<Vector4> _colorsData = new() { Binding = 11 };
 		private ShaderArrayData<Matrix4x4> _matricesData = new() { Binding = 12 };
 		
-		public unsafe override void Push(IShader shader) {
+		public unsafe override void Push(Shader shader) {
 			_verticesData.Size = (uint) Vertices.Count * (uint) sizeof(Vertex);
 			_colorsData.Size = (uint) Colors.Count * (uint) sizeof(Vector4);
 			_matricesData.Size = (uint) Matrices.Count * (uint) sizeof(Matrix4x4);

@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Numerics;
+using GENESIS.GPU;
 using GENESIS.GPU.OpenGL;
 using GENESIS.GPU.Shader;
 using GENESIS.LanguageExtensions;
@@ -60,7 +61,7 @@ namespace GENESIS.Sandbox {
 		private const int OBJECT_COUNT = 50000;
 		private readonly List<OrbitalObject> _orbitalObjects = [];
 		
-		public OrbitDemo(GLPlatform platform) : base(platform, Type.ThreeDimensional, "test3d") {
+		public OrbitDemo(Platform platform) : base(platform, "test3d") {
 			for(int i = 0; i < OBJECT_COUNT; i++) {
 				var pos = _r.NextSphereCoordinate(SPHERE_RADIUS);
 				var obj = new OrbitalObject(pos, pos.Length(), 1, _r);

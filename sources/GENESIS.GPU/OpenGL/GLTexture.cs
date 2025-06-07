@@ -4,19 +4,14 @@ using Silk.NET.OpenGL;
 
 namespace GENESIS.GPU.OpenGL {
 	
-	public class GLTexture : ITexture {
-		
-		public uint Handle { get; private set; }
-		public Vector2D<uint> Size { get; }
+	public class GLTexture : Texture {
 
 		private readonly GLPlatform _platform;
 
-		public GLTexture(GLPlatform platform, Vector2D<uint> size,
-		                 ITexture.Filter filter = ITexture.Filter.Linear,
-		                 ITexture.WrapMode wrapMode = ITexture.WrapMode.Clamp)
+		public GLTexture(GLPlatform platform, Vector2D<uint> size, Filter filter, WrapMode wrapMode)
+			: base(size, filter, wrapMode)
 		{
 			_platform = platform;
-			Size = size;
 
 			Handle = platform.API.GenTexture();
 			Bind();
@@ -36,14 +31,14 @@ namespace GENESIS.GPU.OpenGL {
 			}
 
 			uint glFilter = filter switch {
-				ITexture.Filter.Nearest => (uint) GLEnum.Nearest,
-				ITexture.Filter.Linear => (uint) GLEnum.Linear
+				Filter.Nearest => (uint) GLEnum.Nearest,
+				Filter.Linear => (uint) GLEnum.Linear
 			};
 			
 			uint glWrapMode = wrapMode switch {
-				ITexture.WrapMode.Clamp => (uint) GLEnum.ClampToEdge,
-				ITexture.WrapMode.Repeat => (uint) GLEnum.Repeat,
-				ITexture.WrapMode.RepeatMirrored => (uint) GLEnum.MirroredRepeat
+				WrapMode.Clamp => (uint) GLEnum.ClampToEdge,
+				WrapMode.Repeat => (uint) GLEnum.Repeat,
+				WrapMode.RepeatMirrored => (uint) GLEnum.MirroredRepeat
 			};
 
 			float[] borderColor = [ 0.0f, 0.0f, 0.0f, 0.0f ];
@@ -62,16 +57,16 @@ namespace GENESIS.GPU.OpenGL {
 			Unbind();
 		}
 		
-		public void Bind() {
+		public override void Bind() {
 			Debug.Assert(Handle != 0);
 			_platform.API.BindTexture(TextureTarget.Texture2D, Handle);
 		}
 		
-		public void Unbind() {
+		public override void Unbind() {
 			_platform.API.BindTexture(TextureTarget.Texture2D, 0);
 		}
 		
-		public void Dispose() {
+		public override void Dispose() {
 			GC.SuppressFinalize(this);
 			
 			Debug.Assert(Handle != 0);

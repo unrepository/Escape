@@ -1,0 +1,27 @@
+using GENESIS.GPU.OpenGL;
+
+namespace GENESIS.GPU.Shader {
+	
+	public abstract class ShaderProgram : IDisposable {
+		
+		public Shader[] Shaders { get; }
+		
+		public uint Id { get; protected set; }
+
+		protected ShaderProgram(params Shader[] shaders) {
+			Shaders = shaders;
+		}
+
+		public abstract void Bind();
+		public abstract uint Build();
+
+		public abstract void Dispose();
+
+		public static ShaderProgram Create(Platform platform, params Shader[] shaders) {
+			return platform switch {
+				GLPlatform glPlatform => new GLShaderProgram(glPlatform, shaders),
+				_ => throw new NotImplementedException()
+			};
+		}
+	}
+}

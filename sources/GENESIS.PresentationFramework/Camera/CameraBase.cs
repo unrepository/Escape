@@ -25,7 +25,7 @@ namespace GENESIS.PresentationFramework.Camera {
 
 		protected ShaderData<CameraData> ShaderData;
 
-		protected CameraBase(Window window, IShader shader)
+		protected CameraBase(Window window, Shader shader)
 			: this(window.Base.FramebufferSize.X, window.Base.FramebufferSize.Y, shader)
 		{
 			window.Base.FramebufferResize += size => {
@@ -36,7 +36,7 @@ namespace GENESIS.PresentationFramework.Camera {
 			};
 		}
 
-		protected CameraBase(int width, int height, IShader shader) {
+		protected CameraBase(int width, int height, Shader shader) {
 			Width = width;
 			Height = height;
 			
