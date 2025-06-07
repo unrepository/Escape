@@ -25,7 +25,7 @@ namespace GENESIS.GPU.Shader {
 
 		public abstract void Dispose();
 
-		public static Shader Create(Platform platform, ShaderType type, string code) {
+		public static Shader Create(IPlatform platform, ShaderType type, string code) {
 			return platform switch {
 				GLPlatform glPlatform => new GLShader(glPlatform, type, code),
 				_ => throw new NotImplementedException()

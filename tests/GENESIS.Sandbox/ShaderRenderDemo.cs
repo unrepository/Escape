@@ -61,7 +61,7 @@ namespace GENESIS.Sandbox {
 		private readonly Vector2D<uint> _framebufferSize = new Vector2D<uint>(512, 512);
 		private readonly Framebuffer _framebuffer;
 
-		public ShaderRenderDemo(Platform platform) : base(platform, "shader_render") {
+		public ShaderRenderDemo(IPlatform platform) : base(platform, "shader_render") {
 			ShaderProgram.Shaders[1] = Shader.Create(platform, ShaderType.FragmentShader,
 				Assembly.GetExecutingAssembly().ReadTextResource("GENESIS.Sandbox.Resources.Shaders.demo.frag"));
 			

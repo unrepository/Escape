@@ -7,7 +7,7 @@ using Silk.NET.Windowing;
 
 namespace GENESIS.GPU.OpenGL {
 	
-	public class GLPlatform : Platform {
+	public class GLPlatform : IPlatform {
 		
 		public bool IsInitialized { get; set; }
 		public Options CurrentOptions { get; }

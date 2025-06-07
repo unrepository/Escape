@@ -1,6 +1,6 @@
 namespace GENESIS.GPU {
 	
-	public interface Platform : IDisposable {
+	public interface IPlatform : IDisposable {
 		
 		public bool IsInitialized { get; protected set; }
 		

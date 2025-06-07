@@ -18,7 +18,7 @@ namespace GENESIS.PresentationFramework {
 
 		protected Shader PrimaryShader => ShaderProgram.Shaders[0];
 		
-		public EnvironmentScene(Platform platform, string id) : base(default, id) {
+		public EnvironmentScene(IPlatform platform, string id) : base(default, id) {
 			ShaderProgram = ShaderProgram.Create(platform, GetDefaultShaderSet(platform));
 
 			Painter = platform switch {
@@ -38,7 +38,7 @@ namespace GENESIS.PresentationFramework {
 			Painter.XY.Paint(); // TODO merging 2D and 3D painters would also mean that we can easily manipulate the drawing order
 		}
 
-		public static Shader[] GetDefaultShaderSet(Platform platform) {
+		public static Shader[] GetDefaultShaderSet(IPlatform platform) {
 			return platform switch {
 				GLPlatform glPlatform => [
 					new GLShader(glPlatform, ShaderType.VertexShader,

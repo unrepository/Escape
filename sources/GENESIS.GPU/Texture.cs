@@ -18,7 +18,7 @@ namespace GENESIS.GPU {
 
 		public abstract void Dispose();
 
-		public static Texture Create(Platform platform, Vector2D<uint> size,
+		public static Texture Create(IPlatform platform, Vector2D<uint> size,
 		                              Filter filter = Filter.Linear,
 		                              WrapMode wrapMode = WrapMode.Clamp)
 		{

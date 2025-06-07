@@ -10,7 +10,7 @@ using Silk.NET.Windowing;
 
 namespace GENESIS.GPU.Vulkan {
 	
-	public unsafe class VulkanPlatform : Platform {
+	public unsafe class VulkanPlatform : IPlatform {
 		
 		public bool IsInitialized { get; set; } = false;
 		public Options CurrentOptions { get; }

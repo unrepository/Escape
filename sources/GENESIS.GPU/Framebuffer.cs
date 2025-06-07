@@ -20,7 +20,7 @@ namespace GENESIS.GPU {
 
 		public abstract void Dispose();
 
-		public static Framebuffer Create(Platform platform,
+		public static Framebuffer Create(IPlatform platform,
 		                                 Vector2D<uint> size,
 		                                 Texture? baseTexture = null) {
 			return platform switch {
