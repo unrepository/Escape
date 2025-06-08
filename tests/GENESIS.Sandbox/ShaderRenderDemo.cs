@@ -73,9 +73,9 @@ namespace GENESIS.Sandbox {
 
 			Camera = new Camera2D((int) _framebufferSize.X, (int) _framebufferSize.Y, PrimaryShader);
 			
-			Painter.XY.BeginDrawList();
-			Painter.XY.AddQuad(Vector2.Zero, 0, new Vector2(_framebufferSize.X, _framebufferSize.Y), Color.Red);
-			Painter.XY.EndDrawList();
+			Painter.BeginDrawList();
+			Painter.Add2DQuad(Vector2.Zero, 0, new Vector2(_framebufferSize.X, _framebufferSize.Y), Color.Red);
+			Painter.EndDrawList();
 		}
 
 		protected override void Paint(double delta) {

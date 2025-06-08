@@ -105,14 +105,14 @@ namespace GENESIS.Sandbox {
 		}
 
 		protected override void Paint(double delta) {
-			Painter.XYZ.Clear();
+			Painter.Clear();
 			
-			Painter.XYZ.BeginDrawList();
+			Painter.BeginDrawList();
 			for(int i = 0; i < OBJECT_COUNT; i++) {
 				var obj = _orbitalObjects[i];
-				Painter.XYZ.AddCube(obj.GetPosition((float) Window!.Base.Time), obj.Rotation, obj.Scale, obj.Color);
+				Painter.Add3DCube(obj.GetPosition((float) Window!.Base.Time), obj.Rotation, obj.Scale, obj.Color);
 			}
-			Painter.XYZ.EndDrawList();
+			Painter.EndDrawList();
 			
 			base.Paint(delta);
 		}

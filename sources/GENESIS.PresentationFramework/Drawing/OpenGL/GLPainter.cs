@@ -6,14 +6,13 @@ using Shader = GENESIS.GPU.Shader.Shader;
 
 namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 	
-	// TODO is there really a need for separate 2D and 3D classes? (no)
-	public class GLPainter2D : Painter2D {
+	public class GLPainter : Painter {
 
-		private GLPlatform _platform;
-		private ShaderProgram _targetShaderProgram;
-		private Shader _targetShader;
+		private readonly GLPlatform _platform;
+		private readonly ShaderProgram _targetShaderProgram;
+		private readonly Shader _targetShader;
 
-		public GLPainter2D(GLPlatform platform, ShaderProgram targetShaderProgram, Shader targetShader) {
+		public GLPainter(GLPlatform platform, ShaderProgram targetShaderProgram, Shader targetShader) : base(platform) {
 			_platform = platform;
 			_targetShaderProgram = targetShaderProgram;
 			_targetShader = targetShader;

@@ -22,11 +22,7 @@ namespace GENESIS.PresentationFramework {
 			ShaderProgram = ShaderProgram.Create(platform, GetDefaultShaderSet(platform));
 
 			Painter = platform switch {
-				GLPlatform glPlatform => new Painter {
-					Platform = platform,
-					XY = new GLPainter2D(glPlatform, ShaderProgram, PrimaryShader),
-					XYZ = new GLPainter3D(glPlatform, ShaderProgram, PrimaryShader)
-				},
+				GLPlatform glPlatform => new GLPainter(glPlatform, ShaderProgram, PrimaryShader),
 				_ => throw new NotImplementedException()
 			};
 		}
@@ -35,8 +31,7 @@ namespace GENESIS.PresentationFramework {
 			ShaderProgram.Bind();
 			
 			Camera?.Update();
-			Painter.XYZ.Paint();
-			Painter.XY.Paint(); // TODO merging 2D and 3D painters would also mean that we can easily manipulate the drawing order
+			Painter.Paint();
 		}
 
 		public static Shader[] GetDefaultShaderSet(IPlatform platform) {
