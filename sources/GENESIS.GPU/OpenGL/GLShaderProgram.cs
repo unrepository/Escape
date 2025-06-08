@@ -10,17 +10,17 @@ namespace GENESIS.GPU.OpenGL {
 		private readonly GLPlatform _platform;
 		private static uint _emptyVao = 0;
 		
-		public GLShaderProgram(GLPlatform platform, params Shader.Shader[] shaders) : base(shaders) {
+		public GLShaderProgram(GLPlatform platform, params Shader.Shader[] shaders) : base(platform, shaders) {
 			_platform = platform;
 		}
 
 		public override void Bind() {
-			if(Id == 0) Build();
+			if(Handle == 0) Build();
 			
 			if(_emptyVao == 0) _emptyVao = _platform.API.GenVertexArray();
 			_platform.API.BindVertexArray(_emptyVao);
 			
-			_platform.API.UseProgram(Id);
+			_platform.API.UseProgram(Handle);
 
 			foreach(var shader in Shaders) {
 				foreach(var id in shader.DeallocatedDataObjects) {
@@ -36,15 +36,15 @@ namespace GENESIS.GPU.OpenGL {
 		}
 
 		public override uint Build() {
-			Debug.Assert(Id == 0);
+			Debug.Assert(Handle == 0);
 			
 			if(Shaders.Length == 0) {
 				throw new ArgumentException("A shader program must have at least 1 shader", nameof(Shaders));
 			}
 
-			Id = _platform.API.CreateProgram();
+			Handle = _platform.API.CreateProgram();
 			
-			if(Id == 0) {
+			if(Handle == 0) {
 				throw new PlatformException("Failed to create a GL shader program");
 			}
 
@@ -53,28 +53,28 @@ namespace GENESIS.GPU.OpenGL {
 					shader.Compile();
 				}
 				
-				_platform.API.AttachShader(Id, shader.Handle);
+				_platform.API.AttachShader(Handle, shader.Handle);
 			}
 			
-			_platform.API.LinkProgram(Id);
+			_platform.API.LinkProgram(Handle);
 
-			if(_platform.API.GetProgram(Id, GLEnum.LinkStatus) == 0) {
+			if(_platform.API.GetProgram(Handle, GLEnum.LinkStatus) == 0) {
 				throw new PlatformException("Shader program linking failed");
 			}
 			
 			// cleanup
 			foreach(var shader in Shaders) {
-				_platform.API.DetachShader(Id, shader.Handle);
+				_platform.API.DetachShader(Handle, shader.Handle);
 				shader.Dispose();
 			}
 
-			return Id;
+			return Handle;
 		}
 		
 		public override void Dispose() {
 			GC.SuppressFinalize(this);
-			_platform.API.DeleteProgram(Id);
-			Id = 0;
+			_platform.API.DeleteProgram(Handle);
+			Handle = 0;
 		}
 	}
 }

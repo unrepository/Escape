@@ -27,12 +27,12 @@ namespace GENESIS.GPU.Compute {
 
 			var vertexShaderCode = platform switch {
 				GLPlatform => Assembly.GetExecutingAssembly().ReadTextResourceN("Shaders.OpenGL.compute.vert"),
-				_ => throw new NotImplementedException()
+				_ => throw new NotImplementedException() // PlatformImpl
 			};
 
 			bool hasVertexShader = Program.Shaders.Any(shader => shader.Type == ShaderType.VertexShader);
 			if(!hasVertexShader) {
-				if(Program.Id != 0) Program.Dispose();
+				if(Program.Handle != 0) Program.Dispose();
 				
 				Program = ShaderProgram.Create(platform, program.Shaders.Append(Shader.Shader.Create(
 					platform,
@@ -53,7 +53,7 @@ namespace GENESIS.GPU.Compute {
 					glPlatform.API.DrawArrays(GLEnum.Triangles, 0, VertexCount);
 					break;
 				default:
-					throw new NotImplementedException();
+					throw new NotImplementedException(); // PlatformImpl
 			}
 			
 			Framebuffer.Unbind();

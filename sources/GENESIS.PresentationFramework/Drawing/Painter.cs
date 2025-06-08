@@ -7,12 +7,13 @@ using Hexa.NET.ImGui;
 
 namespace GENESIS.PresentationFramework.Drawing {
 	
-	public abstract class Painter {
+	public abstract class Painter : IDisposable {
 		
 		public IPlatform Platform { get; }
 		
+		public int CurrentDrawList { get; protected set; } = -1;
+		
 		protected List<DrawList> DrawLists { get; } = [];
-		protected int CurrentDrawList { get; set; } = -1;
 		protected string? CurrentModel { get; set; } = null;
 
 		public Painter(IPlatform platform) {
@@ -112,7 +113,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 			var drawList = DrawLists[CurrentDrawList];
 
 			if(CurrentModel is null) {
-				CurrentModel = "quad";
+				CurrentModel = "quad2d";
 				drawList.Model = CurrentModel;
 				drawList.Vertices.AddRange(Models.Quad);
 			}
@@ -152,7 +153,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 			var drawList = DrawLists[CurrentDrawList];
 
 			if(CurrentModel is null) {
-				CurrentModel = "cube";
+				CurrentModel = "cube3d";
 				drawList.Model = CurrentModel;
 				drawList.Vertices.AddRange(Models.Cube);
 			}
@@ -170,7 +171,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 			var drawList = DrawLists[CurrentDrawList];
 
 			if(CurrentModel is null) {
-				CurrentModel = "quad";
+				CurrentModel = "plane3d";
 				drawList.Model = CurrentModel;
 				drawList.Vertices.AddRange(Models.Quad);
 			}
@@ -233,7 +234,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 			Clear();
 			
 		#if DEBUG
-			DebugScene.DebugInfoSlots.Remove(ToString());
+			DebugScene.DebugInfoSlots.Remove($"Painter#{GetHashCode()}");
 		#endif
 		}
 	}

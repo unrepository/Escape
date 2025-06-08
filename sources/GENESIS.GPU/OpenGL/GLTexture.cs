@@ -9,7 +9,7 @@ namespace GENESIS.GPU.OpenGL {
 		private readonly GLPlatform _platform;
 
 		public GLTexture(GLPlatform platform, Vector2D<uint> size, Filter filter, WrapMode wrapMode)
-			: base(size, filter, wrapMode)
+			: base(platform, size, filter, wrapMode)
 		{
 			_platform = platform;
 

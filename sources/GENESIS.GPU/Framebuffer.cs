@@ -5,12 +5,15 @@ namespace GENESIS.GPU {
 
 	public abstract class Framebuffer : IDisposable {
 		
+		public IPlatform Platform { get; }
+		
 		public uint Handle { get; protected set; }
 		public Vector2D<uint> Size { get; protected init; }
 
 		protected List<Texture> TextureAttachments { get; } = [];
 
-		protected Framebuffer(Vector2D<uint> size) {
+		protected Framebuffer(IPlatform platform, Vector2D<uint> size) {
+			Platform = platform;
 			Size = size;
 		}
 
@@ -32,7 +35,7 @@ namespace GENESIS.GPU {
 		                                 Texture? baseTexture = null) {
 			return platform switch {
 				GLPlatform glPlatform => new GLFramebuffer(glPlatform, size, baseTexture as GLTexture),
-				_ => throw new NotImplementedException()
+				_ => throw new NotImplementedException() // PlatformImpl
 			};
 		}
 	}

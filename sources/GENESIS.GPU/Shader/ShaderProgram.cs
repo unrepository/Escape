@@ -4,11 +4,13 @@ namespace GENESIS.GPU.Shader {
 	
 	public abstract class ShaderProgram : IDisposable {
 		
-		public Shader[] Shaders { get; }
+		public IPlatform Platform { get; }
 		
-		public uint Id { get; protected set; }
+		public Shader[] Shaders { get; }
+		public uint Handle { get; protected set; }
 
-		protected ShaderProgram(params Shader[] shaders) {
+		protected ShaderProgram(IPlatform platform, params Shader[] shaders) {
+			Platform = platform;
 			Shaders = shaders;
 		}
 
@@ -20,7 +22,7 @@ namespace GENESIS.GPU.Shader {
 		public static ShaderProgram Create(IPlatform platform, params Shader[] shaders) {
 			return platform switch {
 				GLPlatform glPlatform => new GLShaderProgram(glPlatform, shaders),
-				_ => throw new NotImplementedException()
+				_ => throw new NotImplementedException() // PlatformImpl
 			};
 		}
 	}

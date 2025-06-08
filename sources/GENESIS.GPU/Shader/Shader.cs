@@ -5,6 +5,8 @@ namespace GENESIS.GPU.Shader {
 	
 	public abstract class Shader : IDisposable {
 		
+		public IPlatform Platform { get; }
+		
 		public ShaderType Type { get; }
 		public string Code { get; }
 		
@@ -12,23 +14,20 @@ namespace GENESIS.GPU.Shader {
 
 		internal List<uint> DeallocatedDataObjects { get; } = [];
 
-		protected Shader(ShaderType type, string code) {
+		protected Shader(IPlatform platform, ShaderType type, string code) {
+			Platform = platform;
 			Type = type;
 			Code = code;
 		}
 		
 		public abstract uint Compile();
-
-		public abstract void PushData<T>(ShaderData<T> data);
-		public abstract void UpdateData<T>(ShaderData<T> data);
-		public abstract void ReadData<T>(ref ShaderData<T> data);
-
+		
 		public abstract void Dispose();
 
 		public static Shader Create(IPlatform platform, ShaderType type, string code) {
 			return platform switch {
 				GLPlatform glPlatform => new GLShader(glPlatform, type, code),
-				_ => throw new NotImplementedException()
+				_ => throw new NotImplementedException() // PlatformImpl
 			};
 		}
 	}

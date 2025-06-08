@@ -58,7 +58,7 @@ namespace GENESIS.Sandbox {
 	public class ShaderComputeImGuiDemo : ImGuiScene {
 
 		private ShaderCompute _compute;
-		private ShaderData<ComputeCustomDataDemo> _computeData;
+		private IShaderData<ComputeCustomDataDemo> _computeData;
 		private ComputeCustomDataDemo _data;
 
 		public ShaderComputeImGuiDemo(IPlatform platform) : base(platform, "shader-compute-imgui") {
@@ -76,11 +76,12 @@ namespace GENESIS.Sandbox {
 			_compute = new ShaderCompute(platform, computeProgram, new Vector2D<uint>(512, 512));
 
 			unsafe {
-				_computeData = new() {
-					Binding = 0,
-					Data = _data,
-					Size = (uint) sizeof(ComputeCustomDataDemo)
-				};
+				_computeData = IShaderData.Create(
+					platform,
+					0,
+					_data,
+					(uint) sizeof(ComputeCustomDataDemo)
+				);
 			}
 		}
 
@@ -91,8 +92,8 @@ namespace GENESIS.Sandbox {
 		}
 
 		protected override void Paint(double delta) {
-			if(_computeData.Owner is null) _compute.Program.Shaders[0].PushData(_computeData);
 			_computeData.Data = _data;
+			_computeData.Push();
 			
 			_compute.Render();
 			

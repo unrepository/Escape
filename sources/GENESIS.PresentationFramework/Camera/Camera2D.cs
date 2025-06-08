@@ -46,6 +46,8 @@ namespace GENESIS.PresentationFramework.Camera {
 				View = ViewMatrix,
 				Position = new Vector3(Position.X, Position.Y, 0.0f)
 			};
+			
+			ShaderData.Push();
 		}
 	}
 }

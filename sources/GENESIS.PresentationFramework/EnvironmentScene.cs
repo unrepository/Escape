@@ -22,8 +22,8 @@ namespace GENESIS.PresentationFramework {
 			ShaderProgram = ShaderProgram.Create(platform, GetDefaultShaderSet(platform));
 
 			Painter = platform switch {
-				GLPlatform glPlatform => new GLPainter(glPlatform, ShaderProgram, PrimaryShader),
-				_ => throw new NotImplementedException()
+				GLPlatform glPlatform => new GLPainter(glPlatform),
+				_ => throw new NotImplementedException() // PlatformImpl
 			};
 		}
 
@@ -46,7 +46,7 @@ namespace GENESIS.PresentationFramework {
 							"GENESIS.PresentationFramework.Resources.Shaders.OpenGL.environment.frag"
 						))
 				],
-				_ => throw new NotImplementedException()
+				_ => throw new NotImplementedException() // PlatformImpl
 			};
 		}
 	}

@@ -1,5 +1,6 @@
 using System.Numerics;
 using GENESIS.GPU;
+using GENESIS.GPU.OpenGL;
 using GENESIS.GPU.Shader;
 using GENESIS.LanguageExtensions;
 
@@ -7,12 +8,18 @@ namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 	
 	public class GLDrawList : DrawList {
 
-		private ShaderArrayData<Vertex> _verticesData = new() { Binding = 10 };
+		private IShaderArrayData<Vertex> _verticesData;
 		//private ShaderArrayData<uint> _objectIndicesData = new();
-		private ShaderArrayData<Vector4> _colorsData = new() { Binding = 11 };
-		private ShaderArrayData<Matrix4x4> _matricesData = new() { Binding = 12 };
+		private IShaderArrayData<Vector4> _colorsData;
+		private IShaderArrayData<Matrix4x4> _matricesData;
+
+		public GLDrawList(GLPlatform platform) {
+			_verticesData = IShaderArrayData.Create<Vertex>(platform, 10, null, 0);
+			_colorsData = IShaderArrayData.Create<Vector4>(platform, 11, null, 0);
+			_matricesData = IShaderArrayData.Create<Matrix4x4>(platform, 12, null, 0);
+		}
 		
-		public unsafe override void Push(Shader shader) {
+		public unsafe override void Push() {
 			_verticesData.Size = (uint) Vertices.Count * (uint) sizeof(Vertex);
 			_colorsData.Size = (uint) Colors.Count * (uint) sizeof(Vector4);
 			_matricesData.Size = (uint) Matrices.Count * (uint) sizeof(Matrix4x4);
@@ -21,9 +28,9 @@ namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 			_colorsData.Data = Colors.ToArray();
 			_matricesData.Data = Matrices.ToArray();
 			
-			if(_verticesData.Owner is null) shader.PushData(_verticesData);
-			if(_colorsData.Owner is null) shader.PushData(_colorsData);
-			if(_matricesData.Owner is null) shader.PushData(_matricesData);
+			_verticesData.Push();
+			_colorsData.Push();
+			_matricesData.Push();
 		}
 
 		public override void Clear() {

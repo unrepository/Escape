@@ -12,7 +12,7 @@ namespace GENESIS.GPU.OpenGL {
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		private readonly GLPlatform _platform;
 
-		public GLShader(GLPlatform platform, ShaderType type, string code) : base(type, code) {
+		public GLShader(GLPlatform platform, ShaderType type, string code) : base(platform, type, code) {
 			_platform = platform;
 		}
 		
@@ -50,74 +50,6 @@ namespace GENESIS.GPU.OpenGL {
 			}
 
 			return Handle;
-		}
-
-		// TODO can this be done outside of a shader? because i dont think buffer upload depends on the current shader
-		public unsafe override void PushData<T>(ShaderData<T> data) {
-			if(data.Owner != this && data.Owner is not null) {
-				throw new InvalidOperationException("ShaderData is already assigned to an existing shader");
-			}
-			
-			data.Owner = this;
-
-			if(data.Id != 0) {
-				throw new InvalidOperationException("ShaderData already pushed to shader");
-			}
-			
-			data.Id = _platform.API.CreateBuffer();
-
-			if(data.Data is null) {
-				// only allocate
-				_platform.API.NamedBufferData(data.Id, data.Size, null, VertexBufferObjectUsage.DynamicDraw);
-			} else {
-				if(data is ShaderArrayData<T> arrayData) {
-					if(arrayData.InnerData.Length == 0) {
-						_platform.API.NamedBufferData(data.Id, data.Size, null, VertexBufferObjectUsage.DynamicDraw);
-					} else {
-						fixed(void* dataPtr = &arrayData.InnerData[0]) {
-							_platform.API.NamedBufferData(data.Id, data.Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
-						}
-					}
-				} else {
-					fixed(void* dataPtr = &data.InnerData) {
-						_platform.API.NamedBufferData(data.Id, data.Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
-					}
-				}
-			}
-
-			_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, data.Binding, data.Id);
-		}
-
-		public unsafe override void UpdateData<T>(ShaderData<T> data) {
-			if(data.Owner != this) {
-				throw new InvalidOperationException("ShaderData is not bound to this shader");
-			}
-
-			if(data.Id == 0) {
-				throw new InvalidOperationException("ShaderData does not yet exist");
-			}
-			
-			if(data is ShaderArrayData<T> arrayData) {
-				if(arrayData.InnerData.Length == 0) {
-					_platform.API.NamedBufferSubData(data.Id, 0, data.Size, null);
-					//_platform.API.NamedBufferData(data.Id, data.Size, null, VertexBufferObjectUsage.DynamicDraw);
-				} else {
-					fixed(void* dataPtr = &arrayData.InnerData[0]) {
-						_platform.API.NamedBufferSubData(data.Id, 0, data.Size, dataPtr);
-						//_platform.API.NamedBufferData(data.Id, data.Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
-					}
-				}
-			} else {
-				fixed(void* dataPtr = &data.InnerData) {
-					_platform.API.NamedBufferSubData(data.Id, 0, data.Size, dataPtr);
-					//_platform.API.NamedBufferData(data.Id, data.Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
-				}
-			}
-		}
-
-		public unsafe override void ReadData<T>(ref ShaderData<T> data) {
-			Debug.Assert(data.MappedMemory is not null);
-			data.Data = *data.MappedMemory;
 		}
 
 		public override void Dispose() {

@@ -17,7 +17,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 		public Dictionary<string, Vertex[]> Models = [];
 		public string? Model = null;
 
-		public abstract void Push(Shader shader);
+		public abstract void Push();
 		public abstract void Clear();
 		
 		public abstract void Dispose();

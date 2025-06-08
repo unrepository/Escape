@@ -1,3 +1,3 @@
 using GENESIS.Sandbox;
 
-OrbitDemoProgram.Start(args);
+StaticDynamicTestProgram.Start(args);

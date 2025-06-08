@@ -23,7 +23,7 @@ namespace GENESIS.PresentationFramework.Camera {
 		protected float Width { get; private set; }
 		protected float Height { get; private set; }
 
-		protected ShaderData<CameraData> ShaderData;
+		protected IShaderData<CameraData> ShaderData { get; }
 
 		protected CameraBase(Window window, Shader shader)
 			: this(window.Base.FramebufferSize.X, window.Base.FramebufferSize.Y, shader)
@@ -43,14 +43,15 @@ namespace GENESIS.PresentationFramework.Camera {
 			RecalculateProjectionMatrix();
 
 			unsafe {
-				ShaderData = new ShaderData<CameraData> {
-					Size = (uint) sizeof(CameraData)
-				};
+				ShaderData = IShaderData.Create(
+					shader.Platform,
+					0,
+					new CameraData(),
+					(uint) sizeof(CameraData)
+				);
 			}
 			
 			Update();
-			
-			shader.PushData(ShaderData);
 		}
 
 		protected abstract void RecalculateProjectionMatrix();

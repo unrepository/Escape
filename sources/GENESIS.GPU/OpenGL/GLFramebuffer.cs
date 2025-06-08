@@ -9,7 +9,9 @@ namespace GENESIS.GPU.OpenGL {
 
 		private readonly GLPlatform _platform;
 		
-		public GLFramebuffer(GLPlatform platform, Vector2D<uint> size, GLTexture? baseTexture = null) : base(size) {
+		public GLFramebuffer(GLPlatform platform, Vector2D<uint> size, GLTexture? baseTexture = null)
+			: base(platform, size)
+		{
 			_platform = platform;
 
 			Handle = platform.API.GenFramebuffer();
