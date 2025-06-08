@@ -1,79 +1,42 @@
-﻿using GENESIS.Simulation.PlateTectonics;
+﻿using GENESIS.GPU.OpenGL;
+using GENESIS.PresentationFramework;
+using GENESIS.PresentationFramework.Extensions;
+using GENESIS.UI;
 using Silk.NET.Maths;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using Color = System.Drawing.Color;
+using Silk.NET.OpenGL;
+using Silk.NET.Windowing;
+using Monitor = Silk.NET.Windowing.Monitor;
+using Window = GENESIS.GPU.Window;
 
-var ptData = new PlateTectonicsData() {
-	Map = new Dictionary<Vector2D<int>, TectonicPlateTile>(),
-	MapSize = new Vector2D<int>(1024, 512),
-	Seed = 548589
-};
+Silk.NET.Windowing.Window.PrioritizeGlfw();
 
-var rand = new Random(ptData.Seed);
+var platformOptions = new GLPlatform.Options();
+platformOptions.ParseCommandLine(args);
 
-for(int i = 0; i < 20; i++) {
-	ptData.Map[new Vector2D<int>(rand.Next(0, ptData.MapSize.X), rand.Next(0, ptData.MapSize.Y))]
-		= new TectonicPlateTile() {
-			PlateIndex = i,
-			IsBase = true
-		};
+var platform = new GLPlatform(platformOptions);
+var windowOptions = WindowOptions.Default;
+
+var monitorCenter = Monitor.GetMainMonitor(null).Bounds.Center;
+					
+windowOptions.Position = new Vector2D<int>(
+	monitorCenter.X - windowOptions.Size.X / 2,
+	monitorCenter.Y - windowOptions.Size.Y / 2
+);
+
+var window = Window.Create(platform, windowOptions);
+
+platform.Initialize();
+window.Initialize();
+			
+var splash = new SplashScreen(platform);
+window.PushScene(splash);
+
+if(args.Contains("--debug")) {
+	window.PushScene(new DebugScene(platform));
 }
 
-var pt = new PlateTectonicsSimulation(ptData);
-
-var colors = new Dictionary<int, byte[]>();
-
-using(Image<Rgba32> img = new Image<Rgba32>(ptData.MapSize.X, ptData.MapSize.Y)) {
-	for(int y = 0; y < ptData.MapSize.Y; y++) {
-		for(int x = 0; x < ptData.MapSize.X; x++) {
-			if(!pt.CurrentState.Data.Map.TryGetValue(new Vector2D<int>(x, y), out var t)) {
-				img[x, y] = new Rgba32(0, 0, 0, 255);
-				continue;
-			}
-
-			byte[] c;
-
-			if(!colors.TryGetValue(t.PlateIndex, out c)) {
-				c = new byte[4];
-				rand.NextBytes(c);
-				colors[t.PlateIndex] = c;
-			}
-
-			img[x, y] = new Rgba32(c[0], c[1], c[2], 255);
-		}
-	}
-	
-	img.Save("res.png");
+while(!window.Base.IsClosing) {
+	window.RenderFrame();
 }
 
-// while(true) {
-// 	Console.Clear();
-// 	for(int y = 0; y < ptData.MapSize.Y; y++) {
-// 		for(int x = 0; x < ptData.MapSize.X; x++) {
-// 			Console.ForegroundColor = ConsoleColor.White;
-// 			Console.BackgroundColor = ConsoleColor.Black;
-// 		
-// 			if(!pt.CurrentState.Data.Map.TryGetValue(new Vector2D<int>(x, y), out var t)) {
-// 				Console.Write(".");
-// 				continue;
-// 			}
-//
-// 			Console.BackgroundColor = (ConsoleColor) t.PlateIndex + 1;
-// 			if(t.IsEdge) Console.BackgroundColor = ConsoleColor.White;
-// 			if(t.IsBase) Console.ForegroundColor = ConsoleColor.Black;
-// 			//else Console.ForegroundColor = ConsoleColor.White;
-// 			Console.Write(t.PlateIndex);
-// 		}
-//
-// 		Console.BackgroundColor = ConsoleColor.Black;
-// 		Console.Write("\n");
-// 	}
-//
-// 	Console.ReadKey();
-// 	pt.TickSingle();
-// }
-
-// foreach(var (k, v) in pt.CurrentState.Data.Map) {
-// 	Console.WriteLine($"{k}: {v.PlateIndex}");
-// }
+window.PopAllScenes();

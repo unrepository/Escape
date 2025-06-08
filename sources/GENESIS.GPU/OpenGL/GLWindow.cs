@@ -9,22 +9,8 @@ namespace GENESIS.GPU.OpenGL {
 	
 	public class GLWindow : Window {
 
-		public override string Title {
-			get => Base.Title;
-			set => Base.Title = value;
-		}
-
-		public override uint Width {
-			get => (uint) Base.FramebufferSize.X;
-			set => Base.Size = new Vector2D<int>((int) value, Base.Size.Y);
-		}
-		
-		public override uint Height {
-			get => (uint) Base.FramebufferSize.Y;
-			set => Base.Size = new Vector2D<int>(Base.Size.X, (int) value);
-		}
-
 		private readonly GLPlatform _platform;
+		private readonly List<Action> _scheduledActions = [];
 
 		public GLWindow(GLPlatform platform, WindowOptions? options = null) {
 			_platform = platform;
@@ -69,7 +55,7 @@ namespace GENESIS.GPU.OpenGL {
 				_platform.API.ClearColor(0, 0, 0, 0);
 
 				foreach(var queues in RenderQueues.Values) {
-					foreach(var queue in queues) {
+					foreach(var queue in queues.ToArray()) {
 						queue(delta);
 					}
 				}
@@ -93,13 +79,23 @@ namespace GENESIS.GPU.OpenGL {
 			if(!Base.IsClosing) Base.DoUpdate();
 			if(Base.IsClosing) return -1;
 
-			if(frameProvider is not null) RenderQueues[QueuePriority.Normal].Add(frameProvider);
+			if(frameProvider is not null) AddRenderQueue(0, frameProvider);
 			Base.DoRender();
-			if(frameProvider is not null) RenderQueues[QueuePriority.Normal].Remove(frameProvider);
+			if(frameProvider is not null) RemoveRenderQueue(0, frameProvider);
+
+			foreach(var action in _scheduledActions) {
+				action();
+			}
+			
+			_scheduledActions.Clear();
 
 			return FrameDeltaTime;
 		}
-		
+
+		public override void ScheduleLater(Action action) {
+			_scheduledActions.Add(action);
+		}
+
 		public override void Dispose() {
 			GC.SuppressFinalize(this);
 			Base.Dispose();

@@ -5,10 +5,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GENESIS.GPU\GENESIS.GPU.csproj" />
+    <ProjectReference Include="..\GENESIS.PresentationFramework\GENESIS.PresentationFramework.csproj" />
     <ProjectReference Include="..\GENESIS.Simulation\GENESIS.Simulation.csproj" />
   </ItemGroup>
 
@@ -20,6 +22,14 @@
 
   <ItemGroup>
     <PackageReference Include="NLog" Version="5.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\**\*"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\Shaders\OpenGL\" />
   </ItemGroup>
 
 </Project>

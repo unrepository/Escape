@@ -14,16 +14,45 @@ namespace GENESIS.PresentationFramework.Extensions {
 			
 			_windowScenes[window].Add(scene);
 			scene.Initialize(window);
-			window.RenderQueues[Window.QueuePriority.Normal].Add(scene.Render);
+
+			// only one environment scene allowed per window
+			if(scene is EnvironmentScene) {
+				foreach(var s in window.GetScenes().Where(s => s is EnvironmentScene)) {
+					window.PopScene(s);
+				}
+				
+				window.ClearRenderQueues(-1); // just in case
+				window.AddRenderQueue(-1, scene.Render);
+				return;
+			}
+			
+			window.AddRenderQueue(0, scene.Render);
 		}
 
 		public static void PopScene(this Window window, Scene scene) {
-			Debug.Assert(_windowScenes.ContainsKey(window));
-			Debug.Assert(_windowScenes[window].Contains(scene));
+			if(!_windowScenes.ContainsKey(window)) return;
+			if(!_windowScenes[window].Contains(scene)) return;
 			
 			_windowScenes[window].Remove(scene);
-			window.RenderQueues[Window.QueuePriority.Normal].Remove(scene.Render);
+			
+			var priority = scene is EnvironmentScene ? -1 : 0;
+			window.RemoveRenderQueue(priority, scene.Render);
+			
 			scene.Deinitialize(window);
+		}
+
+		public static void PopAllScenes(this Window window) {
+			foreach(var scene in new List<Scene>(window.GetScenes())) {
+				window.PopScene(scene);
+			}
+		}
+
+		public static IReadOnlyList<Scene> GetScenes(this Window window) {
+			if(!_windowScenes.TryGetValue(window, out var scenes)) {
+				return new List<Scene>();
+			}
+
+			return scenes;
 		}
 
 		public static Scene? GetSceneById(this Window window, string id) {

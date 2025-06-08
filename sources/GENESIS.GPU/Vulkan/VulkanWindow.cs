@@ -8,11 +8,6 @@ namespace GENESIS.GPU.Vulkan {
 	
 	public class VulkanWindow : Window {
 
-		public override string Title { get; set; } = "VkWindow";
-		
-		public override uint Width { get; set; } = 512;
-		public override uint Height { get; set; } = 512;
-
 		public IWindow Base { get; }
 		
 		internal SurfaceKHR Surface { get; }
@@ -60,6 +55,10 @@ namespace GENESIS.GPU.Vulkan {
 		}
 
 		public override double RenderFrame(Action<double>? frameProvider = null) {
+			throw new NotImplementedException();
+		}
+
+		public override void ScheduleLater(Action action) {
 			throw new NotImplementedException();
 		}
 

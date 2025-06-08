@@ -71,8 +71,8 @@ namespace GENESIS.PresentationFramework.Extensions {
 				}
 			};
 			
-			window.RenderQueues[Window.QueuePriority.Lowest].Add(begin);
-			window.RenderQueues[Window.QueuePriority.Highest].Add(end);
+			window.AddRenderQueue(-9999, begin);
+			window.AddRenderQueue(9999, end);
 			
 			_windowContexts[window] = ctx;
 			return ctx;

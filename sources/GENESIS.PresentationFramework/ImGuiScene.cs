@@ -28,6 +28,13 @@ namespace GENESIS.PresentationFramework {
 			ImIO = ImGui.GetIO();
 		}
 
+		public override void Deinitialize(Window window) {
+			base.Deinitialize(window);
+			
+			ImGui.SetCurrentContext(ImContext);
+			unsafe { ImGui.SaveIniSettingsToDisk(ImIO.IniFilename); }
+		}
+
 		public override void Render(double delta) {
 			ImGui.SetCurrentContext(ImContext);
 			Paint(delta);

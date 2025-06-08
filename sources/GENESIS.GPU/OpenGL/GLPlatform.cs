@@ -52,15 +52,7 @@ namespace GENESIS.GPU.OpenGL {
 			
 			IsInitialized = true;
 		}
-		
-		public IReadOnlyCollection<GLDevice> GetDevices() {
-			throw new NotSupportedException();
-		}
-		
-		public GLDevice CreateDevice(int index) {
-			throw new NotSupportedException();
-		}
-		
+
 		public void Dispose() {
 			GC.SuppressFinalize(this);
 		}
