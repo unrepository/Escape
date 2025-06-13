@@ -1,4 +1,5 @@
 #version 430 core
+#extension GL_ARB_bindless_texture : require
 
 struct CameraData {
 	mat4 projection;
@@ -13,22 +14,29 @@ layout(std430, binding = 0) readonly buffer CameraBuffer {
 struct Vertex {
 	vec3 position;
 	vec3 normal;
+	vec2 texCoords;
 };
 
 layout(std430, binding = 10) readonly buffer SSBO1 {
 	Vertex vertices[];
 };
 
+struct Material {
+	vec4 albedoColor;
+	int hasTextures;
+	sampler2D diffuseTexture;
+};
+
 layout(std430, binding = 11) readonly buffer SSBO3 {
-	vec4 objectColors[];
+	Material materials[];
 };
 
 layout(std430, binding = 12) readonly buffer SSBO4 {
 	mat4 objectMatrices[];
 };
 
-out Vertex vertex;
-out vec4 vColor;
+smooth out Vertex vertex;
+flat out Material material;
 
 void main() {
 	Vertex v = vertices[gl_VertexID];
@@ -37,5 +45,5 @@ void main() {
 		* vec4(v.position, 1.0);
 
 	vertex = v;
-	vColor = objectColors[gl_InstanceID];
+	material = materials[gl_InstanceID];
 }

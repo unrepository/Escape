@@ -13,12 +13,19 @@ namespace GENESIS.LanguageExtensions {
 		}
 		
 		public static string ReadTextResourceN(this Assembly assembly, string name) {
-			name = assembly.GetName().Name + ".Resources." + name;
-			
-			using(var stream = assembly.GetManifestResourceStream(name))
-			using(var reader = new StreamReader(stream)) {
-				return reader.ReadToEnd();
+			return assembly.ReadTextResource(assembly.GetName().Name + ".Resources." + name);
+		}
+		
+		public static byte[] ReadBinaryResource(this Assembly assembly, string path) {
+			using(var stream = assembly.GetManifestResourceStream(path))
+			using(var memory = new MemoryStream()) {
+				stream.CopyTo(memory);
+				return memory.ToArray();
 			}
+		}
+		
+		public static byte[] ReadBinaryResourceN(this Assembly assembly, string name) {
+			return assembly.ReadBinaryResource(assembly.GetName().Name + ".Resources." + name);
 		}
 	}
 }

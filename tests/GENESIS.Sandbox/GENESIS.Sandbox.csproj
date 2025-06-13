@@ -23,4 +23,8 @@
         <EmbeddedResource Include="Resources\**\*"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Resources\Textures\" />
+    </ItemGroup>
+
 </Project>

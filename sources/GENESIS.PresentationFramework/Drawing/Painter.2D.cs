@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
+using GENESIS.GPU;
 using GENESIS.LanguageExtensions;
 
 namespace GENESIS.PresentationFramework.Drawing {
@@ -19,7 +20,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 				drawList.Vertices.AddRange(Models.Quad);
 			}
 			
-			drawList.Colors.Add(color.ToVector4());
+			drawList.Materials.Add(new Material { Albedo = color.ToVector4() });
 			drawList.Matrices.Add(Matrix4x4.CreateScale(new Vector3(scale.X, scale.Y, 1))
 			                      * Matrix4x4.CreateFromYawPitchRoll(0, 0, rotation)
 			                      * Matrix4x4.CreateTranslation(new Vector3(position.X, position.Y, 0)));
@@ -41,7 +42,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 				drawList.Vertices.AddRange(CustomModels[modelName]);
 			}
 			
-			drawList.Colors.Add(color.ToVector4());
+			drawList.Materials.Add(new Material { Albedo = color.ToVector4() });
 			drawList.Matrices.Add(Matrix4x4.CreateScale(new Vector3(scale.X, scale.Y, 1))
 			                      * Matrix4x4.CreateFromYawPitchRoll(0, 0, rotation)
 			                      * Matrix4x4.CreateTranslation(new Vector3(position.X, position.Y, 0)));

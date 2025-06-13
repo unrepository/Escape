@@ -57,9 +57,9 @@ namespace GENESIS.PresentationFramework.Drawing {
 							ImGui.TreePop();
 						}
 						
-						if(ImGui.TreeNode($"Colors {drawList.Colors.Count}")) {
-							for(int j = 0; j < drawList.Colors.Count; j++) {
-								ImGui.Text($"{j}: {drawList.Colors[j]}");
+						if(ImGui.TreeNode($"Materials {drawList.Materials.Count}")) {
+							for(int j = 0; j < drawList.Materials.Count; j++) {
+								ImGui.Text($"{j}: {drawList.Materials[j]}");
 							}
 							
 							ImGui.TreePop();
@@ -106,9 +106,16 @@ namespace GENESIS.PresentationFramework.Drawing {
 			return true;
 		}
 
-		public void SetColor(int index, Color color) {
-			Debug.Assert(CurrentDrawList != -1, "SetColor() called outside a draw list");
-			DrawLists[CurrentDrawList].Colors[index] = color.ToVector4();
+		public void SetMaterial(int index, Material material) {
+			Debug.Assert(CurrentDrawList != -1, "SetMaterial() called outside a draw list");
+			var drawList = DrawLists[CurrentDrawList];
+			if(material.DiffuseTexture > 0) {
+				material.HasTextures = 1;
+				if(!drawList.Textures.Contains(material.DiffuseTexture)) {
+					drawList.Textures.Add(material.DiffuseTexture);
+				}
+			}
+			drawList.Materials[index] = material;
 		}
 		
 		public void SetTransform(int index, Vector3? position = null, Vector3? rotation = null, Vector3? scale = null) {

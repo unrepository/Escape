@@ -51,7 +51,7 @@ namespace GENESIS.GPU.OpenGL {
 				FramebufferTarget.Framebuffer,
 				FramebufferAttachment.ColorAttachment0 + TextureAttachments.Count,
 				TextureTarget.Texture2D,
-				texture.Handle,
+				((GLTexture) texture).Id,
 				0
 			);
 			

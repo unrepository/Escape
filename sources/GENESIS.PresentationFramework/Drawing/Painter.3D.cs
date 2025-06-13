@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
+using GENESIS.GPU;
 using GENESIS.LanguageExtensions;
 
 namespace GENESIS.PresentationFramework.Drawing {
@@ -19,7 +20,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 				drawList.Vertices.AddRange(Models.Cube);
 			}
 			
-			drawList.Colors.Add(color.ToVector4());
+			drawList.Materials.Add(new Material { Albedo = color.ToVector4() });
 			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
 			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
 			                      * Matrix4x4.CreateTranslation(position));
@@ -39,7 +40,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 				drawList.Vertices.AddRange(Models.Quad);
 			}
 			
-			drawList.Colors.Add(color.ToVector4());
+			drawList.Materials.Add(new Material { Albedo = color.ToVector4() });
 			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
 			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
 			                      * Matrix4x4.CreateTranslation(position));
@@ -83,7 +84,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 				drawList.Vertices.AddRange(CustomModels[modelName]);
 			}
 			
-			drawList.Colors.Add(color.ToVector4());
+			drawList.Materials.Add(new Material { Albedo = color.ToVector4() });
 			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
 			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
 			                      * Matrix4x4.CreateTranslation(position));
