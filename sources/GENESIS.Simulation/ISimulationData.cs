@@ -1,6 +1,4 @@
 namespace GENESIS.Simulation {
-	
-	public interface ISimulationData {
-		
-	}
+
+	public interface ISimulationData;
 }

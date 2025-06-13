@@ -14,11 +14,12 @@ namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 			_platform = platform;
 		}
 
-		public override void BeginDrawList() {
+		public override int BeginDrawList(DrawList.ShapeType type = DrawList.ShapeType.Triangle) {
 			Debug.Assert(CurrentDrawList == -1, "BeginDrawList() called without EndDrawList()");
 			
 			CurrentDrawList = DrawLists.Count;
-			DrawLists.Add(new GLDrawList(_platform));
+			DrawLists.Add(new GLDrawList(_platform, type));
+			return CurrentDrawList;
 		}
 		
 		public override void EndDrawList() {
@@ -34,7 +35,7 @@ namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 				
 				drawList.Push();
 				_platform.API.DrawArraysInstanced(
-					GLEnum.Triangles,
+					((GLDrawList) drawList).GLShapeType,
 					0,
 					(uint) drawList.Vertices.Count,
 					(uint) drawList.Matrices.Count

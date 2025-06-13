@@ -20,7 +20,7 @@ namespace GENESIS.PresentationFramework.Dialog {
 			IsOpen = true;
 		}
 		
-		public bool Prompt() {
+		public bool Prompt(bool popup = true) {
 			if(!IsOpen) return false;
 			
 			ImGui.SetNextWindowPos(
@@ -29,7 +29,13 @@ namespace GENESIS.PresentationFramework.Dialog {
 				new Vector2(0.5f, 0.5f)
 			);
 			
-			if(ImGui.Begin(_title, ImGuiWindowFlags.AlwaysAutoResize)) {
+			if(popup) ImGui.OpenPopup(_title);
+
+			var begin = popup
+				? ImGui.BeginPopup(_title, ImGuiWindowFlags.AlwaysAutoResize)
+				: ImGui.Begin(_title, ImGuiWindowFlags.AlwaysAutoResize);
+			
+			if(begin) {
 				foreach(var messageLine in _message.Split("\n")) {
 					ImGui.Text(messageLine);
 				}
@@ -51,9 +57,11 @@ namespace GENESIS.PresentationFramework.Dialog {
 					default:
 						throw new NotImplementedException();
 				}
+				
+				if(popup) ImGui.EndPopup();
 			}
-			ImGui.End();
 
+			if(!popup) ImGui.End();
 			return !IsOpen;
 		}
 

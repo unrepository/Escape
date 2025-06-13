@@ -14,12 +14,28 @@ namespace GENESIS.PresentationFramework.Drawing {
 		public List<Vector4> Colors = [];
 		public List<Matrix4x4> Matrices = [];
 
-		public Dictionary<string, Vertex[]> Models = [];
+		public ShapeType Type { get; }
+		
+		//public Dictionary<string, Vertex[]> Models = [];
 		public string? Model = null;
+
+		public DrawList(ShapeType type) {
+			Type = type;
+		}
 
 		public abstract void Push();
 		public abstract void Clear();
 		
 		public abstract void Dispose();
+
+		public enum ShapeType {
+			
+			Triangle,
+			TriangleStrip,
+			TriangleFan,
+			Line,
+			LineStrip,
+			Point
+		}
 	}
 }

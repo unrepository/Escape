@@ -8,7 +8,7 @@ namespace GENESIS.PresentationFramework.Camera {
 	public abstract class Camera3D : CameraBase {
 		
 		public static float ZNear { get; set; } = 0.01f;
-		public static float ZFar { get; set; } = 1000f;
+		public static float ZFar { get; set; } = 1_000_000f;
 
 		public Vector3 Position = Vector3.Zero;
 		public Vector3 Rotation = Vector3.Zero;

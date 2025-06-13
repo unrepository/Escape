@@ -4,6 +4,7 @@ using GENESIS.GPU;
 using GENESIS.PresentationFramework;
 using GENESIS.PresentationFramework.Dialog;
 using GENESIS.Project;
+using GENESIS.Simulation;
 using Hexa.NET.ImGui;
 
 namespace GENESIS.UI.Project {
@@ -77,6 +78,15 @@ namespace GENESIS.UI.Project {
 					
 					ImGui.Separator();
 
+					if(ImGui.BeginMenu("Simulation")) {
+						if(ImGui.MenuItem("Planetary (N-body)")) {
+							_objectCreateType = typeof(NBodySimulationObject);
+							_objectCreatePrompt = new("New N-body simulation...", "Name");
+						}
+						
+						ImGui.EndMenu();
+					}
+
 					if(ImGui.Selectable("Map")) {
 						_objectCreateType = typeof(MapObject);
 						_objectCreatePrompt = new("New map...", "Name");
@@ -118,27 +128,27 @@ namespace GENESIS.UI.Project {
 			}
 
 		#region Prompts
-			if(_folderCreatePrompt?.Prompt() == true
+			if(_folderCreatePrompt?.Prompt(false) == true
 			   && _folderCreatePrompt.Result is not null)
 			{
 				SelectedDirectory.CreateSubdirectory(_folderCreatePrompt.Result);
 			}
 			
-			if(_objectCreatePrompt?.Prompt() == true
+			if(_objectCreatePrompt?.Prompt(false) == true
 			   && _objectCreatePrompt.Result is not null) {
 				Debug.Assert(_objectCreateType is not null);
 
 				var extensionProperty = _objectCreateType.GetProperty("Extension",
 					BindingFlags.Public | BindingFlags.Static);
-				
+
 				Debug.Assert(extensionProperty is not null);
-				
+
 				var file = new FileInfo(
 					SelectedDirectory.FullName
 					+ Path.DirectorySeparatorChar
 					+ _objectCreatePrompt.Result
 					+ extensionProperty.GetValue(null));
-				
+
 				file.Create().Close();
 			}
 			

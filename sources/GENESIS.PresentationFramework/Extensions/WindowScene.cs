@@ -17,7 +17,8 @@ namespace GENESIS.PresentationFramework.Extensions {
 
 			// only one environment scene allowed per window
 			if(scene is EnvironmentScene) {
-				foreach(var s in window.GetScenes().Where(s => s is EnvironmentScene)) {
+				foreach(var s in window.GetScenes().Where(s => s is EnvironmentScene).ToArray()) {
+					if(s == scene) continue; 
 					window.PopScene(s);
 				}
 				

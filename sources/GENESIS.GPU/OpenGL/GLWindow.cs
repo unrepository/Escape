@@ -52,7 +52,7 @@ namespace GENESIS.GPU.OpenGL {
 				Base.MakeCurrent();
 				
 				_platform.API.Clear((uint) (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
-				_platform.API.ClearColor(0, 0, 0, 0);
+				_platform.API.ClearColor(0, 0, 0, 1);
 
 				foreach(var queues in RenderQueues.Values) {
 					foreach(var queue in queues.ToArray()) {

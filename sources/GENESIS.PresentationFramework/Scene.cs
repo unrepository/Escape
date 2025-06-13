@@ -10,7 +10,9 @@ namespace GENESIS.PresentationFramework {
 		public string Id { get; }
 		
 		public Window? Window { get; private set; }
-		public double UpdatesPerSecond { get; init; } = 60;
+		
+		public double UpdatesPerSecond = 60;
+		public bool DoUpdates = true;
 		
 		protected Thread UpdateThread { get; private set; }
 		
@@ -25,16 +27,14 @@ namespace GENESIS.PresentationFramework {
 			Window = window;
 			
 			UpdateThread = new Thread(() => {
-				double interval = 1000.0 / UpdatesPerSecond;
-
 				var stopwatch = new Stopwatch();
 				stopwatch.Start();
 
 				long nextTick = stopwatch.ElapsedTicks;
 				long lastTick = nextTick;
-				long ticksPerInterval = (long) (Stopwatch.Frequency / UpdatesPerSecond);
 
 				while(_runUpdateThread) {
+					long ticksPerInterval = (long) (Stopwatch.Frequency / UpdatesPerSecond);
 					nextTick += ticksPerInterval;
 
 					while(stopwatch.ElapsedTicks < nextTick) {
@@ -52,7 +52,7 @@ namespace GENESIS.PresentationFramework {
 					lastTick = currentTick;
 
 					double delta = (double) deltaTicks / Stopwatch.Frequency;
-					Update(delta);
+					if(DoUpdates) Update(delta);
 				}
 			}) {
 				IsBackground = true

@@ -63,7 +63,7 @@ namespace GENESIS.UI.Object {
 			TerrainComputeData.Push();
 			TerrainCompute.Render();
 			
-			if(ImGui.Begin($"Map editor - {Object.ProjectPath}")) {
+			if(ImGui.Begin($"Map editor - {Object.ProjectPath}", ref IsOpen)) {
 				ImGui.Image(
 					new ImTextureID(TerrainCompute.Framebuffer.GetTextureAttachments()[0].Handle),
 					new Vector2(TerrainCompute.Size.X, TerrainCompute.Size.Y),

@@ -17,6 +17,7 @@ namespace GENESIS.Project {
 
 		public static IProjectObject CreateFromFile(FileInfo file) {
 			if(file.Extension == MapObject.Extension) return new MapObject(file);
+			if(file.Extension == NBodySimulationObject.Extension) return new NBodySimulationObject(file);
 			throw new NotImplementedException();
 		}
 	}

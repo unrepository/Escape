@@ -16,6 +16,10 @@ namespace GENESIS.UI {
 		public SplashScreen(IPlatform platform) : base(platform, "splash_screen") { }
 		
 		protected override void Paint(double delta) {
+		#if DEBUG
+			ImGui.ShowDemoWindow();
+		#endif
+			
 			// center splash window
 			ImGui.SetNextWindowPos(
 				ImGui.GetCenter(ImGui.GetMainViewport()),

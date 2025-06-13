@@ -7,11 +7,12 @@ using Hexa.NET.ImGui;
 
 namespace GENESIS.PresentationFramework.Drawing {
 	
-	public abstract class Painter : IDisposable {
+	public abstract partial class Painter : IDisposable {
 		
 		public IPlatform Platform { get; }
 		
 		public int CurrentDrawList { get; protected set; } = -1;
+		public Dictionary<string, Vertex[]> CustomModels { get; } = [];
 		
 		protected List<DrawList> DrawLists { get; } = [];
 		protected string? CurrentModel { get; set; } = null;
@@ -94,7 +95,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 		#endif
 		}
 		
-		public abstract void BeginDrawList();
+		public abstract int BeginDrawList(DrawList.ShapeType type = DrawList.ShapeType.Triangle);
 		public abstract void EndDrawList();
 		
 		public bool SetDrawList(int index) {
@@ -105,103 +106,35 @@ namespace GENESIS.PresentationFramework.Drawing {
 			return true;
 		}
 
-	#region 2D
-		public void Add2DQuad(Vector2 position, float rotation, Vector2 scale, Color color) {
-			Debug.Assert(CurrentDrawList != -1, "Add2DQuad() called outside a draw list");
-			Debug.Assert(CurrentModel is null or "quad2d", "Only a single model can be drawn per draw list");
-
-			var drawList = DrawLists[CurrentDrawList];
-
-			if(CurrentModel is null) {
-				CurrentModel = "quad2d";
-				drawList.Model = CurrentModel;
-				drawList.Vertices.AddRange(Models.Quad);
-			}
-			
-			drawList.Colors.Add(color.ToVector4());
-			drawList.Matrices.Add(Matrix4x4.CreateScale(new Vector3(scale.X, scale.Y, 1))
-			                      * Matrix4x4.CreateFromYawPitchRoll(0, 0, rotation)
-			                      * Matrix4x4.CreateTranslation(new Vector3(position.X, position.Y, 0)));
-		}
-
-		public void Add2DObject(string modelName, Vector2 position, float rotation, Vector2 scale, Color color) {
-			Debug.Assert(CurrentDrawList != -1, "Add2DObject() called outside a draw list");
-			Debug.Assert(CurrentModel is null || CurrentModel == modelName, "Only a single model can be drawn per draw list");
-
-			var drawList = DrawLists[CurrentDrawList];
-			
-			Debug.Assert(drawList.Models.ContainsKey(modelName));
-
-			if(CurrentModel is null) {
-				CurrentModel = modelName;
-				drawList.Model = CurrentModel;
-				drawList.Vertices.AddRange(drawList.Models[modelName]);
-			}
-			
-			drawList.Colors.Add(color.ToVector4());
-			drawList.Matrices.Add(Matrix4x4.CreateScale(new Vector3(scale.X, scale.Y, 1))
-			                      * Matrix4x4.CreateFromYawPitchRoll(0, 0, rotation)
-			                      * Matrix4x4.CreateTranslation(new Vector3(position.X, position.Y, 0)));
-		}
-	#endregion
-
-	#region 3D
-		public void Add3DCube(Vector3 position, Vector3 rotation, Vector3 scale, Color color) {
-			Debug.Assert(CurrentDrawList != -1, "Add3DCube() called outside a draw list");
-			Debug.Assert(CurrentModel is null or "cube3d", "Only a single model can be drawn per draw list");
-
-			var drawList = DrawLists[CurrentDrawList];
-
-			if(CurrentModel is null) {
-				CurrentModel = "cube3d";
-				drawList.Model = CurrentModel;
-				drawList.Vertices.AddRange(Models.Cube);
-			}
-			
-			drawList.Colors.Add(color.ToVector4());
-			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
-			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
-			                      * Matrix4x4.CreateTranslation(position));
+		public void SetColor(int index, Color color) {
+			Debug.Assert(CurrentDrawList != -1, "SetColor() called outside a draw list");
+			DrawLists[CurrentDrawList].Colors[index] = color.ToVector4();
 		}
 		
-		public void Add3DPlane(Vector3 position, Vector3 rotation, Vector3 scale, Color color) {
-			Debug.Assert(CurrentDrawList != -1, "Add3DPlane() called outside a draw list");
-			Debug.Assert(CurrentModel is null or "plane3d", "Only a single model can be drawn per draw list");
+		public void SetTransform(int index, Vector3? position = null, Vector3? rotation = null, Vector3? scale = null) {
+			Debug.Assert(CurrentDrawList != -1, "SetTransform() called outside a draw list");
 
-			var drawList = DrawLists[CurrentDrawList];
+			var matrix = DrawLists[CurrentDrawList].Matrices[index];
 
-			if(CurrentModel is null) {
-				CurrentModel = "plane3d";
-				drawList.Model = CurrentModel;
-				drawList.Vertices.AddRange(Models.Quad);
+			var oScale = Vector3.One;
+			var oRotation = Quaternion.Zero;
+			var oPosition = Vector3.Zero;
+
+			if(!position.HasValue || !rotation.HasValue || !scale.HasValue) {
+				Matrix4x4.Decompose(matrix, out oScale, out oRotation, out oPosition);
+			}
+
+			var newMatrix = Matrix4x4.CreateScale(scale ?? oScale);
+
+			if(rotation.HasValue) {
+				newMatrix *= Matrix4x4.CreateFromYawPitchRoll(rotation.Value.Y, rotation.Value.X, rotation.Value.Z);
+			} else {
+				newMatrix *= Matrix4x4.CreateFromQuaternion(oRotation);
 			}
 			
-			drawList.Colors.Add(color.ToVector4());
-			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
-			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
-			                      * Matrix4x4.CreateTranslation(position));
+			newMatrix *= Matrix4x4.CreateTranslation(position ?? oPosition);
+			DrawLists[CurrentDrawList].Matrices[index] = newMatrix;
 		}
-
-		public void Add3DObject(string modelName, Vector3 position, Vector3 rotation, Vector3 scale, Color color) {
-			Debug.Assert(CurrentDrawList != -1, "Add3DObject() called outside a draw list");
-			Debug.Assert(CurrentModel is null || CurrentModel == modelName, "Only a single model can be drawn per draw list");
-
-			var drawList = DrawLists[CurrentDrawList];
-			
-			Debug.Assert(drawList.Models.ContainsKey(modelName));
-
-			if(CurrentModel is null) {
-				CurrentModel = modelName;
-				drawList.Model = CurrentModel;
-				drawList.Vertices.AddRange(drawList.Models[modelName]);
-			}
-			
-			drawList.Colors.Add(color.ToVector4());
-			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
-			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
-			                      * Matrix4x4.CreateTranslation(position));
-		}
-	#endregion
 
 		public abstract void Paint();
 

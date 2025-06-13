@@ -43,6 +43,8 @@
 						vulkan-headers
 						vulkan-loader
 						stdenv.cc.cc.lib
+						opencl-headers
+						ocl-icd
 					];
 					
 					LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath libs;

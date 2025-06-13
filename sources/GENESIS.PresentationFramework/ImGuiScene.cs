@@ -13,8 +13,10 @@ namespace GENESIS.PresentationFramework {
 		
 		public IPlatform Platform { get; }
 		
-		protected ImGuiContextPtr ImContext { get; private set; }
+		protected ImGuiContextPtr? ImContext { get; private set; }
 		protected ImGuiIOPtr ImIO { get; private set; }
+
+		protected bool IsOpen = true;
 
 		protected ImGuiScene(IPlatform platform, string id) : base(default, id) {
 			Platform = platform;
@@ -24,19 +26,37 @@ namespace GENESIS.PresentationFramework {
 			base.Initialize(window);
 			
 			ImContext = window.CreateImGui();
-			ImGui.SetCurrentContext(ImContext);
+			ImGui.SetCurrentContext(ImContext.Value);
 			ImIO = ImGui.GetIO();
 		}
 
 		public override void Deinitialize(Window window) {
 			base.Deinitialize(window);
+
+			if(!ImContext.HasValue) return;
 			
-			ImGui.SetCurrentContext(ImContext);
+			ImGui.SetCurrentContext(ImContext.Value);
 			unsafe { ImGui.SaveIniSettingsToDisk(ImIO.IniFilename); }
 		}
 
+		public override void Update(double delta) {
+			base.Update(delta);
+			
+			if(!ImContext.HasValue) return;
+			
+			ImGui.SetCurrentContext(ImContext.Value);
+			ImIO = ImGui.GetIO();
+		}
+
 		public override void Render(double delta) {
-			ImGui.SetCurrentContext(ImContext);
+			if(!ImContext.HasValue) return;
+			ImGui.SetCurrentContext(ImContext.Value);
+
+			if(!IsOpen) {
+				Window!.ScheduleLater(() => Window.PopScene(this));
+				return;
+			}
+			
 			Paint(delta);
 		}
 	}

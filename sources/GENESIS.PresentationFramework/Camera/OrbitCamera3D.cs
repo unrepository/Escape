@@ -14,6 +14,10 @@ namespace GENESIS.PresentationFramework.Camera {
 		public Camera3D Camera { get; set; }
 
 		public double Sensitivity { get; set; } = 10.0f;
+
+		public bool AllowZooming { get; set; } = true;
+		public bool AllowPanning { get; set; } = true;
+		public bool AllowRotating { get; set; } = true;
 		
 		public Vector3 Target = Vector3.Zero;
 		public float Distance { get; set; } = 10.0f;
@@ -36,8 +40,15 @@ namespace GENESIS.PresentationFramework.Camera {
 			MovementKeyboard = window.Input.Keyboards[0];
 
 			MovementMouse.Scroll += (_, scroll) => {
-				Distance -= scroll.Y;
-				Distance = Math.Clamp(Distance, 1, 1000);
+				if(!AllowZooming) return;
+
+				int multiplier = 1;
+				if(MovementKeyboard?.IsKeyPressed(Key.ShiftLeft) == true) multiplier = 10;
+				if(MovementKeyboard?.IsKeyPressed(Key.ControlLeft) == true) multiplier = 50;
+				if(MovementKeyboard?.IsKeyPressed(Key.AltLeft) == true) multiplier = 100;
+				
+				Distance -= scroll.Y * multiplier;
+				Distance = MathF.Max(Distance, 1);
 			};
 			
 		#if DEBUG
@@ -55,34 +66,38 @@ namespace GENESIS.PresentationFramework.Camera {
 			var deltaY = (MovementMouse.Position.Y - _lastMousePosition.Y) * Sensitivity;
 			_lastMousePosition = MovementMouse.Position;
 
+			var mouseCaptured = false;
+			
 			if(_window.HasImGuiContext()) {
 				ImGui.SetCurrentContext(_window.CreateImGui());
-				if(ImGui.GetIO().WantCaptureMouse) return;
+				if(ImGui.GetIO().WantCaptureMouse) mouseCaptured = true;
 			}
 
-			// rotation
-			if(MovementMouse.IsButtonPressed(MouseButton.Left)) {
-				Camera.Yaw -= (float) (deltaX * delta);
-				Camera.Pitch += (float) (deltaY * delta);
+			if(!mouseCaptured) {
+				// rotation
+				if(AllowRotating && MovementMouse.IsButtonPressed(MouseButton.Left)) {
+					Camera.Yaw -= (float) (deltaX * delta);
+					Camera.Pitch += (float) (deltaY * delta);
 			
-				Camera.Pitch = Math.Clamp(Camera.Pitch, -89.9f, 89.9f);
-			}
+					Camera.Pitch = Math.Clamp(Camera.Pitch, -89, 89);
+				}
 
-			// translation X/Z
-			if(MovementMouse.IsButtonPressed(MouseButton.Right)) {
-				float prevY = Target.Y;
+				// translation X/Z
+				if(AllowPanning && MovementMouse.IsButtonPressed(MouseButton.Right)) {
+					float prevY = Target.Y;
 				
-				Target -= Vector3.Multiply(Camera.ViewMatrix.PositiveX(),
-					(float) (deltaX * delta * (Sensitivity / 50.0)));
-				Target -= Vector3.Multiply(Camera.ViewMatrix.PositiveZ(),
-					(float) (deltaY * delta * (Sensitivity / 50.0)));
+					Target -= Vector3.Multiply(Camera.ViewMatrix.PositiveX(),
+						(float) (deltaX * delta * (Sensitivity / 50.0)));
+					Target -= Vector3.Multiply(Camera.ViewMatrix.PositiveZ(),
+						(float) (deltaY * delta * (Sensitivity / 50.0)));
 				
-				Target.Y = prevY;
-			}
+					Target.Y = prevY;
+				}
 			
-			// translation Y
-			if(MovementMouse.IsButtonPressed(MouseButton.Middle)) {
-				Target.Y -= (float) (deltaY * delta * (Sensitivity / 50.0));
+				// translation Y
+				if(AllowPanning && MovementMouse.IsButtonPressed(MouseButton.Middle)) {
+					Target.Y -= (float) (deltaY * delta * (Sensitivity / 50.0));
+				}
 			}
 			
 			var offset = new Vector3(

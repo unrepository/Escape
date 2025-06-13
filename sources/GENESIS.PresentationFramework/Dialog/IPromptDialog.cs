@@ -5,6 +5,6 @@ namespace GENESIS.PresentationFramework.Dialog {
 		public bool IsOpen { get; }
 		public TResult? Result { get; }
 
-		public bool Prompt();
+		public bool Prompt(bool popup = true);
 	}
 }

@@ -3,17 +3,21 @@ using Hexa.NET.ImGui;
 
 namespace GENESIS.PresentationFramework.Dialog {
 	
-	public class TextPrompt : IPromptDialog<string> {
+	public class ListPrompt : IPromptDialog<string> {
 
 		public bool IsOpen { get; private set; }
-		public string? Result { get; private set; }
+		public string Result { get; private set; }
 
 		private readonly string _title;
-		private readonly string _hint;
+		private readonly string _label;
+		private readonly string[] _choices;
 
-		public TextPrompt(string title, string hint) {
+		private int _selectedItem = 0;
+
+		public ListPrompt(string title, string label, params string[] choices) {
 			_title = title;
-			_hint = hint;
+			_label = label;
+			_choices = choices;
 
 			IsOpen = true;
 		}
@@ -34,16 +38,13 @@ namespace GENESIS.PresentationFramework.Dialog {
 				: ImGui.Begin(_title, ImGuiWindowFlags.AlwaysAutoResize);
 			
 			if(begin) {
-				string result = "";
-				
-				ImGui.SetKeyboardFocusHere();
-				if(ImGui.InputTextWithHint("##input", _hint, ref result, 1024,
-					   ImGuiInputTextFlags.EnterReturnsTrue))
-				{
-					Result = result;
+				ImGui.Combo(_label, ref _selectedItem, string.Join('\0', _choices));
+
+				if(ImGui.Button("OK")) {
+					Result = _choices[_selectedItem];
 					IsOpen = false;
 				}
-				
+
 				if(popup) ImGui.EndPopup();
 			}
 

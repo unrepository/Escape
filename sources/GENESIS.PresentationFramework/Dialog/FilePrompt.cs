@@ -31,7 +31,7 @@ namespace GENESIS.PresentationFramework.Dialog {
 			IsOpen = true;
 		}
 		
-		public bool Prompt() {
+		public bool Prompt(bool popup = false) {
 			if(!IsOpen) return false;
 			
 			ImGui.SetNextWindowPos(
@@ -43,6 +43,7 @@ namespace GENESIS.PresentationFramework.Dialog {
 			// TODO do drives on Windows need to be handled differently?
 			ImGui.SetNextWindowSizeConstraints(new Vector2(300, 200), new Vector2(900, 600));
 			ImGui.SetNextWindowSize(new Vector2(600, 350), ImGuiCond.Appearing);
+			
 			if(ImGui.Begin(_title, ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.AlwaysAutoResize))
 			{
 			#region Top bar

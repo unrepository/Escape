@@ -23,6 +23,8 @@ windowOptions.Position = new Vector2D<int>(
 	monitorCenter.Y - windowOptions.Size.Y / 2
 );
 
+windowOptions.WindowState = WindowState.Maximized;
+
 var window = Window.Create(platform, windowOptions);
 
 platform.Initialize();
