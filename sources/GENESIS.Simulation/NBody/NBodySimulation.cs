@@ -19,11 +19,8 @@ namespace GENESIS.Simulation.NBody {
 		
 		public NBodySimulation(NBodySimulationState state) : base(state) { }
 		
-		public override NBodySimulationState TickSingle() {
-			CurrentState = new NBodySimulationState {
-				Tick = CurrentState.Tick + 1,
-				Data = CurrentState.Data
-			};
+		public override NBodySimulationState TickSingle(double delta) {
+			CurrentState.Tick++;
 			
 			var forces = _CalculateForces();
 
@@ -39,7 +36,7 @@ namespace GENESIS.Simulation.NBody {
 				body.Velocity += a * CurrentState.Data.TimeStep;
 				body.Position += body.Velocity * CurrentState.Data.TimeStep;
 
-				if(body.Parent is not null) {
+				/*if(body.Parent is not null) {
 					var distance = (body.Position - body.Parent.Position).Length;
 
 					if(body.OrbitApogee is null || distance > body.OrbitApogee.Meters) {
@@ -50,18 +47,18 @@ namespace GENESIS.Simulation.NBody {
 						body.OrbitPerigee = Length.FromMeters(distance);
 					}
 					
-					if(Math.Abs(distance - body.OrbitApogee.Meters) > 0.001) {
+					if(Math.Abs(distance - body.OrbitApogee.Meters) > 1e-3) {
 						body.OrbitApoapsis = body.Position;
 					}
 
-					if(Math.Abs(distance - body.OrbitPerigee.Meters) > 0.001) {
+					if(Math.Abs(distance - body.OrbitPerigee.Meters) > 1e-3) {
 						body.OrbitPeriapsis = body.Position;
 					}
 					
 					// TODO tilt
-				}
+				}*/
 				
-				_logger.Trace($"{CurrentState.Tick}: {body}");
+				_logger.Trace("{Tick}: {Body}", CurrentState.Tick, body);
 			}
 
 			return CurrentState;
@@ -69,6 +66,7 @@ namespace GENESIS.Simulation.NBody {
 
 		private Vector3D<double>[] _CalculateForces() {
 			var forces = new Vector3D<double>[CurrentState.Data.Bodies.Count];
+			Array.Fill(forces, Vector3D<double>.Zero);
 
 			for(int i = 0; i < CurrentState.Data.Bodies.Count; i++) {
 				var a = CurrentState.Data.Bodies[i];

@@ -67,8 +67,9 @@ namespace GENESIS.PresentationFramework.Drawing {
 			]
 		};
 
-		public static Vertex[] CircleOutline(float radius, float thickness, int segments) {
-			List<Vertex> vertices = [];
+		public static Model CircleOutline(float radius, float thickness, int segments) {
+			var vertices = new List<Vertex>();
+			var indices = new List<uint>();
 
 			float innerRadius = radius - thickness / 2;
 			float outerRadius = radius + thickness / 2;
@@ -103,17 +104,33 @@ namespace GENESIS.PresentationFramework.Drawing {
 				vertices.Add(outer0);
 				vertices.Add(outer1);
 				
+				indices.Add((uint) indices.Count);
+				indices.Add((uint) indices.Count);
+				indices.Add((uint) indices.Count);
+				
 				// triangle 2
 				vertices.Add(inner0);
 				vertices.Add(outer1);
 				vertices.Add(inner1);
+				
+				indices.Add((uint) indices.Count);
+				indices.Add((uint) indices.Count);
+				indices.Add((uint) indices.Count);
 			}
 
-			return vertices.ToArray();
+			return new() {
+				Meshes = [
+					new() {
+						Vertices = vertices.ToArray(),
+						Indices = indices.ToArray()
+					}
+				]
+			};
 		}
 		
-		public static Vertex[] EllipseOutline(float rMin, float rMax, float thickness, int segments) {
-			List<Vertex> vertices = [];
+		public static Model EllipseOutline(float rMin, float rMax, float thickness, int segments) {
+			var vertices = new List<Vertex>();
+			var indices = new List<uint>();
 
 			float majorAxis = MathF.Max(rMin, rMax);
 			float minorAxis = MathF.Min(rMin, rMax);
@@ -127,48 +144,64 @@ namespace GENESIS.PresentationFramework.Drawing {
 
 			for(int i = 0; i < segments; i++) {
 				float angle0 = i * angle;
-				//float angle1 = (i + 1) * angle;
+				float angle1 = (i + 1) * angle;
 
 				float cos0 = MathF.Cos(angle0), sin0 = MathF.Sin(angle0);
-				//float cos1 = MathF.Cos(angle1), sin1 = MathF.Sin(angle1);
+				float cos1 = MathF.Cos(angle1), sin1 = MathF.Sin(angle1);
 
 				var outer0 = new Vertex {
 					Position = new Vector3(outerA * cos0, 0, outerB * sin0)
 				};
 				
-				/*var outer1 = new Vertex {
+				var outer1 = new Vertex {
 					Position = new Vector3(outerA * cos1, 0, outerB * sin1)
-				};*/
+				};
 				
 				var inner0 = new Vertex {
 					Position = new Vector3(innerA * cos0, 0, innerB * sin0)
 				};
 				
-				/*var inner1 = new Vertex {
+				var inner1 = new Vertex {
 					Position = new Vector3(innerA * cos1, 0, innerB * sin1)
-				};*/
+				};
 				
 				// triangle 1
 				vertices.Add(inner0);
 				vertices.Add(outer0);
-				/*vertices.Add(outer1);
+				vertices.Add(outer1);
+				
+				indices.Add((uint) indices.Count);
+				indices.Add((uint) indices.Count);
+				indices.Add((uint) indices.Count);
 				
 				// triangle 2
 				vertices.Add(inner0);
 				vertices.Add(outer1);
-				vertices.Add(inner1);*/
+				vertices.Add(inner1);
+				
+				indices.Add((uint) indices.Count);
+				indices.Add((uint) indices.Count);
+				indices.Add((uint) indices.Count);
 			}
 
-			return vertices.ToArray();
+			return new() {
+				Meshes = [
+					new() {
+						Vertices = vertices.ToArray(),
+						Indices = indices.ToArray()
+					}
+				]
+			};
 		}
 
-		public static Vertex[] Curve(IList<Vector3> points, float width) {
-			if(points.Count < 2) return [];
+		public static Model? Curve(IList<Vector3> points, float width) {
+			if(points.Count < 2) return null;
 
 			int pCount = points.Count;
 			if(points.Count % 2 == 1) pCount--;
 			
-			List<Vertex> vertices = [];
+			var vertices = new List<Vertex>();
+			var indices = new List<uint>();
 
 			for(int i = 0; i < pCount - 1; i++) {
 				var p0 = points[i];
@@ -195,9 +228,19 @@ namespace GENESIS.PresentationFramework.Drawing {
 				
 				vertices.Add(v0);
 				vertices.Add(v1);
+				
+				indices.Add((uint) indices.Count);
+				indices.Add((uint) indices.Count);
 			}
 
-			return vertices.ToArray();
+			return new() {
+				Meshes = [
+					new() {
+						Vertices = vertices.ToArray(),
+						Indices = indices.ToArray()
+					}
+				]
+			};
 		}
 	}
 }

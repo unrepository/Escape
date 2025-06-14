@@ -27,6 +27,7 @@ namespace GENESIS.UI.Simulation {
 		
 		public int TicksPerUpdate = 1;
 
+		private readonly Dictionary<CelestialBody, Model> _bodyTrails = [];
 		private OrbitCamera3D _orbitCamera;
 
 		public NBodySimulationViewer(IPlatform platform, NBodySimulation simulation)
@@ -59,7 +60,7 @@ namespace GENESIS.UI.Simulation {
 			base.Update(delta);
 			
 			for(int i = 0; i < TicksPerUpdate; i++) {
-				Simulation.TickSingle();
+				Simulation.TickSingle(delta);
 			}
 			
 			// data update
@@ -84,11 +85,11 @@ namespace GENESIS.UI.Simulation {
                 
 				rData.PositionHistory.Enqueue(relativeParentPosition);
                 
-				// TODO
-				/*Painter.CustomModels[body.Name] = Models.Curve(
+				var trail = Models.Curve(
 					rData.PositionHistory.ToArray(),
 					body.ScaledRadius() / 2
-				);*/
+				);
+				if(trail is not null) _bodyTrails[body] = trail;
 			#endregion
 			}
 		}
@@ -126,16 +127,16 @@ namespace GENESIS.UI.Simulation {
 				if(body.Parent is null) continue;
 				if(body.OrbitApogee is null || body.OrbitPerigee is null) continue;
 				
-				//TODO if(!Painter.CustomModels.ContainsKey(body.Name)) continue;
+				if(!_bodyTrails.ContainsKey(body)) continue;
 				
 				Painter.BeginDrawList(DrawList.ShapeType.TriangleStrip);
-				/*Painter.Add3DObject(
-					body.Name,
+				Painter.Add3DObject(
+					_bodyTrails[body],
 					body.Parent.ScaledPosition(),
 					Vector3.Zero,
 					Vector3.One,
 					Color.White
-				); TODO*/ 
+				);
 				Painter.EndDrawList();
 			}
 			

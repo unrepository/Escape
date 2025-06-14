@@ -64,24 +64,7 @@ namespace GENESIS.Sandbox {
 		private Model _testModel;
 
 		public ModelTest(IPlatform platform) : base(platform, "texture_test") {
-			var vertices = Models.CircleOutline(5, 3, 12);
-			var indices = new uint[vertices.Length];
-
-			for(uint i = 0; i < indices.Length; i++) {
-				indices[i] = i;
-			}
-
-			_circleModel = new Model {
-				Name = "circle",
-				Meshes = [
-					new() {
-						Vertices = vertices,
-						Indices = indices,
-						Material = Color.DarkCyan
-					}
-				]
-			};
-
+			_circleModel = Models.CircleOutline(5, 3, 12);
 			_testModel = AssimpModelLoader.Load(platform, "thing", Resources.LoadBinary("Models.thing.glb"));
 		}
 

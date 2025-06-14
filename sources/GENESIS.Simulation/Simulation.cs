@@ -25,6 +25,6 @@ namespace GENESIS.Simulation {
 			CurrentState = state;
 		}
 		
-		public abstract S TickSingle();
+		public abstract S TickSingle(double delta);
 	}
 }

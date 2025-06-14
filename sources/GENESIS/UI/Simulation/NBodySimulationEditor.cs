@@ -191,10 +191,8 @@ namespace GENESIS.UI.Simulation {
 					ImGui.InputInt("Time step (seconds)", ref ts, 1, int.MaxValue);
 
 					if(ts != Simulation.CurrentState.Data.TimeStep) {
-						Simulation.CurrentState = Simulation.CurrentState with {
-							Data = Simulation.CurrentState.Data with {
-								TimeStep = ts
-							}
+						Simulation.CurrentState.Data = Simulation.CurrentState.Data with {
+							TimeStep = ts
 						};
 					}
 			
@@ -209,6 +207,13 @@ namespace GENESIS.UI.Simulation {
 							if(ImGui.Button("Focus")) {
 								_viewer.ZoomInto(body);
 							}
+							
+							ImGui.Text($"Perigee: {body.OrbitPerigee?.Kilometers} km");
+							ImGui.Text($"Periapsis: {body.OrbitPeriapsis}");
+							ImGui.Text($"Apogee: {body.OrbitApogee?.Kilometers} km");
+							ImGui.Text($"Apoapsis: {body.OrbitApoapsis}");
+							ImGui.Text($"Distance to parent: {body.DistanceToParent / 1000.0} km");
+							ImGui.Separator();
 
 							_BodyEditor(body, Simulation.CurrentState.Data.Bodies, false, true, true);
 					

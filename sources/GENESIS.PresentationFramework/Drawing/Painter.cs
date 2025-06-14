@@ -48,28 +48,42 @@ namespace GENESIS.PresentationFramework.Drawing {
 						if(ImGui.Button("Toggle")) {
 							drawList.IsEnabled = !drawList.IsEnabled;
 						}
-						
-						/*if(ImGui.TreeNode($"Vertices {drawList.Vertices.Count}")) {
-							for(int j = 0; j < drawList.Vertices.Count; j++) {
-								ImGui.Text($"{j}: {drawList.Vertices[j]}");
+
+						if(ImGui.TreeNode($"Meshes {drawList.Meshes.Count}")) {
+							foreach(var (j, mesh) in drawList.Meshes.Enumerate()) {
+								if(ImGui.TreeNode($"Mesh {j}")) {
+									ImGui.SeparatorText("Vertices");
+									foreach(var (k, vertex) in mesh.Vertices.Enumerate()) {
+										ImGui.Text($"{k}: {vertex}");
+									}
+									
+									ImGui.SeparatorText("Indices");
+									foreach(var (k, index) in mesh.Indices.Enumerate()) {
+										ImGui.Text($"{index}");
+										if(k != mesh.Indices.Length - 1) ImGui.SameLine();
+									}
+									
+									ImGui.SeparatorText("Material");
+									ImGui.Text(mesh.Material.ToString());
+									
+									ImGui.TreePop();
+								}
 							}
 							
 							ImGui.TreePop();
-						}*/
+						}
 						
 						if(ImGui.TreeNode($"Materials {drawList.Materials.Count}")) {
-							for(int j = 0; j < drawList.Materials.Count; j++) {
-								ImGui.Text($"{j}: {drawList.Materials[j]}");
+							foreach(var (j, material) in drawList.Materials.Enumerate()) {
+								ImGui.Text($"{j}: {material}");
 							}
 							
 							ImGui.TreePop();
 						}
 						
 						if(ImGui.TreeNode($"Matrices {drawList.Matrices.Count}")) {
-							for(int j = 0; j < drawList.Matrices.Count; j++) {
+							foreach(var (j, matrix) in drawList.Matrices.Enumerate()) {
 								if(ImGui.TreeNode($"{j}")) {
-									var matrix = drawList.Matrices[j];
-									
 									Matrix4x4.Decompose(
 										matrix,
 										out var scale,

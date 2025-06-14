@@ -103,7 +103,7 @@ namespace GENESIS.Simulation.PlateTectonics {
 		
 		public PlateTectonicsSimulation(PlateTectonicsState state) : base(state) { }
 
-		public override PlateTectonicsState TickSingle() {
+		public override PlateTectonicsState TickSingle(double delta) {
 			
 
 			return CurrentState;
