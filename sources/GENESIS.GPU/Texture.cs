@@ -10,6 +10,7 @@ namespace GENESIS.GPU {
 		
 		public IPlatform Platform { get; }
 		
+		public uint Id { get; protected set; }
 		public ulong Handle { get; protected set; }
 		public Vector2D<uint> Size { get; }
 
@@ -20,7 +21,7 @@ namespace GENESIS.GPU {
 
 		public abstract void LoadImage(Image<Rgba32> image);
 		
-		public abstract void Bind();
+		public abstract void Bind(int unit = 0);
 		public abstract void Unbind();
 
 		public abstract void Dispose();

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using GENESIS.GPU;
 using GENESIS.LanguageExtensions;
 using Hexa.NET.ImGui;
@@ -106,7 +107,39 @@ namespace GENESIS.PresentationFramework.Drawing {
 			return true;
 		}
 
-		public void SetMaterial(int index, Material material) {
+		public void SetMaterial(Material material, int index = -1) {
+			Debug.Assert(CurrentDrawList != -1, "SetMaterial() called outside a draw list");
+
+			var drawList = DrawLists[CurrentDrawList];
+			index = index < 0 ? drawList.Materials.Count - 1 : index;
+
+			drawList.Materials[index] = material;
+		}
+
+		public void SetTextures(
+			Texture diffuse,
+			Texture? normal = null,
+			Texture? roughness = null,
+			Texture? metallic = null,
+			int index = -1
+		) {
+			Debug.Assert(CurrentDrawList != -1, "SetMaterial() called outside a draw list");
+
+			var drawList = DrawLists[CurrentDrawList];
+			drawList.Textures.Clear();
+			drawList.Textures.AddRange(diffuse, normal, roughness, metallic);
+		}
+		
+		public void UseTextures(Material.TextureUse use, int index = -1) {
+			Debug.Assert(CurrentDrawList != -1, "SetMaterial() called outside a draw list");
+
+			var drawList = DrawLists[CurrentDrawList];
+			index = index < 0 ? drawList.Materials.Count - 1 : index;
+
+			CollectionsMarshal.AsSpan(drawList.Materials)[index].UseTextures = use;
+		}
+
+		/*public void SetMaterial(int index, Material material) {
 			Debug.Assert(CurrentDrawList != -1, "SetMaterial() called outside a draw list");
 			var drawList = DrawLists[CurrentDrawList];
 			if(material.DiffuseTexture > 0) {
@@ -116,7 +149,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 				}
 			}
 			drawList.Materials[index] = material;
-		}
+		}*/
 		
 		public void SetTransform(int index, Vector3? position = null, Vector3? rotation = null, Vector3? scale = null) {
 			Debug.Assert(CurrentDrawList != -1, "SetTransform() called outside a draw list");

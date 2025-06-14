@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using GENESIS.GPU.OpenGL;
 using GENESIS.GPU.Shader;
+using GENESIS.LanguageExtensions;
 using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ARB;
 using Shader = GENESIS.GPU.Shader.Shader;
@@ -38,8 +39,8 @@ namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 				
 				drawList.Push();
 
-				foreach(var texture in drawList.Textures) {
-					_bindlessTexture.MakeTextureHandleResident(texture);
+				foreach(var (i, texture) in drawList.Textures.Enumerate()) {
+					texture?.Bind(i);
 				}
 				
 				_platform.API.DrawArraysInstanced(
@@ -48,10 +49,6 @@ namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 					(uint) drawList.Vertices.Count,
 					(uint) drawList.Matrices.Count
 				);
-				
-				foreach(var texture in drawList.Textures) {
-					_bindlessTexture.MakeTextureHandleNonResident(texture);
-				}
 			}
 		}
 	}

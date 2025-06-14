@@ -61,8 +61,7 @@ namespace GENESIS.Sandbox {
 		private Texture _smileyTexture;
 
 		public TextureTest(IPlatform platform) : base(platform, "texture_test") {
-			_smileyTexture = Texture.Create(platform,
-				Assembly.GetExecutingAssembly().ReadBinaryResourceN("Textures.smiley.png"));
+			_smileyTexture = Texture.Create(platform, Resources.Get("Textures.smiley.png"));
 		}
 
 		public override void Initialize(Window window) {
@@ -80,11 +79,12 @@ namespace GENESIS.Sandbox {
 			Painter.EndDrawList();
 			
 			Painter.BeginDrawList();
+			Painter.SetTextures(_smileyTexture);
 			Painter.Add3DCube(new Vector3(0, 2, 0), Vector3.Zero, Vector3.One, Color.Red);
-			Painter.SetMaterial(0, new Material {
-				Albedo = Color.White.ToVector4(),
-				DiffuseTexture = _smileyTexture.Handle
+			Painter.SetMaterial(new Material {
+				Albedo = Color.DarkGreen.ToVector4()
 			});
+			//Painter.UseTextures(Material.TextureUse.Diffuse);
 			Painter.EndDrawList();
 		}
 		
@@ -98,11 +98,19 @@ namespace GENESIS.Sandbox {
 			Painter.RemoveDrawList(2);
 			
 			Painter.BeginDrawList();
+			Painter.SetTextures(_smileyTexture);
 			Painter.Add3DCube(
-				new Vector3(4 * MathF.Sin((float) Window.Base.Time), 0, 4* MathF.Cos((float) Window.Base.Time)),
+				new Vector3(4 * MathF.Sin((float) Window.Base.Time), 0, 3 * MathF.Cos((float) Window.Base.Time * 2)),
 				Vector3.Zero,
 				Vector3.One, 
 				Color.Yellow
+			);
+			Painter.UseTextures(Material.TextureUse.Diffuse);
+			Painter.Add3DCube(
+				new Vector3(2.5f * MathF.Sin((float) Window.Base.Time), 1, 7 * MathF.Cos((float) Window.Base.Time)),
+				Vector3.Zero,
+				Vector3.One, 
+				Color.Red
 			);
 			Painter.EndDrawList();
 			

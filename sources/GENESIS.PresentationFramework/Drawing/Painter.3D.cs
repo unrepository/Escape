@@ -8,7 +8,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 	
 	public abstract partial class Painter {
 		
-		public int Add3DCube(Vector3 position, Vector3 rotation, Vector3 scale, Color color) {
+		public int Add3DCube(Vector3 position, Vector3 rotation, Vector3 scale, Material material) {
 			Debug.Assert(CurrentDrawList != -1, "Add3DCube() called outside a draw list");
 			Debug.Assert(CurrentModel is null or "cube3d", "Only a single model can be drawn per draw list");
 
@@ -20,7 +20,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 				drawList.Vertices.AddRange(Models.Cube);
 			}
 			
-			drawList.Materials.Add(new Material { Albedo = color.ToVector4() });
+			drawList.Materials.Add(material);
 			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
 			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
 			                      * Matrix4x4.CreateTranslation(position));
@@ -70,7 +70,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 		// 	                      * Matrix4x4.CreateTranslation(position));
 		// }
 
-		public int Add3DObject(string modelName, Vector3 position, Vector3 rotation, Vector3 scale, Color color) {
+		public int Add3DObject(string modelName, Vector3 position, Vector3 rotation, Vector3 scale, Material material) {
 			Debug.Assert(CurrentDrawList != -1, "Add3DObject() called outside a draw list");
 			Debug.Assert(CurrentModel is null || CurrentModel == modelName, "Only a single model can be drawn per draw list");
 
@@ -84,7 +84,7 @@ namespace GENESIS.PresentationFramework.Drawing {
 				drawList.Vertices.AddRange(CustomModels[modelName]);
 			}
 			
-			drawList.Materials.Add(new Material { Albedo = color.ToVector4() });
+			drawList.Materials.Add(material);
 			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
 			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
 			                      * Matrix4x4.CreateTranslation(position));

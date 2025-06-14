@@ -1,17 +1,22 @@
 #version 430 core
-#extension GL_ARB_bindless_texture : require
 
 struct Vertex {
 	vec3 position;
 	vec3 normal;
-	vec2 texCoords;
+	vec2 uv;
 };
 
 struct Material {
-	vec4 albedoColor;
-	int hasTextures;
-	sampler2D diffuseTexture;
+	vec4 albedo;
+	float roughness;
+	float metallic;
+	int useTextures;
 };
+
+uniform sampler2D diffuseTexture;
+uniform sampler2D normalTexture;
+uniform sampler2D roughnessTexture;
+uniform sampler2D metallicTexture;
 
 smooth in Vertex vertex;
 flat in Material material;
@@ -19,9 +24,14 @@ flat in Material material;
 out vec4 FragColor;
 
 void main() {
-	if(material.hasTextures > 0) {
-		FragColor = /*material.albedoColor * */vec4(texture(material.diffuseTexture, vertex.texCoords).rgb, 1.0) + vec4(0.5, 0.5, 0.5, 0.0);
-	} else {
-		FragColor = vec4(vertex.texCoords, 1.0, 1.0);
+	bool hasDiffuse = (material.useTextures & (1 << 0)) != 0;
+	bool hasNormal = (material.useTextures & (1 << 1)) != 0;
+	bool hasRoughness = (material.useTextures & (1 << 2)) != 0;
+	bool hasMetallic = (material.useTextures & (1 << 3)) != 0;
+	
+	FragColor = material.albedo;
+	
+	if(hasDiffuse) {
+		FragColor *= texture(diffuseTexture, vertex.uv).rgba;
 	}
 }

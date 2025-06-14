@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\GENESIS.LanguageExtensions\GENESIS.LanguageExtensions.csproj" />
+      <ProjectReference Include="..\GENESIS.LanguageExtensions\GENESIS.LanguageExtensions.csproj" />
       <ProjectReference Include="..\GENESIS.GPU\GENESIS.GPU.csproj" />
       <ProjectReference Include="..\GENESIS.LanguageExtensions\GENESIS.LanguageExtensions.csproj" />
     </ItemGroup>

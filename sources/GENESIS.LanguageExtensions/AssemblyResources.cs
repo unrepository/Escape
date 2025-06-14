@@ -3,6 +3,7 @@ using System.Reflection;
 
 namespace GENESIS.LanguageExtensions {
 	
+	[Obsolete]
 	public static class AssemblyResources {
 
 		public static string ReadTextResource(this Assembly assembly, string path) {
