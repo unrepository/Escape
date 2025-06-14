@@ -140,16 +140,16 @@ namespace GENESIS.PresentationFramework.Drawing {
 				index = index < 0 ? drawList.Materials.Count - 1 : index;
 				drawList.Textures[index] = [diffuse, normal, roughness, metallic];
 
-				var use = Material.TextureUse.Diffuse;
-				if(normal is not null) use |= Material.TextureUse.Normal;
-				if(roughness is not null) use |= Material.TextureUse.Roughness;
-				if(metallic is not null) use |= Material.TextureUse.Metallic;
+				var use = Material.TextureType.Diffuse;
+				if(normal is not null) use |= Material.TextureType.Normal;
+				if(roughness is not null) use |= Material.TextureType.Roughness;
+				if(metallic is not null) use |= Material.TextureType.Metallic;
 				
 				CollectionsMarshal.AsSpan(drawList.Materials)[index].UseTextures = use;
 			}
 		}
 		
-		public void UseTextures(Material.TextureUse use, int index = -1) {
+		public void UseTextures(Material.TextureType use, int index = -1) {
 			Debug.Assert(CurrentDrawList != -1, "UseTextures() called outside a draw list");
 			var drawList = DrawLists[CurrentDrawList];
 			//Debug.Assert(drawList.IsInstanced, "UseTextures() can only be called in an instanced draw list");

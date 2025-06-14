@@ -11,7 +11,7 @@ namespace GENESIS.GPU {
 		[FieldOffset(0)] public Vector4 Albedo = Vector4.One;
 		[FieldOffset(16)] public float Roughness = 0.5f;
 		[FieldOffset(20)] public float Metallic = 0.5f;
-		[FieldOffset(24)] public TextureUse UseTextures = 0;
+		[FieldOffset(24)] public TextureType UseTextures = 0;
 		[FieldOffset(28)] private float _padding0 = 0;
 
 		public static implicit operator Material(System.Drawing.Color color)
@@ -25,7 +25,7 @@ namespace GENESIS.GPU {
 		}
 
 		[Flags]
-		public enum TextureUse {
+		public enum TextureType {
 			
 			None = 0,
 			Diffuse = (1 << 0),

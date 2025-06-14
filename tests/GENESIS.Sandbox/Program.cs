@@ -1,3 +1,3 @@
 using GENESIS.Sandbox;
 
-TextureTestProgram.Start(args);
+ModelTestProgram.Start(args);

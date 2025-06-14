@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\sources\GENESIS.PresentationFramework.Extensions.ModelLoader\GENESIS.PresentationFramework.Extensions.ModelLoader.csproj" />
       <ProjectReference Include="..\..\sources\GENESIS.PresentationFramework\GENESIS.PresentationFramework.csproj" />
       <ProjectReference Include="..\..\sources\GENESIS\GENESIS.csproj" />
     </ItemGroup>

@@ -4,8 +4,8 @@ namespace GENESIS.LanguageExtensions {
 	
 	public static class Resources {
 
-		public static Stream Get(string name) {
-			var assembly = Assembly.GetCallingAssembly();
+		public static Stream Get(string name, Assembly? assembly = null) {
+			assembly ??= Assembly.GetCallingAssembly();
 			var path = assembly.GetName().Name + ".Resources." + name;
 
 			var stream = assembly.GetManifestResourceStream(path);
@@ -18,13 +18,13 @@ namespace GENESIS.LanguageExtensions {
 		}
 
 		public static string LoadText(string name) {
-			using var stream = Get(name);
+			using var stream = Get(name, Assembly.GetCallingAssembly());
 			using var reader = new StreamReader(stream);
 			return reader.ReadToEnd();
 		}
 		
 		public static byte[] LoadBinary(string name) {
-			using var stream = Get(name);
+			using var stream = Get(name, Assembly.GetCallingAssembly());
 			using var memory = new MemoryStream();
 			
 			stream.CopyTo(memory);
