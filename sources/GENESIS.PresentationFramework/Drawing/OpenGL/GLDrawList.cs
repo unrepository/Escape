@@ -4,7 +4,6 @@ using GENESIS.GPU.OpenGL;
 using GENESIS.GPU.Shader;
 using GENESIS.LanguageExtensions;
 using Silk.NET.OpenGL;
-using Silk.NET.OpenGL.Extensions.ARB;
 
 namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 	
@@ -13,20 +12,20 @@ namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 		internal GLEnum GLShapeType;
 		
 		private IShaderArrayData<Vertex> _verticesData;
-		private IShaderArrayData<Material> _materialsData;
-		private IShaderArrayData<Matrix4x4> _matricesData;
+		private IShaderArrayData<uint> _indicesData;
+		private IShaderData<Material> _materialData;
+		private IShaderData<Matrix4x4> _matrixData;
 
 		private readonly GLPlatform _platform;
-		private readonly ArbBindlessTexture _bindlessTexture;
 		
-		public GLDrawList(GLPlatform platform, ShapeType type) : base(type) {
+		public unsafe GLDrawList(GLPlatform platform, ShapeType type) : base(type, false) {
 			_platform = platform;
-			_bindlessTexture = new(_platform.API.Context);
 			
-			_verticesData = IShaderArrayData.Create<Vertex>(platform, 10, null, 0);
-			_materialsData = IShaderArrayData.Create<Material>(platform, 11, null, 0);
-			_matricesData = IShaderArrayData.Create<Matrix4x4>(platform, 12, null, 0);
-
+			_verticesData = IShaderArrayData.Create<Vertex>(platform, 11, null, 0);
+			_indicesData = IShaderArrayData.Create<uint>(platform, 12, null, 0);
+			_materialData = IShaderData.Create<Material>(platform, 13, new() /* TODO why can't this be null??? */, (uint) sizeof(Material));
+			_matrixData = IShaderData.Create<Matrix4x4>(platform, 14, new(), (uint) sizeof(Matrix4x4));
+			
 			GLShapeType = type switch {
 				ShapeType.Triangle => GLEnum.Triangles,
 				ShapeType.TriangleStrip => GLEnum.TriangleStrip,
@@ -39,22 +38,34 @@ namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 		}
 		
 		public unsafe override void Push() {
-			// foreach(var texture in Textures) {
-			// 	_bindlessTexture.MakeTextureHandleResident(texture);
-			// }
 			
-			_verticesData.Size = (uint) Vertices.Count * (uint) sizeof(Vertex);
-			_materialsData.Size = (uint) Materials.Count * (uint) sizeof(Material);
-			_matricesData.Size = (uint) Matrices.Count * (uint) sizeof(Matrix4x4);
+		}
 
-			// TODO test NoCopy
-			_verticesData.Data = Vertices.ToArray();
-			_materialsData.Data = Materials.ToArray();
-			_matricesData.Data = Matrices.ToArray();
-			
-			_verticesData.Push();
-			_materialsData.Push();
-			_matricesData.Push();
+		public unsafe override void Draw() {
+			foreach(var (i, mesh) in Meshes.Enumerate()) {
+				_verticesData.Size = (uint) mesh.Vertices.Length * (uint) sizeof(Vertex);
+				_indicesData.Size = (uint) mesh.Indices.Length * (uint) sizeof(uint);
+
+				_verticesData.Data = mesh.Vertices;
+				_indicesData.Data = mesh.Indices;
+				_materialData.Data = Materials[i];
+				_matrixData.Data = Matrices[i];
+				
+				_verticesData.Push();
+				_indicesData.Push();
+				_materialData.Push();
+				_matrixData.Push();
+				
+				foreach(var texture in Textures[i]) {
+					texture?.Bind();
+				}
+				
+				_platform.API.DrawArrays(
+					GLShapeType,
+					0,
+					(uint) mesh.Indices.Length
+				);
+			}
 		}
 
 		public override void Clear() {
@@ -62,9 +73,8 @@ namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 			// 	_bindlessTexture.MakeTextureHandleNonResident(texture);
 			// }
 			
+			Meshes.Clear();
 			Textures.Clear();
-			Vertices.Clear();
-			Materials.Clear();
 			Matrices.Clear();
 		}
 
@@ -73,8 +83,9 @@ namespace GENESIS.PresentationFramework.Drawing.OpenGL {
 			Clear();
 			
 			_verticesData.Dispose();
-			_materialsData.Dispose();
-			_matricesData.Dispose();
+			_indicesData.Dispose();
+			_materialData.Dispose();
+			_matrixData.Dispose();
 		}
 	}
 }

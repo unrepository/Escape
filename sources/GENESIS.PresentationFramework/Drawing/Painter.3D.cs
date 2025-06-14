@@ -8,86 +8,35 @@ namespace GENESIS.PresentationFramework.Drawing {
 	
 	public abstract partial class Painter {
 		
-		public int Add3DCube(Vector3 position, Vector3 rotation, Vector3 scale, Material material) {
-			Debug.Assert(CurrentDrawList != -1, "Add3DCube() called outside a draw list");
-			Debug.Assert(CurrentModel is null or "cube3d", "Only a single model can be drawn per draw list");
+		public int Add3DCube(Vector3 position, Vector3 rotation, Vector3 scale, Material material)
+			=> Add3DObject(Models.Cube, position, rotation, scale, material);
 
-			var drawList = DrawLists[CurrentDrawList];
-
-			if(CurrentModel is null) {
-				CurrentModel = "cube3d";
-				drawList.Model = CurrentModel;
-				drawList.Vertices.AddRange(Models.Cube);
-			}
-			
-			drawList.Materials.Add(material);
-			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
-			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
-			                      * Matrix4x4.CreateTranslation(position));
-
-			return drawList.Matrices.Count - 1;
-		}
-		
-		public int Add3DPlane(Vector3 position, Vector3 rotation, Vector3 scale, Color color) {
-			Debug.Assert(CurrentDrawList != -1, "Add3DPlane() called outside a draw list");
-			Debug.Assert(CurrentModel is null or "plane3d", "Only a single model can be drawn per draw list");
-
-			var drawList = DrawLists[CurrentDrawList];
-
-			if(CurrentModel is null) {
-				CurrentModel = "plane3d";
-				drawList.Model = CurrentModel;
-				drawList.Vertices.AddRange(Models.Quad);
-			}
-			
-			drawList.Materials.Add(new Material { Albedo = color.ToVector4() });
-			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
-			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
-			                      * Matrix4x4.CreateTranslation(position));
-			
-			return drawList.Matrices.Count - 1;
-		}
-
-		public int Add3DSphere(Vector3 position, Vector3 rotation, float radius, Color color) {
-			throw new NotImplementedException();
-		}
-
-		// public void Add3DCircleOutlined(Vector3 position, Vector3 rotation, float radius, int segments, Color color) {
-		// 	Debug.Assert(CurrentDrawList != -1, "Add3DPlane() called outside a draw list");
-		// 	Debug.Assert(CurrentModel is null or "cout3d", "Only a single model can be drawn per draw list");
-		//
-		// 	var drawList = DrawLists[CurrentDrawList];
-		//
-		// 	if(CurrentModel is null) {
-		// 		CurrentModel = "cout3d";
-		// 		drawList.Model = CurrentModel;
-		// 		drawList.Vertices.AddRange(Models.Quad);
-		// 	}
-		// 	
-		// 	drawList.Colors.Add(color.ToVector4());
-		// 	drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
-		// 	                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
-		// 	                      * Matrix4x4.CreateTranslation(position));
-		// }
-
-		public int Add3DObject(string modelName, Vector3 position, Vector3 rotation, Vector3 scale, Material material) {
+		public int Add3DObject(Model? model, Vector3 position, Vector3 rotation, Vector3 scale, Material? material = null) {
 			Debug.Assert(CurrentDrawList != -1, "Add3DObject() called outside a draw list");
-			Debug.Assert(CurrentModel is null || CurrentModel == modelName, "Only a single model can be drawn per draw list");
-
 			var drawList = DrawLists[CurrentDrawList];
+			Debug.Assert((model is null && drawList.IsInstanced) || (model is not null && !drawList.IsInstanced),
+				"Model must be null in an instanced draw list and cannot be null in a non-instanced draw list");
 			
-			Debug.Assert(CustomModels.ContainsKey(modelName));
+			int c = model is null ? 1 : model.Meshes.Count;
 
-			if(CurrentModel is null) {
-				CurrentModel = modelName;
-				drawList.Model = CurrentModel;
-				drawList.Vertices.AddRange(CustomModels[modelName]);
+			for(int i = 0; i < c; i++) {
+				if(model is not null) {
+					drawList.Meshes.Add(model.Meshes[i]);
+					drawList.Textures.Add(model.Meshes[i].Textures);
+				} else {
+					drawList.Textures.Add([]);
+				}
+				
+				if(material.HasValue) drawList.Materials.Add(material.Value);
+				else drawList.Materials.Add(drawList.Meshes[i].Material);
+
+				var matrix =
+					Matrix4x4.CreateScale(scale)
+					* Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
+					* Matrix4x4.CreateTranslation(position);
+				
+				drawList.Matrices.Add(matrix);
 			}
-			
-			drawList.Materials.Add(material);
-			drawList.Matrices.Add(Matrix4x4.CreateScale(scale)
-			                      * Matrix4x4.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z)
-			                      * Matrix4x4.CreateTranslation(position));
 			
 			return drawList.Matrices.Count - 1;
 		}

@@ -84,10 +84,11 @@ namespace GENESIS.UI.Simulation {
                 
 				rData.PositionHistory.Enqueue(relativeParentPosition);
                 
-				Painter.CustomModels[body.Name] = Models.Curve(
+				// TODO
+				/*Painter.CustomModels[body.Name] = Models.Curve(
 					rData.PositionHistory.ToArray(),
 					body.ScaledRadius() / 2
-				);
+				);*/
 			#endregion
 			}
 		}
@@ -125,16 +126,16 @@ namespace GENESIS.UI.Simulation {
 				if(body.Parent is null) continue;
 				if(body.OrbitApogee is null || body.OrbitPerigee is null) continue;
 				
-				if(!Painter.CustomModels.ContainsKey(body.Name)) continue;
+				//TODO if(!Painter.CustomModels.ContainsKey(body.Name)) continue;
 				
 				Painter.BeginDrawList(DrawList.ShapeType.TriangleStrip);
-				Painter.Add3DObject(
+				/*Painter.Add3DObject(
 					body.Name,
 					body.Parent.ScaledPosition(),
 					Vector3.Zero,
 					Vector3.One,
 					Color.White
-				);
+				); TODO*/ 
 				Painter.EndDrawList();
 			}
 			

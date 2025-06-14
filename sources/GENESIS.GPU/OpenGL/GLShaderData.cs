@@ -31,11 +31,11 @@ namespace GENESIS.GPU.OpenGL {
 
 			void* dataPtr = null;
 			
-			if(Data != null) {
+			//if(Data is not null) {
 				fixed(void* ptr = &_data) {
 					dataPtr = ptr;
 				}
-			}
+			//}
 			
 			_platform.API.NamedBufferData(Handle, Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
 			_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, Binding, Handle);

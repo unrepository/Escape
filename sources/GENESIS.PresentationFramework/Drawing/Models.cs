@@ -7,89 +7,65 @@ namespace GENESIS.PresentationFramework.Drawing {
 	
 	public static class Models {
 
-		public static readonly Vertex[] Cube = [
-		    new() { Position = new(-1.0f, -1.0f,  1.0f), UV = new(0.0f, 0.0f) },
-		    new() { Position = new(-1.0f,  1.0f,  1.0f), UV = new(0.0f, 1.0f) },
-		    new() { Position = new( 1.0f,  1.0f,  1.0f), UV = new(1.0f, 1.0f) },
-		    new() { Position = new(-1.0f, -1.0f,  1.0f), UV = new(0.0f, 0.0f) },
-		    new() { Position = new( 1.0f,  1.0f,  1.0f), UV = new(1.0f, 1.0f) },
-		    new() { Position = new( 1.0f, -1.0f,  1.0f), UV = new(1.0f, 0.0f) },
-		    new() { Position = new(-1.0f, -1.0f, -1.0f), UV = new(1.0f, 0.0f) },
-		    new() { Position = new( 1.0f,  1.0f, -1.0f), UV = new(0.0f, 1.0f) },
-		    new() { Position = new(-1.0f,  1.0f, -1.0f), UV = new(1.0f, 1.0f) },
-		    new() { Position = new(-1.0f, -1.0f, -1.0f), UV = new(1.0f, 0.0f) },
-		    new() { Position = new( 1.0f, -1.0f, -1.0f), UV = new(0.0f, 0.0f) },
-		    new() { Position = new( 1.0f,  1.0f, -1.0f), UV = new(0.0f, 1.0f) },
-		    new() { Position = new(-1.0f, -1.0f, -1.0f), UV = new(0.0f, 0.0f) },
-		    new() { Position = new(-1.0f,  1.0f,  1.0f), UV = new(1.0f, 1.0f) },
-		    new() { Position = new(-1.0f,  1.0f, -1.0f), UV = new(0.0f, 1.0f) },
-		    new() { Position = new(-1.0f, -1.0f, -1.0f), UV = new(0.0f, 0.0f) },
-		    new() { Position = new(-1.0f, -1.0f,  1.0f), UV = new(1.0f, 0.0f) },
-		    new() { Position = new(-1.0f,  1.0f,  1.0f), UV = new(1.0f, 1.0f) },
-		    new() { Position = new( 1.0f, -1.0f, -1.0f), UV = new(1.0f, 0.0f) },
-		    new() { Position = new( 1.0f,  1.0f, -1.0f), UV = new(1.0f, 1.0f) },
-		    new() { Position = new( 1.0f,  1.0f,  1.0f), UV = new(0.0f, 1.0f) },
-		    new() { Position = new( 1.0f, -1.0f, -1.0f), UV = new(1.0f, 0.0f) },
-		    new() { Position = new( 1.0f,  1.0f,  1.0f), UV = new(0.0f, 1.0f) },
-		    new() { Position = new( 1.0f, -1.0f,  1.0f), UV = new(0.0f, 0.0f) },
-		    new() { Position = new(-1.0f,  1.0f, -1.0f), UV = new(0.0f, 1.0f) },
-		    new() { Position = new( 1.0f,  1.0f,  1.0f), UV = new(1.0f, 0.0f) },
-		    new() { Position = new(-1.0f,  1.0f,  1.0f), UV = new(0.0f, 0.0f) },
-		    new() { Position = new(-1.0f,  1.0f, -1.0f), UV = new(0.0f, 1.0f) },
-		    new() { Position = new( 1.0f,  1.0f, -1.0f), UV = new(1.0f, 1.0f) },
-		    new() { Position = new( 1.0f,  1.0f,  1.0f), UV = new(1.0f, 0.0f) },
-		    new() { Position = new(-1.0f, -1.0f, -1.0f), UV = new(0.0f, 0.0f) },
-		    new() { Position = new(-1.0f, -1.0f,  1.0f), UV = new(0.0f, 1.0f) },
-		    new() { Position = new( 1.0f, -1.0f,  1.0f), UV = new(1.0f, 1.0f) },
-		    new() { Position = new(-1.0f, -1.0f, -1.0f), UV = new(0.0f, 0.0f) },
-		    new() { Position = new( 1.0f, -1.0f,  1.0f), UV = new(1.0f, 1.0f) },
-		    new() { Position = new( 1.0f, -1.0f, -1.0f), UV = new(1.0f, 0.0f) }
-		    /*new() { Position = new(-1.0f, -1.0f, -1.0f) },
-		    new() { Position = new(-1.0f, -1.0f,  1.0f) },
-		    new() { Position = new(-1.0f,  1.0f,  1.0f) },
-		    new() { Position = new( 1.0f,  1.0f, -1.0f) },
-		    new() { Position = new(-1.0f, -1.0f, -1.0f) },
-		    new() { Position = new(-1.0f,  1.0f, -1.0f) },
-		    new() { Position = new( 1.0f, -1.0f,  1.0f) },
-		    new() { Position = new(-1.0f, -1.0f, -1.0f) },
-		    new() { Position = new( 1.0f, -1.0f, -1.0f) },
-		    new() { Position = new( 1.0f,  1.0f, -1.0f) },
-		    new() { Position = new( 1.0f, -1.0f, -1.0f) },
-		    new() { Position = new(-1.0f, -1.0f, -1.0f) },
-		    new() { Position = new(-1.0f, -1.0f, -1.0f) },
-		    new() { Position = new(-1.0f,  1.0f,  1.0f) },
-		    new() { Position = new(-1.0f,  1.0f, -1.0f) },
-		    new() { Position = new( 1.0f, -1.0f,  1.0f) },
-		    new() { Position = new(-1.0f, -1.0f,  1.0f) },
-		    new() { Position = new(-1.0f, -1.0f, -1.0f) },
-		    new() { Position = new(-1.0f,  1.0f,  1.0f) },
-		    new() { Position = new(-1.0f, -1.0f,  1.0f) },
-		    new() { Position = new( 1.0f, -1.0f,  1.0f) },
-		    new() { Position = new( 1.0f,  1.0f,  1.0f) },
-		    new() { Position = new( 1.0f, -1.0f, -1.0f) },
-		    new() { Position = new( 1.0f,  1.0f, -1.0f) },
-		    new() { Position = new( 1.0f, -1.0f, -1.0f) },
-		    new() { Position = new( 1.0f,  1.0f,  1.0f) },
-		    new() { Position = new( 1.0f, -1.0f,  1.0f) },
-		    new() { Position = new( 1.0f,  1.0f,  1.0f) },
-		    new() { Position = new( 1.0f,  1.0f, -1.0f) },
-		    new() { Position = new(-1.0f,  1.0f, -1.0f) },
-		    new() { Position = new( 1.0f,  1.0f,  1.0f) },
-		    new() { Position = new(-1.0f,  1.0f, -1.0f) },
-		    new() { Position = new(-1.0f,  1.0f,  1.0f) },
-		    new() { Position = new( 1.0f,  1.0f,  1.0f) },
-		    new() { Position = new(-1.0f,  1.0f,  1.0f) },
-		    new() { Position = new( 1.0f, -1.0f,  1.0f) }*/
-		];
+		public static readonly Model Cube = new() {
+			Name = "cube",
+			Meshes = [
+				new() {
+					Vertices = [
+						new() { Position = new(-0.5f,  0.5f,  0.5f), UV = new(0, 1) },
+						new() { Position = new(-0.5f, -0.5f,  0.5f), UV = new(0, 0) },
+						new() { Position = new( 0.5f, -0.5f,  0.5f), UV = new(1, 0) },
+						new() { Position = new( 0.5f,  0.5f,  0.5f), UV = new(1, 1) },
+						new() { Position = new( 0.5f,  0.5f,  0.5f), UV = new(0, 1) },
+						new() { Position = new( 0.5f, -0.5f,  0.5f), UV = new(0, 0) },
+						new() { Position = new( 0.5f, -0.5f, -0.5f), UV = new(1, 0) },
+						new() { Position = new( 0.5f,  0.5f, -0.5f), UV = new(1, 1) },
+						new() { Position = new( 0.5f,  0.5f, -0.5f), UV = new(0, 1) },
+						new() { Position = new( 0.5f, -0.5f, -0.5f), UV = new(0, 0) },
+						new() { Position = new(-0.5f, -0.5f, -0.5f), UV = new(1, 0) },
+						new() { Position = new(-0.5f,  0.5f, -0.5f), UV = new(1, 1) },
+						new() { Position = new(-0.5f,  0.5f, -0.5f), UV = new(0, 1) },
+						new() { Position = new(-0.5f, -0.5f, -0.5f), UV = new(0, 0) },
+						new() { Position = new(-0.5f, -0.5f,  0.5f), UV = new(1, 0) },
+						new() { Position = new(-0.5f,  0.5f,  0.5f), UV = new(1, 1) },
+						new() { Position = new(-0.5f,  0.5f, -0.5f), UV = new(0, 0) },
+						new() { Position = new(-0.5f,  0.5f,  0.5f), UV = new(0, 1) },
+						new() { Position = new( 0.5f,  0.5f,  0.5f), UV = new(1, 1) },
+						new() { Position = new( 0.5f,  0.5f, -0.5f), UV = new(1, 0) },
+						new() { Position = new(-0.5f, -0.5f,  0.5f), UV = new(0, 0) },
+						new() { Position = new(-0.5f, -0.5f, -0.5f), UV = new(0, 1) },
+						new() { Position = new( 0.5f, -0.5f, -0.5f), UV = new(1, 1) },
+						new() { Position = new( 0.5f, -0.5f,  0.5f), UV = new(1, 0) },
+					],
+					Indices = [
+						0, 1, 2, 0, 2, 3,
+						4, 5, 6, 4, 6, 7,
+						8, 9,10, 8,10,11,
+						12, 13, 14, 12, 14, 15,
+						16, 17, 18, 16, 18, 19,
+						20, 21, 22, 20, 22, 23
+					]
+				}
+			]
+		};
 
-		public static readonly Vertex[] Quad = [
-			new() { Position = new(-1, -1, 0) },
-			new() { Position = new(1, -1, 0) },
-			new() { Position = new(-1, 1, 0) },
-			new() { Position = new(-1, 1, 0) },
-			new() { Position = new(1, -1, 0) },
-			new() { Position = new(1, 1, 0) },
-		];
+		public static readonly Model Quad = new() {
+			Name = "quad",
+			Meshes = [
+				new() {
+					Vertices = [
+						new() { Position = new(-1, -1, 0) },
+						new() { Position = new(1, -1, 0) },
+						new() { Position = new(-1, 1, 0) },
+						new() { Position = new(1, 1, 0) },
+					],
+					Indices = [
+						0, 1, 2,
+						2, 1, 3
+					]
+				}
+			]
+		};
 
 		public static Vertex[] CircleOutline(float radius, float thickness, int segments) {
 			List<Vertex> vertices = [];

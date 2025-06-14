@@ -16,8 +16,12 @@ struct Vertex {
 	vec2 uv;
 };
 
-layout(std430, binding = 10) readonly buffer SSBO1 {
+layout(std430, binding = 11) readonly buffer SSBO1 {
 	Vertex vertices[];
+};
+
+layout(std430, binding = 12) readonly buffer SSBO2 {
+	uint indices[];
 };
 
 struct Material {
@@ -27,23 +31,24 @@ struct Material {
 	int useTextures;
 };
 
-layout(std430, binding = 11) readonly buffer SSBO3 {
-	Material materials[];
+layout(std430, binding = 13) readonly buffer SSBO3 {
+	Material b_material/*[]*/;
 };
 
-layout(std430, binding = 12) readonly buffer SSBO4 {
-	mat4 objectMatrices[];
+layout(std430, binding = 14) readonly buffer SSBO4 {
+	mat4 b_matrix/*[]*/;
 };
 
 smooth out Vertex vertex;
 flat out Material material;
 
 void main() {
-	Vertex v = vertices[gl_VertexID];
+	uint index = indices[gl_VertexID];
+	Vertex v = vertices[index];
 	
-	gl_Position = cameraData.projection * cameraData.view * objectMatrices[gl_InstanceID]
+	gl_Position = cameraData.projection * cameraData.view * b_matrix
 		* vec4(v.position, 1.0);
 
 	vertex = v;
-	material = materials[gl_InstanceID];
+	material = b_material;
 }

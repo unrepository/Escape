@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using SixLabors.ImageSharp;
@@ -63,16 +64,20 @@ namespace GENESIS.GPU.OpenGL {
 
 		public unsafe override void LoadImage(Image<Rgba32> image) {
 			Bind();
+
+			var data = new Rgba32[image.Width * image.Height];
 			
 			image.ProcessPixelRows(accessor => {
-				var data = new Rgba32*[image.Height];
-				
-				for(int y = 0; y < accessor.Height; y++) {
-					fixed(Rgba32* addr = accessor.GetRowSpan(y)) {
-						data[y] = addr;
+				for(int y = 0; y < image.Height; y++) {
+					fixed(Rgba32* addr = accessor.GetRowSpan(image.Height - y - 1)) {
+						for(int x = 0; x < image.Width; x++) {
+							data[y * image.Width + x] = addr[x];
+						}
 					}
 				}
-				
+			});
+
+			fixed(void* ptr = &data[0]) {
 				_platform.API.TexImage2D(
 					TextureTarget.Texture2D,
 					0,
@@ -82,9 +87,9 @@ namespace GENESIS.GPU.OpenGL {
 					0,
 					PixelFormat.Rgba,
 					PixelType.UnsignedByte,
-					data[0]
+					ptr
 				);
-			});
+			}
 		}
 
 		public override void Bind(int unit = 0) {

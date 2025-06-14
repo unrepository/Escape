@@ -1,0 +1,37 @@
+
+[*]
+
+# Microsoft .NET properties
+csharp_new_line_before_catch = false
+csharp_new_line_before_members_in_object_initializers = false
+csharp_preferred_modifier_order = internal, public, private, unsafe, protected, virtual, file, new, sealed, static, readonly, abstract, extern, override, volatile, async, required:suggestion
+csharp_preserve_single_line_blocks = true
+csharp_style_var_for_built_in_types = false:suggestion
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
+
+# ReSharper properties
+resharper_blank_lines_after_block_statements = 0
+resharper_blank_lines_after_start_comment = 1
+resharper_blank_lines_around_auto_property = 0
+resharper_blank_lines_around_property = 1
+resharper_braces_for_for = required
+resharper_braces_for_ifelse = required_for_multiline_statement
+resharper_csharp_alignment_tab_fill_style = optimal_fill
+resharper_csharp_blank_lines_around_field = 0
+resharper_csharp_empty_block_style = multiline
+resharper_csharp_insert_final_newline = true
+resharper_csharp_keep_existing_enum_arrangement = false
+resharper_csharp_max_line_length = 591
+resharper_csharp_wrap_before_binary_opsign = true
+resharper_indent_preprocessor_if = do_not_change
+resharper_method_or_operator_body = expression_body
+resharper_object_creation_when_type_evident = target_typed
+resharper_object_creation_when_type_not_evident = target_typed
+resharper_parentheses_redundancy_style = remove
+resharper_place_expr_property_on_single_line = true
+resharper_place_single_method_argument_lambda_on_same_line = false
+resharper_remove_blank_lines_near_braces_in_code = true
+resharper_wrap_array_initializer_style = chop_always
+resharper_wrap_list_pattern = chop_if_long
+resharper_wrap_object_and_collection_initializer_style = chop_always
+resharper_wrap_ternary_expr_style = chop_if_long

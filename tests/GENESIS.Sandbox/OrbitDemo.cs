@@ -86,6 +86,13 @@ namespace GENESIS.Sandbox {
 			var c3d = (Camera3D) Camera;
 
 			_orbitCamera = new OrbitCamera3D(c3d, window);
+			
+			Painter.BeginDrawList();
+			for(int i = 0; i < OBJECT_COUNT; i++) {
+				var obj = _orbitalObjects[i];
+				Painter.Add3DCube(obj.GetPosition((float) Window!.Base.Time), obj.Rotation, obj.Scale, obj.Color);
+			}
+			Painter.EndDrawList();
 		}
 		
 		private OrbitCamera3D _orbitCamera;
@@ -105,12 +112,10 @@ namespace GENESIS.Sandbox {
 		}
 
 		protected override void Paint(double delta) {
-			Painter.Clear();
-			
-			Painter.BeginDrawList();
+			Painter.SetDrawList(0);
 			for(int i = 0; i < OBJECT_COUNT; i++) {
 				var obj = _orbitalObjects[i];
-				Painter.Add3DCube(obj.GetPosition((float) Window!.Base.Time), obj.Rotation, obj.Scale, obj.Color);
+				Painter.SetTransform(i, obj.GetPosition((float) Window!.Base.Time));
 			}
 			Painter.EndDrawList();
 			

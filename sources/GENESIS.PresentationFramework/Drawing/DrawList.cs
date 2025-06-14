@@ -7,25 +7,23 @@ namespace GENESIS.PresentationFramework.Drawing {
 	
 	public abstract class DrawList : IDisposable {
 
-		public bool Enabled { get; set; } = true;
+		public bool IsEnabled { get; set; } = true;
+		public bool IsInstanced { get; } = false;
 
-		public List<Vertex> Vertices = [];
-		//public List<uint> ObjectIndices = [];
-		public List<Material> Materials = [];
-		public List<Matrix4x4> Matrices = [];
-
-		public List<Texture?> Textures = [];
+		public List<Mesh> Meshes { get; } = [];
+		public List<Material> Materials { get; } = [];
+		public List<Texture?[]> Textures { get; } = [];
+		public List<Matrix4x4> Matrices { get; } = [];
 
 		public ShapeType Type { get; }
-		
-		//public Dictionary<string, Vertex[]> Models = [];
-		public string? Model = null;
 
-		public DrawList(ShapeType type) {
+		public DrawList(ShapeType type, bool instanced) {
 			Type = type;
+			IsInstanced = instanced;
 		}
 
 		public abstract void Push();
+		public abstract void Draw();
 		public abstract void Clear();
 		
 		public abstract void Dispose();

@@ -5,18 +5,17 @@ using System.Runtime.InteropServices;
 using GENESIS.GPU;
 using GENESIS.LanguageExtensions;
 using Hexa.NET.ImGui;
+using ILGPU.Util;
+using NLog;
 
 namespace GENESIS.PresentationFramework.Drawing {
 	
 	public abstract partial class Painter : IDisposable {
 		
 		public IPlatform Platform { get; }
-		
 		public int CurrentDrawList { get; protected set; } = -1;
-		public Dictionary<string, Vertex[]> CustomModels { get; } = [];
 		
 		protected List<DrawList> DrawLists { get; } = [];
-		protected string? CurrentModel { get; set; } = null;
 
 		public Painter(IPlatform platform) {
 			Platform = platform;
@@ -43,20 +42,20 @@ namespace GENESIS.PresentationFramework.Drawing {
 					var drawList = DrawLists[i];
 
 					if(ImGui.TreeNode(i.ToString())) {
-						ImGui.Text(drawList.Enabled ? "Enabled" : "Disabled");
+						ImGui.Text(drawList.IsEnabled ? "Enabled" : "Disabled");
 						ImGui.SameLine();
 						
 						if(ImGui.Button("Toggle")) {
-							drawList.Enabled = !drawList.Enabled;
+							drawList.IsEnabled = !drawList.IsEnabled;
 						}
 						
-						if(ImGui.TreeNode($"Vertices {drawList.Vertices.Count}")) {
+						/*if(ImGui.TreeNode($"Vertices {drawList.Vertices.Count}")) {
 							for(int j = 0; j < drawList.Vertices.Count; j++) {
 								ImGui.Text($"{j}: {drawList.Vertices[j]}");
 							}
 							
 							ImGui.TreePop();
-						}
+						}*/
 						
 						if(ImGui.TreeNode($"Materials {drawList.Materials.Count}")) {
 							for(int j = 0; j < drawList.Materials.Count; j++) {
@@ -96,15 +95,23 @@ namespace GENESIS.PresentationFramework.Drawing {
 		#endif
 		}
 		
-		public abstract int BeginDrawList(DrawList.ShapeType type = DrawList.ShapeType.Triangle);
+		public abstract int BeginDrawList(DrawList.ShapeType type = DrawList.ShapeType.Triangle, bool instanced = false);
 		public abstract void EndDrawList();
 		
 		public bool SetDrawList(int index) {
 			if(index > DrawLists.Count - 1) return false;
 
 			CurrentDrawList = index;
-			CurrentModel = DrawLists[index].Model;
 			return true;
+		}
+
+		public void SetModel(Model model) {
+			Debug.Assert(CurrentDrawList != -1, "SetModel() called outside a draw list");
+			var drawList = DrawLists[CurrentDrawList];
+			Debug.Assert(drawList.IsInstanced, "SetModel() can only be called inside an instanced draw list");
+
+			drawList.Meshes.Clear();
+			drawList.Meshes.AddRange(model.Meshes);
 		}
 
 		public void SetMaterial(Material material, int index = -1) {
@@ -112,7 +119,6 @@ namespace GENESIS.PresentationFramework.Drawing {
 
 			var drawList = DrawLists[CurrentDrawList];
 			index = index < 0 ? drawList.Materials.Count - 1 : index;
-
 			drawList.Materials[index] = material;
 		}
 
@@ -123,33 +129,34 @@ namespace GENESIS.PresentationFramework.Drawing {
 			Texture? metallic = null,
 			int index = -1
 		) {
-			Debug.Assert(CurrentDrawList != -1, "SetMaterial() called outside a draw list");
-
+			Debug.Assert(CurrentDrawList != -1, "SetTextures() called outside a draw list");
 			var drawList = DrawLists[CurrentDrawList];
-			drawList.Textures.Clear();
-			drawList.Textures.AddRange(diffuse, normal, roughness, metallic);
+			//Debug.Assert(drawList.IsInstanced, "SetTextures() can only be called in an instanced draw list");
+
+			if(drawList.IsInstanced) {
+				drawList.Textures.Clear();
+				drawList.Textures.Add([diffuse, normal, roughness, metallic]);
+			} else {
+				index = index < 0 ? drawList.Materials.Count - 1 : index;
+				drawList.Textures[index] = [diffuse, normal, roughness, metallic];
+
+				var use = Material.TextureUse.Diffuse;
+				if(normal is not null) use |= Material.TextureUse.Normal;
+				if(roughness is not null) use |= Material.TextureUse.Roughness;
+				if(metallic is not null) use |= Material.TextureUse.Metallic;
+				
+				CollectionsMarshal.AsSpan(drawList.Materials)[index].UseTextures = use;
+			}
 		}
 		
 		public void UseTextures(Material.TextureUse use, int index = -1) {
-			Debug.Assert(CurrentDrawList != -1, "SetMaterial() called outside a draw list");
-
+			Debug.Assert(CurrentDrawList != -1, "UseTextures() called outside a draw list");
 			var drawList = DrawLists[CurrentDrawList];
+			//Debug.Assert(drawList.IsInstanced, "UseTextures() can only be called in an instanced draw list");
+			
 			index = index < 0 ? drawList.Materials.Count - 1 : index;
-
 			CollectionsMarshal.AsSpan(drawList.Materials)[index].UseTextures = use;
 		}
-
-		/*public void SetMaterial(int index, Material material) {
-			Debug.Assert(CurrentDrawList != -1, "SetMaterial() called outside a draw list");
-			var drawList = DrawLists[CurrentDrawList];
-			if(material.DiffuseTexture > 0) {
-				material.HasTextures = 1;
-				if(!drawList.Textures.Contains(material.DiffuseTexture)) {
-					drawList.Textures.Add(material.DiffuseTexture);
-				}
-			}
-			drawList.Materials[index] = material;
-		}*/
 		
 		public void SetTransform(int index, Vector3? position = null, Vector3? rotation = null, Vector3? scale = null) {
 			Debug.Assert(CurrentDrawList != -1, "SetTransform() called outside a draw list");

@@ -26,20 +26,22 @@ namespace GENESIS.GPU {
 
 		public abstract void Dispose();
 
-		public static Texture Create(IPlatform platform, Vector2D<uint> size,
-		                              Filter filter = Filter.Linear,
-		                              WrapMode wrapMode = WrapMode.Repeat)
-		{
+		public static Texture Create(
+			IPlatform platform, Vector2D<uint> size,
+			Filter filter = Filter.Linear,
+			WrapMode wrapMode = WrapMode.Repeat
+		) {
 			return platform switch {
 				GLPlatform glPlatform => new GLTexture(glPlatform, size, filter, wrapMode),
 				_ => throw new NotImplementedException() // PlatformImpl
 			};
 		}
 
-		public static Texture Create(IPlatform platform, byte[] imageData,
-		                             Filter filter = Filter.Linear,
-		                             WrapMode wrapMode = WrapMode.Repeat)
-		{
+		public static Texture Create(
+			IPlatform platform, byte[] imageData,
+			Filter filter = Filter.Linear,
+			WrapMode wrapMode = WrapMode.Repeat
+		) {
 			using var image = Image.Load<Rgba32>(imageData);
 			var texture = Create(platform, new Vector2D<uint>((uint) image.Width, (uint) image.Height), filter, wrapMode);
 			texture.LoadImage(image);
@@ -47,10 +49,11 @@ namespace GENESIS.GPU {
 			return texture;
 		}
 		
-		public static Texture Create(IPlatform platform, Stream imageData,
-		                             Filter filter = Filter.Linear,
-		                             WrapMode wrapMode = WrapMode.Repeat)
-		{
+		public static Texture Create(
+			IPlatform platform, Stream imageData,
+			Filter filter = Filter.Linear,
+			WrapMode wrapMode = WrapMode.Repeat
+		) {
 			using var image = Image.Load<Rgba32>(imageData);
 			var texture = Create(platform, new Vector2D<uint>((uint) image.Width, (uint) image.Height), filter, wrapMode);
 			texture.LoadImage(image);

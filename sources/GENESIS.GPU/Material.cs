@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using GENESIS.LanguageExtensions;
@@ -15,15 +14,20 @@ namespace GENESIS.GPU {
 		[FieldOffset(24)] public TextureUse UseTextures = 0;
 		[FieldOffset(28)] private float _padding0 = 0;
 
-		public static implicit operator Material(Color color)
+		public static implicit operator Material(System.Drawing.Color color)
 			=> new Material { Albedo = color.ToVector4() };
+		
+		public static implicit operator Material(SixLabors.ImageSharp.Color color)
+			=> new Material { Albedo = (Vector4) color };
 		
 		public override string ToString() {
 			return $"[Albedo={Albedo}]";
 		}
 
+		[Flags]
 		public enum TextureUse {
 			
+			None = 0,
 			Diffuse = (1 << 0),
 			Normal = (1 << 1),
 			Roughness = (1 << 3),

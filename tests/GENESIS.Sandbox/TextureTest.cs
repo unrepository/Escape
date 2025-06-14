@@ -79,12 +79,11 @@ namespace GENESIS.Sandbox {
 			Painter.EndDrawList();
 			
 			Painter.BeginDrawList();
-			Painter.SetTextures(_smileyTexture);
 			Painter.Add3DCube(new Vector3(0, 2, 0), Vector3.Zero, Vector3.One, Color.Red);
 			Painter.SetMaterial(new Material {
 				Albedo = Color.DarkGreen.ToVector4()
 			});
-			//Painter.UseTextures(Material.TextureUse.Diffuse);
+			Painter.SetTextures(_smileyTexture);
 			Painter.EndDrawList();
 		}
 		
@@ -98,14 +97,13 @@ namespace GENESIS.Sandbox {
 			Painter.RemoveDrawList(2);
 			
 			Painter.BeginDrawList();
-			Painter.SetTextures(_smileyTexture);
 			Painter.Add3DCube(
 				new Vector3(4 * MathF.Sin((float) Window.Base.Time), 0, 3 * MathF.Cos((float) Window.Base.Time * 2)),
 				Vector3.Zero,
 				Vector3.One, 
 				Color.Yellow
 			);
-			Painter.UseTextures(Material.TextureUse.Diffuse);
+			Painter.SetTextures(_smileyTexture);
 			Painter.Add3DCube(
 				new Vector3(2.5f * MathF.Sin((float) Window.Base.Time), 1, 7 * MathF.Cos((float) Window.Base.Time)),
 				Vector3.Zero,
