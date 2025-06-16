@@ -5,11 +5,14 @@ using System.Runtime.InteropServices.ComTypes;
 using Eclair.Renderer.OpenGL;
 using Eclair.Renderer.Shader;
 using Eclair.Extensions.CSharp;
+using Eclair.Renderer;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using SixLabors.ImageSharp.PixelFormats;
+using Framebuffer = Eclair.Renderer.Framebuffer;
+using Shader = Eclair.Renderer.Shader.Shader;
 
-namespace Eclair.Renderer.Compute {
+namespace Eclair.Compute {
 	
 	public class ShaderCompute {
 		
@@ -34,7 +37,7 @@ namespace Eclair.Renderer.Compute {
 			if(!hasVertexShader) {
 				if(Program.Handle != 0) Program.Dispose();
 				
-				Program = ShaderProgram.Create(platform, program.Shaders.Append(Shader.Shader.Create(
+				Program = ShaderProgram.Create(platform, program.Shaders.Append(Shader.Create(
 					platform,
 					ShaderType.VertexShader,
 					vertexShaderCode

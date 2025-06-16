@@ -100,7 +100,7 @@ namespace Eclair.Renderer.Vulkan {
 		public void Initialize() {
 			var appInfo = new ApplicationInfo() {
 				SType = StructureType.ApplicationInfo,
-				PApplicationName = (byte*) Marshal.StringToHGlobalAnsi("GENESIS"),
+				PApplicationName = (byte*) Marshal.StringToHGlobalAnsi("Eclair"),
 				ApplicationVersion = new Version32(1, 0, 0),
 				PEngineName = (byte*) Marshal.StringToHGlobalAnsi("N/A"),
 				EngineVersion = new Version32(1, 0, 0),

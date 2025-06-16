@@ -11,6 +11,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\sources\Eclair.Presentation.Extensions.ModelLoading\Eclair.Presentation.Extensions.ModelLoading.csproj" />
       <ProjectReference Include="..\..\sources\Eclair.Presentation\Eclair.Presentation.csproj" />
+      <ProjectReference Include="..\..\sources\Eclair.Compute\Eclair.Compute.csproj" />
     </ItemGroup>
 
     <ItemGroup>

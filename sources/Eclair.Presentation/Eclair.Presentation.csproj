@@ -23,7 +23,6 @@
     <ItemGroup>
       <ProjectReference Include="..\Eclair.Extensions.CSharp\Eclair.Extensions.CSharp.csproj" />
       <ProjectReference Include="..\Eclair.Renderer\Eclair.Renderer.csproj" />
-      <ProjectReference Include="..\GENESIS.LanguageExtensions\GENESIS.LanguageExtensions.csproj" />
     </ItemGroup>
     
     <ItemGroup>

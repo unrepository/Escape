@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml;
 using Eclair.Renderer;
-using Eclair.Renderer.Compute;
+using Eclair.Compute;
 using Eclair.Renderer.OpenGL;
 using Eclair.Renderer.Shader;
 using Eclair.Extensions.CSharp;
