@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using Eclair.Renderer;
 using Eclair.Renderer.Compute;
 using Eclair.Renderer.Shader;
-using GENESIS.LanguageExtensions;
+using Eclair.Extensions.CSharp;
 using Eclair.Presentation;
 using GENESIS.Project;
 using Hexa.NET.ImGui;

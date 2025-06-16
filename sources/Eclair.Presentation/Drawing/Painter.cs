@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Eclair.Renderer;
-using GENESIS.LanguageExtensions;
+using Eclair.Extensions.CSharp;
 using Hexa.NET.ImGui;
 using ILGPU.Util;
 using NLog;

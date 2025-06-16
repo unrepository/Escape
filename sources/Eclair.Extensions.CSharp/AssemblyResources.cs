@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Reflection;
 
-namespace GENESIS.LanguageExtensions {
+namespace Eclair.Extensions.CSharp {
 	
 	[Obsolete]
 	public static class AssemblyResources {

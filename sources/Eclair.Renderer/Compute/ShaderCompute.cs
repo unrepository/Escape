@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using Eclair.Renderer.OpenGL;
 using Eclair.Renderer.Shader;
-using GENESIS.LanguageExtensions;
+using Eclair.Extensions.CSharp;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using SixLabors.ImageSharp.PixelFormats;

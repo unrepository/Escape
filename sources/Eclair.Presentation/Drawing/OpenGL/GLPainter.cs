@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Eclair.Renderer.OpenGL;
 using Eclair.Renderer.Shader;
-using GENESIS.LanguageExtensions;
+using Eclair.Extensions.CSharp;
 using Silk.NET.OpenGL;
 
 namespace Eclair.Presentation.Drawing.OpenGL {

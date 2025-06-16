@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using Eclair.Renderer;
-using GENESIS.LanguageExtensions;
+using Eclair.Extensions.CSharp;
 
 namespace Eclair.Presentation.Drawing {
 	

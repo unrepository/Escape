@@ -12,8 +12,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\GENESIS.LanguageExtensions\GENESIS.LanguageExtensions.csproj" />
-      <ProjectReference Include="..\GENESIS.UnitTypes\GENESIS.UnitTypes.csproj" />
+      <ProjectReference Include="..\Eclair.Extensions.CSharp\Eclair.Extensions.CSharp.csproj" />
+      <ProjectReference Include="..\Eclair.UnitTypes\Eclair.UnitTypes.csproj" />
     </ItemGroup>
 
     <ItemGroup>

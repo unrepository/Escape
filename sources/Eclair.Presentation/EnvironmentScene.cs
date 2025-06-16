@@ -4,7 +4,7 @@ using Eclair.Presentation.Drawing.OpenGL;
 using Eclair.Renderer;
 using Eclair.Renderer.OpenGL;
 using Eclair.Renderer.Shader;
-using GENESIS.LanguageExtensions;
+using Eclair.Extensions.CSharp;
 using Eclair.Presentation.Drawing;
 using Silk.NET.OpenGL;
 using Shader = Eclair.Renderer.Shader.Shader;

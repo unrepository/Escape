@@ -1,7 +1,7 @@
 using System.Drawing;
 using System.Numerics;
 
-namespace GENESIS.LanguageExtensions {
+namespace Eclair.Extensions.CSharp {
 	
 	public static class ColorExtensions {
 

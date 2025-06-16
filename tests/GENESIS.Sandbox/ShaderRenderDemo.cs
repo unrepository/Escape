@@ -5,7 +5,7 @@ using System.Xml;
 using Eclair.Renderer;
 using Eclair.Renderer.OpenGL;
 using Eclair.Renderer.Shader;
-using GENESIS.LanguageExtensions;
+using Eclair.Extensions.CSharp;
 using Eclair.Presentation;
 using Eclair.Presentation.Camera;
 using Eclair.Presentation.Extensions;

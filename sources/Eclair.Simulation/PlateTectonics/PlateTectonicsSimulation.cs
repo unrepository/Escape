@@ -1,7 +1,7 @@
 using System.Numerics;
 using Silk.NET.Maths;
 
-namespace GENESIS.Simulation.PlateTectonics {
+namespace Eclair.Simulation.PlateTectonics {
 	
 	public class PlateTectonicsSimulation
 		: Simulation<PlateTectonicsData, PlateTectonicsState> {

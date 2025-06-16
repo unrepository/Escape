@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GENESIS.LanguageExtensions\GENESIS.LanguageExtensions.csproj" />
+    <ProjectReference Include="..\Eclair.Extensions.CSharp\Eclair.Extensions.CSharp.csproj" />
   </ItemGroup>
 
   <ItemGroup>

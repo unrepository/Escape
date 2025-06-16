@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace GENESIS.Simulation.PlateTectonics {
+namespace Eclair.Simulation.PlateTectonics {
 	
 	public class TectonicPlateTile {
 	

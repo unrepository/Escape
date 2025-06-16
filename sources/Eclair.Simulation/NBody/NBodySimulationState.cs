@@ -1,4 +1,4 @@
-namespace GENESIS.Simulation.NBody {
+namespace Eclair.Simulation.NBody {
 	
 	public struct NBodySimulationState() : ISimulationState<NBodySimulationData> {
 

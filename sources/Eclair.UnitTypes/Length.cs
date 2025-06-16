@@ -1,4 +1,4 @@
-namespace GENESIS.UnitTypes {
+namespace Eclair.UnitTypes {
 	
 	public class Length {
 

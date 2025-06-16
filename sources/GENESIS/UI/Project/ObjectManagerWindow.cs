@@ -4,7 +4,7 @@ using Eclair.Renderer;
 using Eclair.Presentation;
 using Eclair.Presentation.Dialog;
 using GENESIS.Project;
-using GENESIS.Simulation;
+using Eclair.Simulation;
 using Hexa.NET.ImGui;
 
 namespace GENESIS.UI.Project {

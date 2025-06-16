@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace GENESIS.LanguageExtensions {
+namespace Eclair.Extensions.CSharp {
 	
 	public static class Matrix4x4Extensions {
 		

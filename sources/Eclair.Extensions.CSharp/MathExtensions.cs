@@ -1,4 +1,4 @@
-namespace GENESIS.LanguageExtensions {
+namespace Eclair.Extensions.CSharp {
 	
 	public static class MathExtensions {
 

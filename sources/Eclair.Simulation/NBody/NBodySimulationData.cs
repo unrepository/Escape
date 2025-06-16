@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace GENESIS.Simulation.NBody {
+namespace Eclair.Simulation.NBody {
 	
 	public struct NBodySimulationData() : ISimulationData {
 

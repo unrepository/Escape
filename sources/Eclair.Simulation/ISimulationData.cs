@@ -1,4 +1,4 @@
-namespace GENESIS.Simulation {
+namespace Eclair.Simulation {
 
 	public interface ISimulationData;
 }

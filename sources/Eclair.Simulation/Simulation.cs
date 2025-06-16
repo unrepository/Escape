@@ -1,4 +1,4 @@
-namespace GENESIS.Simulation {
+namespace Eclair.Simulation {
 	
 	public abstract class Simulation<D, S>
 		where D : ISimulationData

@@ -1,7 +1,7 @@
 using System.Numerics;
 using Silk.NET.Maths;
 
-namespace GENESIS.Simulation {
+namespace Eclair.Simulation {
 	
 	public static class RayCast {
 		

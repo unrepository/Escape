@@ -11,7 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Eclair.Renderer\Eclair.Renderer.csproj" />
     <ProjectReference Include="..\Eclair.Presentation\Eclair.Presentation.csproj" />
-    <ProjectReference Include="..\GENESIS.Simulation\GENESIS.Simulation.csproj" />
+    <ProjectReference Include="..\Eclair.Simulation\Eclair.Simulation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

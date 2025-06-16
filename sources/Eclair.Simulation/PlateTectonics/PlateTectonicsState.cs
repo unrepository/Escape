@@ -1,4 +1,4 @@
-namespace GENESIS.Simulation.PlateTectonics {
+namespace Eclair.Simulation.PlateTectonics {
 	
 	public struct PlateTectonicsState : ISimulationState<PlateTectonicsData> {
 

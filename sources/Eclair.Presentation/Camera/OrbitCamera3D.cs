@@ -1,7 +1,7 @@
 using System.Numerics;
 using Eclair.Renderer;
 using Eclair.Renderer.Shader;
-using GENESIS.LanguageExtensions;
+using Eclair.Extensions.CSharp;
 using Eclair.Presentation.Extensions;
 using Hexa.NET.ImGui;
 using Silk.NET.Core;

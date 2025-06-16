@@ -1,6 +1,6 @@
 using Silk.NET.Maths;
 
-namespace GENESIS.Simulation.PlateTectonics {
+namespace Eclair.Simulation.PlateTectonics {
 	
 	public struct PlateTectonicsData() : ISimulationData {
 

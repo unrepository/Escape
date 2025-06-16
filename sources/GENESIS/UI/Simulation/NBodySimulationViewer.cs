@@ -2,13 +2,13 @@ using System.Collections.Concurrent;
 using System.Drawing;
 using System.Numerics;
 using Eclair.Renderer;
-using GENESIS.LanguageExtensions;
+using Eclair.Extensions.CSharp;
 using Eclair.Presentation;
 using Eclair.Presentation.Camera;
 using Eclair.Presentation.Drawing;
-using GENESIS.Simulation;
-using GENESIS.Simulation.NBody;
-using GENESIS.UnitTypes;
+using Eclair.Simulation;
+using Eclair.Simulation.NBody;
+using Eclair.UnitTypes;
 
 namespace GENESIS.UI.Simulation {
 	

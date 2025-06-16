@@ -1,8 +1,8 @@
-using GENESIS.UnitTypes;
+using Eclair.UnitTypes;
 using NLog;
 using Silk.NET.Maths;
 
-namespace GENESIS.Simulation.NBody {
+namespace Eclair.Simulation.NBody {
 	
 	public class NBodySimulation : Simulation<NBodySimulationData, NBodySimulationState> {
 		

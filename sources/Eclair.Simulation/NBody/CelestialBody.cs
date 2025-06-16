@@ -1,8 +1,8 @@
 using System.Drawing;
-using GENESIS.UnitTypes;
+using Eclair.UnitTypes;
 using Silk.NET.Maths;
 
-namespace GENESIS.Simulation.NBody {
+namespace Eclair.Simulation.NBody {
 	
 	public class CelestialBody {
 		

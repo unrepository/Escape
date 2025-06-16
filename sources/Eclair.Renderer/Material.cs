@@ -1,6 +1,6 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
-using GENESIS.LanguageExtensions;
+using Eclair.Extensions.CSharp;
 using ILGPU.Runtime.CPU;
 
 namespace Eclair.Renderer {

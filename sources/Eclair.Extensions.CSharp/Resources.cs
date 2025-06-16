@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace GENESIS.LanguageExtensions {
+namespace Eclair.Extensions.CSharp {
 	
 	public static class Resources {
 
