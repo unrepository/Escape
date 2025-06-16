@@ -1,8 +1,8 @@
 using System.Numerics;
-using GENESIS.GPU;
-using GENESIS.PresentationFramework;
-using GENESIS.PresentationFramework.Dialog;
-using GENESIS.PresentationFramework.Extensions;
+using Eclair.Renderer;
+using Eclair.Presentation;
+using Eclair.Presentation.Dialog;
+using Eclair.Presentation.Extensions;
 using GENESIS.Project;
 using GENESIS.UI.Project;
 using Hexa.NET.ImGui;

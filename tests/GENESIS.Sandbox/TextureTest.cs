@@ -1,20 +1,20 @@
 using System.Drawing;
 using System.Numerics;
 using System.Reflection;
-using GENESIS.GPU;
-using GENESIS.GPU.OpenGL;
-using GENESIS.GPU.Shader;
+using Eclair.Renderer;
+using Eclair.Renderer.OpenGL;
+using Eclair.Renderer.Shader;
 using GENESIS.LanguageExtensions;
-using GENESIS.PresentationFramework;
-using GENESIS.PresentationFramework.Camera;
-using GENESIS.PresentationFramework.Drawing;
-using GENESIS.PresentationFramework.Extensions;
+using Eclair.Presentation;
+using Eclair.Presentation.Camera;
+using Eclair.Presentation.Drawing;
+using Eclair.Presentation.Extensions;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using Monitor = Silk.NET.Windowing.Monitor;
-using Texture = GENESIS.GPU.Texture;
-using Window = GENESIS.GPU.Window;
+using Texture = Eclair.Renderer.Texture;
+using Window = Eclair.Renderer.Window;
 
 namespace GENESIS.Sandbox {
 

@@ -1,4 +1,4 @@
-using GENESIS.GPU;
+using Eclair.Renderer;
 
 namespace GENESIS.Project {
 	

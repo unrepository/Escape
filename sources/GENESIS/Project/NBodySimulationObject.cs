@@ -1,5 +1,5 @@
-using GENESIS.GPU;
-using GENESIS.PresentationFramework.Extensions;
+using Eclair.Renderer;
+using Eclair.Presentation.Extensions;
 using GENESIS.UI.Object;
 using GENESIS.UI.Simulation;
 

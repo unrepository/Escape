@@ -1,11 +1,11 @@
 using System.Collections.Concurrent;
 using System.Drawing;
 using System.Numerics;
-using GENESIS.GPU;
+using Eclair.Renderer;
 using GENESIS.LanguageExtensions;
-using GENESIS.PresentationFramework;
-using GENESIS.PresentationFramework.Camera;
-using GENESIS.PresentationFramework.Drawing;
+using Eclair.Presentation;
+using Eclair.Presentation.Camera;
+using Eclair.Presentation.Drawing;
 using GENESIS.Simulation;
 using GENESIS.Simulation.NBody;
 using GENESIS.UnitTypes;

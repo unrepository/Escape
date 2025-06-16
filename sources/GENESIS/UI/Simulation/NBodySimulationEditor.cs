@@ -1,10 +1,10 @@
 using System.Collections.Concurrent;
 using System.Drawing;
 using System.Numerics;
-using GENESIS.GPU;
+using Eclair.Renderer;
 using GENESIS.LanguageExtensions;
-using GENESIS.PresentationFramework.Dialog;
-using GENESIS.PresentationFramework.Extensions;
+using Eclair.Presentation.Dialog;
+using Eclair.Presentation.Extensions;
 using GENESIS.Project;
 using GENESIS.Simulation.NBody;
 using GENESIS.UnitTypes;

@@ -1,4 +1,4 @@
-using GENESIS.GPU.Vulkan;
+using Eclair.Renderer.Vulkan;
 using NLog;
 using Silk.NET.Windowing;
 

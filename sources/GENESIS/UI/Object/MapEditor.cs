@@ -1,17 +1,17 @@
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using GENESIS.GPU;
-using GENESIS.GPU.Compute;
-using GENESIS.GPU.Shader;
+using Eclair.Renderer;
+using Eclair.Renderer.Compute;
+using Eclair.Renderer.Shader;
 using GENESIS.LanguageExtensions;
-using GENESIS.PresentationFramework;
+using Eclair.Presentation;
 using GENESIS.Project;
 using Hexa.NET.ImGui;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using Framebuffer = GENESIS.GPU.Framebuffer;
-using Shader = GENESIS.GPU.Shader.Shader;
+using Framebuffer = Eclair.Renderer.Framebuffer;
+using Shader = Eclair.Renderer.Shader.Shader;
 
 namespace GENESIS.UI.Object {
 	

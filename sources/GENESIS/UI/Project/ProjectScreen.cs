@@ -1,6 +1,6 @@
-using GENESIS.GPU;
-using GENESIS.PresentationFramework;
-using GENESIS.PresentationFramework.Extensions;
+using Eclair.Renderer;
+using Eclair.Presentation;
+using Eclair.Presentation.Extensions;
 using Hexa.NET.ImGui;
 
 namespace GENESIS.UI.Project {

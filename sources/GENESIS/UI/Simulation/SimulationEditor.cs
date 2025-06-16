@@ -1,6 +1,6 @@
 using System.Numerics;
-using GENESIS.GPU;
-using GENESIS.PresentationFramework;
+using Eclair.Renderer;
+using Eclair.Presentation;
 using GENESIS.Project;
 using GENESIS.Simulation;
 using Hexa.NET.ImGui;

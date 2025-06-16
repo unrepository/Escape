@@ -2,23 +2,23 @@ using System.Drawing;
 using System.Numerics;
 using System.Reflection;
 using System.Xml;
-using GENESIS.GPU;
-using GENESIS.GPU.Compute;
-using GENESIS.GPU.OpenGL;
-using GENESIS.GPU.Shader;
+using Eclair.Renderer;
+using Eclair.Renderer.Compute;
+using Eclair.Renderer.OpenGL;
+using Eclair.Renderer.Shader;
 using GENESIS.LanguageExtensions;
-using GENESIS.PresentationFramework;
-using GENESIS.PresentationFramework.Camera;
-using GENESIS.PresentationFramework.Extensions;
+using Eclair.Presentation;
+using Eclair.Presentation.Camera;
+using Eclair.Presentation.Extensions;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Framebuffer = GENESIS.GPU.Framebuffer;
+using Framebuffer = Eclair.Renderer.Framebuffer;
 using Monitor = Silk.NET.Windowing.Monitor;
-using Shader = GENESIS.GPU.Shader.Shader;
-using Window = GENESIS.GPU.Window;
+using Shader = Eclair.Renderer.Shader.Shader;
+using Window = Eclair.Renderer.Window;
 
 namespace GENESIS.Sandbox {
 	

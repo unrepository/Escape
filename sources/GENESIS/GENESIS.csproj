@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GENESIS.GPU\GENESIS.GPU.csproj" />
-    <ProjectReference Include="..\GENESIS.PresentationFramework\GENESIS.PresentationFramework.csproj" />
+    <ProjectReference Include="..\Eclair.Renderer\Eclair.Renderer.csproj" />
+    <ProjectReference Include="..\Eclair.Presentation\Eclair.Presentation.csproj" />
     <ProjectReference Include="..\GENESIS.Simulation\GENESIS.Simulation.csproj" />
   </ItemGroup>
 
