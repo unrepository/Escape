@@ -20,7 +20,7 @@ using Monitor = Silk.NET.Windowing.Monitor;
 using Shader = Eclair.Renderer.Shader.Shader;
 using Window = Eclair.Renderer.Window;
 
-namespace GENESIS.Sandbox {
+namespace Eclair.Sandbox {
 	
 	public static class ShaderComputeDemoProgram {
 

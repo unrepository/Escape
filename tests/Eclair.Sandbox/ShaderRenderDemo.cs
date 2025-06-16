@@ -1,22 +1,25 @@
 using System.Drawing;
 using System.Numerics;
+using System.Reflection;
+using System.Xml;
 using Eclair.Renderer;
 using Eclair.Renderer.OpenGL;
 using Eclair.Renderer.Shader;
 using Eclair.Extensions.CSharp;
 using Eclair.Presentation;
 using Eclair.Presentation.Camera;
-using Eclair.Presentation.Drawing;
 using Eclair.Presentation.Extensions;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using Framebuffer = Eclair.Renderer.Framebuffer;
 using Monitor = Silk.NET.Windowing.Monitor;
+using Shader = Eclair.Renderer.Shader.Shader;
 using Window = Eclair.Renderer.Window;
 
-namespace GENESIS.Sandbox {
-
-	public static class StaticDynamicTestProgram {
+namespace Eclair.Sandbox {
+	
+	public static class ShaderRenderDemoProgram {
 
 		public static void Start(string[] args) {
 			Silk.NET.Windowing.Window.PrioritizeGlfw();
@@ -39,7 +42,7 @@ namespace GENESIS.Sandbox {
 			platform.Initialize();
 			window.Initialize();
 			
-			var scene = new StaticDynamicTest(platform);
+			var scene = new ShaderRenderDemo(platform);
 			window.PushScene(scene);
 
 			window.PushScene(new DebugScene(platform));
@@ -52,51 +55,33 @@ namespace GENESIS.Sandbox {
 			}
 		}
 	}
-	
-	public class StaticDynamicTest : EnvironmentScene {
-		
-		private OrbitCamera3D _orbitCamera;
-		
-		public StaticDynamicTest(IPlatform platform) : base(platform, "static_dynamic_test") { }
+
+	public class ShaderRenderDemo : EnvironmentScene {
+
+		private readonly Vector2D<uint> _framebufferSize = new Vector2D<uint>(512, 512);
+		private readonly Framebuffer _framebuffer;
+
+		public ShaderRenderDemo(IPlatform platform) : base(platform, "shader_render") {
+			ShaderProgram.Shaders[1] = Shader.Create(platform, ShaderType.FragmentShader,
+				Assembly.GetExecutingAssembly().ReadTextResource("Eclair.Sandbox.Resources.Shaders.demo.frag"));
+			
+			_framebuffer = Framebuffer.Create(platform, _framebufferSize);
+		}
 
 		public override void Initialize(Window window) {
 			base.Initialize(window);
 
-			Camera = new PerspectiveCamera3D(window, PrimaryShader);
-			Camera.FieldOfView = 60;
-
-			var c3d = (Camera3D) Camera;
-
-			_orbitCamera = new OrbitCamera3D(c3d, window);
+			Camera = new Camera2D((int) _framebufferSize.X, (int) _framebufferSize.Y, PrimaryShader);
 			
 			Painter.BeginDrawList();
-			Painter.Add2DQuad(new Vector2(0, 0), 45, new Vector2(5, 5), Color.BlueViolet);
+			Painter.Add2DQuad(Vector2.Zero, 0, new Vector2(_framebufferSize.X, _framebufferSize.Y), Color.Red);
 			Painter.EndDrawList();
-			
-			Painter.BeginDrawList();
-			Painter.Add3DCube(new Vector3(0, 2, 0), Vector3.Zero, Vector3.One, Color.Red);
-			Painter.EndDrawList();
-		}
-		
-		public override void Update(double delta) {
-			base.Update(delta);
-			
-			_orbitCamera.Update(delta);
 		}
 
 		protected override void Paint(double delta) {
-			Painter.RemoveDrawList(2);
-			
-			Painter.BeginDrawList();
-			Painter.Add3DCube(
-				new Vector3(4 * MathF.Sin((float) Window.Base.Time), 0, 4* MathF.Cos((float) Window.Base.Time)),
-				Vector3.Zero,
-				Vector3.One, 
-				Color.Yellow
-			);
-			Painter.EndDrawList();
-			
+			_framebuffer.Bind();
 			base.Paint(delta);
+			_framebuffer.Unbind();
 		}
 	}
 }

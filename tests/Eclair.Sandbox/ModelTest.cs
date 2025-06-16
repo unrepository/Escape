@@ -17,7 +17,7 @@ using Monitor = Silk.NET.Windowing.Monitor;
 using Texture = Eclair.Renderer.Texture;
 using Window = Eclair.Renderer.Window;
 
-namespace GENESIS.Sandbox {
+namespace Eclair.Sandbox {
 
 	public static class ModelTestProgram {
 

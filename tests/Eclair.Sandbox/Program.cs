@@ -1,3 +1,3 @@
-using GENESIS.Sandbox;
+using Eclair.Sandbox;
 
 ModelTestProgram.Start(args);

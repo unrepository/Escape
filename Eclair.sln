@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eclair.Renderer", "sources\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eclair.Simulation", "sources\Eclair.Simulation\Eclair.Simulation.csproj", "{0F0F9F0F-2BC0-4B20-A73C-4405ABB3A0A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GENESIS.Sandbox", "tests\GENESIS.Sandbox\GENESIS.Sandbox.csproj", "{8C9B0604-4DB8-4999-91D4-0D40B916C078}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eclair.Sandbox", "tests\Eclair.Sandbox\Eclair.Sandbox.csproj", "{8C9B0604-4DB8-4999-91D4-0D40B916C078}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5CC8AE63-73AD-40D9-B832-D17F37042E38}"
 EndProject

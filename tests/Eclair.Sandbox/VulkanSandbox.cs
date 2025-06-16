@@ -2,7 +2,7 @@ using Eclair.Renderer.Vulkan;
 using NLog;
 using Silk.NET.Windowing;
 
-namespace GENESIS.Sandbox {
+namespace Eclair.Sandbox {
 	
 	public static class VulkanSandbox {
 		

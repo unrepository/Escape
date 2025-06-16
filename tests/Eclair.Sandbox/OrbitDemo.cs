@@ -14,7 +14,7 @@ using Silk.NET.Windowing;
 using Monitor = Silk.NET.Windowing.Monitor;
 using Window = Eclair.Renderer.Window;
 
-namespace GENESIS.Sandbox {
+namespace Eclair.Sandbox {
 
 	public static class OrbitDemoProgram {
 
