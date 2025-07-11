@@ -48,19 +48,16 @@
 					];
 					
 					LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath libs;
-
-					# dotnet = (with pkgs.dotnetCorePackages; combinePackages [
-					# 	sdk_9_0-bin
-					# ]);
-					dotnet = pkgs.dotnetCorePackages.sdk_9_0_2xx;
+					dotnet = pkgs.dotnetCorePackages.sdk_9_0_3xx;
 
 					nativeBuildInputs = with pkgs; [
 						dotnet
 
-						godot-mono
-
 						# debugging
 						renderdoc
+
+						# shader compiler
+						shaderc
 
 						gcc
 						cmake
