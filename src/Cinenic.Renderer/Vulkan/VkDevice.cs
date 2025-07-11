@@ -15,8 +15,12 @@ namespace Cinenic.Renderer.Vulkan {
 
 		public PhysicalDeviceFeatures Features { get; }
 
-		internal Device Logical { get; }
-		internal PhysicalDevice Physical { get; }
+		public Device Logical { get; }
+		public PhysicalDevice Physical { get; }
+		
+		public readonly Queue GraphicsQueue;
+		public readonly Queue ComputeQueue;
+		public readonly Queue? SurfaceQueue;
 
 		internal int GraphicsFamily { get; } = -1;
 		internal int ComputeFamily { get; } = -1;
@@ -33,10 +37,6 @@ namespace Cinenic.Renderer.Vulkan {
 				return indices.ToArray();
 			}
 		}
-		
-		internal readonly Queue GraphicsQueue;
-		internal readonly Queue ComputeQueue;
-		internal readonly Queue? SurfaceQueue;
 
 		internal readonly SurfaceCapabilitiesKHR? SurfaceCapabilities;
 		internal readonly SurfaceFormatKHR[]? SurfaceFormats;
@@ -80,7 +80,7 @@ namespace Cinenic.Renderer.Vulkan {
 			
 			// if not headless, also check for presentation support
 			if(!_platform.CurrentOptions.Headless) {
-				if(!_platform.API.TryGetInstanceExtension(_platform.VK, out surfaceKhr)) {
+				if(!_platform.API.TryGetInstanceExtension(_platform.Vk, out surfaceKhr)) {
 					throw new ApplicationException($"{KhrSurface.ExtensionName} not loaded even though we are not running headlessly?");
 				}
 

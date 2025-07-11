@@ -38,9 +38,9 @@ namespace Cinenic.Renderer.Vulkan {
 			Base = Silk.NET.Windowing.Window.Create(windowOptions);
 			Base.Initialize();
 
-			Surface = Base.VkSurface!.Create<AllocationCallbacks>(_platform.VK.ToHandle(), null).ToSurface();
+			Surface = Base.VkSurface!.Create<AllocationCallbacks>(_platform.Vk.ToHandle(), null).ToSurface();
 
-			if(!_platform.API.TryGetDeviceExtension(_platform.VK, _device.Logical, out _khrSwapchain)) {
+			if(!_platform.API.TryGetDeviceExtension(_platform.Vk, _device.Logical, out _khrSwapchain)) {
 				throw new ExternalException($"Could not load the {KhrSurface.ExtensionName} extension");
 			}
 			

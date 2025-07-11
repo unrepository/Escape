@@ -21,7 +21,7 @@ namespace Cinenic.Renderer.OpenGL {
 			_platform = platform;
 		}
 		
-		public override uint Compile() {
+		public override ulong Compile() {
 			Debug.Assert(Handle == 0);
 			
 			if(string.IsNullOrEmpty(Code)) {

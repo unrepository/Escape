@@ -15,8 +15,9 @@ namespace Cinenic.Renderer.Vulkan {
 		public bool IsInitialized { get; set; } = false;
 		public Options CurrentOptions { get; }
 
-		public Vk API { get; set; }
-		public Instance VK { get; private set; }
+		public Vk API { get; }
+		public Instance Vk { get; private set; }
+		public VkPipeline Pipeline { get; private set; }
 
 		public VkDevice? PrimaryDevice {
 			get;
@@ -39,7 +40,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 		public VkPlatform(PlatformOptions? options = null) {
 			CurrentOptions = options as Options ?? new Options();
-			API = Vk.GetApi();
+			API = Silk.NET.Vulkan.Vk.GetApi();
 
 		#region Layer validation
 			uint layerCount = 0;
@@ -104,7 +105,7 @@ namespace Cinenic.Renderer.Vulkan {
 				ApplicationVersion = new Version32(1, 0, 0),
 				PEngineName = (byte*) Marshal.StringToHGlobalAnsi("N/A"),
 				EngineVersion = new Version32(1, 0, 0),
-				ApiVersion = Vk.Version10,
+				ApiVersion = Silk.NET.Vulkan.Vk.Version10,
 			};
 
 			var instanceInfo = new InstanceCreateInfo() {
@@ -122,7 +123,7 @@ namespace Cinenic.Renderer.Vulkan {
 				throw new ExternalException($"Failed to initialize Vulkan: {result}", (int) result);
 			}
 
-			VK = vk;
+			Vk = vk;
 
 			// free the stuff we allocated earlier
 			/*Marshal.FreeHGlobal((nint) appInfo.PApplicationName);
@@ -132,7 +133,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 			if(_vkExtensions.Contains(ExtDebugUtils.ExtensionName)) {
 				// set up message callback
-				if(API.TryGetInstanceExtension(VK, out ExtDebugUtils debugUtils)) {
+				if(API.TryGetInstanceExtension(Vk, out ExtDebugUtils debugUtils)) {
 					var messengerInfo = new DebugUtilsMessengerCreateInfoEXT() {
 						SType = StructureType.DebugUtilsMessengerCreateInfoExt,
 						MessageSeverity =
@@ -150,7 +151,7 @@ namespace Cinenic.Renderer.Vulkan {
 					fixed(DebugUtilsMessengerEXT* debugMessenger = &_debugMessenger) {
 						if(
 							(result = debugUtils.CreateDebugUtilsMessenger(
-								VK,
+								Vk,
 								&messengerInfo,
 								null,
 								debugMessenger
@@ -167,15 +168,17 @@ namespace Cinenic.Renderer.Vulkan {
 			if(!CurrentOptions.Headless) {
 				var window = Silk.NET.Windowing.Window.Create(WindowOptions.DefaultVulkan);
 				window.Initialize();
-				InitialSurface = window.VkSurface!.Create<AllocationCallbacks>(VK.ToHandle(), null).ToSurface();
+				InitialSurface = window.VkSurface!.Create<AllocationCallbacks>(Vk.ToHandle(), null).ToSurface();
 				window.Close();
 			}
+
+			Pipeline = new VkPipeline(this);
 			
 			IsInitialized = true;
 		}
 
 		public IReadOnlyCollection<VkDevice> GetDevices() {
-			var nativeDevices = API.GetPhysicalDevices(VK);
+			var nativeDevices = API.GetPhysicalDevices(Vk);
 			var devices = new List<VkDevice>();
 
 			foreach(var nativeDevice in nativeDevices) {
@@ -186,7 +189,7 @@ namespace Cinenic.Renderer.Vulkan {
 		}
 
 		public VkDevice CreateDevice(int index) {
-			var nativeDevices = API.GetPhysicalDevices(VK);
+			var nativeDevices = API.GetPhysicalDevices(Vk);
 
 			if(nativeDevices.Count <= 0) {
 				throw new PlatformNotSupportedException("No Vulkan-capable devices present");
@@ -209,12 +212,12 @@ namespace Cinenic.Renderer.Vulkan {
 			
 			if(
 				_vkExtensions.Contains(ExtDebugUtils.ExtensionName)
-				&& API.TryGetInstanceExtension(VK, out ExtDebugUtils debugUtils)
+				&& API.TryGetInstanceExtension(Vk, out ExtDebugUtils debugUtils)
 			) {
-				debugUtils.DestroyDebugUtilsMessenger(VK, _debugMessenger, null);
+				debugUtils.DestroyDebugUtilsMessenger(Vk, _debugMessenger, null);
 			}
 			
-			API.DestroyInstance(VK, null);
+			API.DestroyInstance(Vk, null);
 		}
 		
 		private uint DebugMessageCallback(
@@ -222,7 +225,7 @@ namespace Cinenic.Renderer.Vulkan {
 			DebugUtilsMessengerCallbackDataEXT* callbackData, void* userData
 		) {
 			_logger.Debug(Marshal.PtrToStringAnsi((nint) callbackData->PMessage));
-			return Vk.False;
+			return Silk.NET.Vulkan.Vk.False;
 		}
 
 		public class Options : PlatformOptions {

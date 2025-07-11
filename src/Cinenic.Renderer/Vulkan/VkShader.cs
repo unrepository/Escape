@@ -19,7 +19,7 @@ namespace Cinenic.Renderer.Vulkan {
 			_platform = platform;
 		}
 
-		public unsafe override uint Compile() {
+		public unsafe override ulong Compile() {
 			Debug.Assert(Handle == 0);
 
 			var codePtr = Marshal.StringToHGlobalAuto(Code);
@@ -33,7 +33,7 @@ namespace Cinenic.Renderer.Vulkan {
 			
 			Result result;
 			if(
-				(result = _platform.API.CreateShaderModule(_platform.PrimaryDevice.Logical, &moduleInfo, null, out var module))
+				(result = _platform.API.CreateShaderModule(_platform.PrimaryDevice!.Logical, &moduleInfo, null, out var module))
 				!= Result.Success
 			) {
 				throw new PlatformException($"Could not create shader module: {result}");
@@ -41,10 +41,18 @@ namespace Cinenic.Renderer.Vulkan {
 
 			Module = module;
 			Handle = module.Handle;
+
+			return Handle;
 		}
 		
 		public override void Dispose() {
-			throw new NotImplementedException();
+			GC.SuppressFinalize(this);
+
+			unsafe {
+				_platform.API.DestroyShaderModule(_platform.PrimaryDevice!.Logical, Module, null);
+			}
+
+			Handle = 0;
 		}
 	}
 }

@@ -20,8 +20,7 @@ namespace Cinenic.Renderer.Shader {
 			Code = code;
 		}
 		
-		public abstract uint Compile();
-		
+		public abstract ulong Compile();
 		public abstract void Dispose();
 
 		public static Shader Create(IPlatform platform, ShaderType type, string code) {
