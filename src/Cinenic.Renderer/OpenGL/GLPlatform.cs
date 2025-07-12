@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text;
+using Cinenic.Renderer.Shader;
 using NLog;
 using Silk.NET.Core.Contexts;
 using Silk.NET.OpenGL;
@@ -10,6 +11,7 @@ namespace Cinenic.Renderer.OpenGL {
 	public class GLPlatform : IPlatform {
 		
 		public bool IsInitialized { get; set; }
+		public ShaderProgram? DefaultProgram { get; set; } // TODO
 		public Options CurrentOptions { get; }
 
 		public GL API { get; protected set; }

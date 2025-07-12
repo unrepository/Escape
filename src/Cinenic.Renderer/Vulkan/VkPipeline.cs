@@ -133,7 +133,7 @@ namespace Cinenic.Renderer.Vulkan {
 				}
 			}
 			
-			_logger.Trace("Pipeline setup #1: Created layout");
+			_logger.Debug("Pipeline setup: Create layout");
 		}
 
 		public unsafe void InitializeGraphics(VkWindow window, VkShaderProgram shaderProgram) {
@@ -152,14 +152,18 @@ namespace Cinenic.Renderer.Vulkan {
 			};
 			
 			MainRenderPass = new RenderPass(_platform, this);
-			MainRenderPass.SetupDefault(window);
+			MainRenderPass.CreateAttachment(window.SwapchainFormat);
+			MainRenderPass.CreateSubpass(0, ImageLayout.ColorAttachmentOptimal, new SubpassDescription {
+				PipelineBindPoint = PipelineBindPoint.Graphics,
+				ColorAttachmentCount = 1
+			});
 			MainRenderPass.Initialize();
 
 			var pipelineInfo = new GraphicsPipelineCreateInfo {
 				SType = StructureType.GraphicsPipelineCreateInfo,
 				StageCount = (uint) shaderProgram.Stages.Count,
 				Layout = PipelineLayout,
-				RenderPass = MainRenderPass.RndrPass,
+				RenderPass = MainRenderPass.Base,
 				Subpass = 0,
 				BasePipelineHandle = new Pipeline(),
 				BasePipelineIndex = -1
@@ -214,7 +218,7 @@ namespace Cinenic.Renderer.Vulkan {
 			}
 
 			GraphicsPipeline = pipeline;
-			_logger.Trace("Pipeline setup: Created graphics pipeline");
+			_logger.Debug("Pipeline setup: Create graphics pipeline");
 		}
 
 		public void Dispose() {
@@ -233,7 +237,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 		public class RenderPass : IDisposable {
 
-			public Silk.NET.Vulkan.RenderPass RndrPass;
+			public Silk.NET.Vulkan.RenderPass Base;
 			
 			internal readonly List<AttachmentDescription> Attachments = [];
 			internal readonly List<SubpassDescription> Subpasses = [];
@@ -270,25 +274,16 @@ namespace Cinenic.Renderer.Vulkan {
 							throw new PlatformException($"Could not create render pass: {result}");
 						}
 
-						RndrPass = pass;
+						Base = pass;
 					}
 				}
 				
-				_logger.Trace("Initialized render pass");
+				_logger.Debug("Initialized");
 			}
 
-			public void SetupDefault(VkWindow window) {
-				CreateAttachment(window);
-				
-				CreateSubpass(0, ImageLayout.ColorAttachmentOptimal, new SubpassDescription {
-					PipelineBindPoint = PipelineBindPoint.Graphics,
-					ColorAttachmentCount = 1
-				});
-			}
-
-			public void CreateAttachment(VkWindow window) {
+			public void CreateAttachment(Format format) {
 				var attachment = new AttachmentDescription {
-					Format = window.SwapchainFormat,
+					Format = format,
 					Samples = SampleCountFlags.Count1Bit,
 					LoadOp = AttachmentLoadOp.Clear,
 					StoreOp = AttachmentStoreOp.Store,
@@ -300,7 +295,7 @@ namespace Cinenic.Renderer.Vulkan {
 				
 				Attachments.Add(attachment);
 				
-				_logger.Trace("Created attachment for window {Window}", window);
+				_logger.Debug("Created attachment for {RenderPass}", this);
 			}
 
 			public unsafe void CreateSubpass(uint attachmentIndex, ImageLayout layout, SubpassDescription description) {
@@ -314,7 +309,7 @@ namespace Cinenic.Renderer.Vulkan {
 				
 				Subpasses.Add(description);
 				
-				_logger.Trace("Created subpass for render pass {RenderPass}, attachmentIndex={AttachmentIndex}, layout={Layout}, bindPoint={BindPoint}",
+				_logger.Debug("Created subpass for {RenderPass}, attachmentIndex={AttachmentIndex}, layout={Layout}, bindPoint={BindPoint}",
 					this, attachmentIndex, layout, description.PipelineBindPoint);
 			}
 			
@@ -322,7 +317,7 @@ namespace Cinenic.Renderer.Vulkan {
 				GC.SuppressFinalize(this);
 
 				unsafe {
-					_platform.API.DestroyRenderPass(_platform.PrimaryDevice.Logical, RndrPass, null);
+					_platform.API.DestroyRenderPass(_platform.PrimaryDevice.Logical, Base, null);
 				}
 			}
 		}

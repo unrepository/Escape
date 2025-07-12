@@ -13,30 +13,32 @@ namespace Cinenic.Renderer.OpenGL {
 			: base(platform, size)
 		{
 			_platform = platform;
-
 			Handle = platform.API.GenFramebuffer();
-			Bind();
-			
-			// create and attach 2d texture
-			baseTexture ??= new GLTexture(platform, size, Texture.Filter.Nearest, Texture.WrapMode.Clamp);
-			AttachTexture(baseTexture);
-			
-			// check completeness
-			if(platform.API.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != GLEnum.FramebufferComplete) {
-				throw new PlatformException("Framebuffer is incomplete");
-			}
-			
-			Unbind();
 		}
 		
 		public override void Bind() {
-			Debug.Assert(Handle != 0);
+			if(Handle == 0) Create();
 			_platform.API.BindFramebuffer(FramebufferTarget.Framebuffer, Handle);
 			_platform.API.Viewport(0, 0, Size.X, Size.Y);
 		}
 		
 		public override void Unbind() {
 			_platform.API.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+		}
+
+		public override void Create() {
+			Bind();
+
+			if(TextureAttachments.Count == 0) {
+				AttachTexture(new GLTexture(_platform, Size, Texture.Filter.Nearest, Texture.WrapMode.Clamp));
+			}
+			
+			// check completeness
+			if(_platform.API.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != GLEnum.FramebufferComplete) {
+				throw new PlatformException("Framebuffer is incomplete");
+			}
+			
+			Unbind();
 		}
 
 		public override void AttachTexture(Texture texture) {

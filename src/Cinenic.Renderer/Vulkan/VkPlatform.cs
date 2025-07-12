@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Cinenic.Renderer.Shader;
 using NLog;
 using Silk.NET.Core;
 using Silk.NET.Core.Native;
@@ -13,11 +14,12 @@ namespace Cinenic.Renderer.Vulkan {
 	public unsafe class VkPlatform : IPlatform {
 		
 		public bool IsInitialized { get; set; } = false;
+		public ShaderProgram? DefaultProgram { get; set; }
+		
 		public Options CurrentOptions { get; }
 
 		public Vk API { get; }
 		public Instance Vk { get; private set; }
-		public VkPipeline Pipeline { get; private set; }
 
 		public VkDevice? PrimaryDevice {
 			get;
@@ -171,8 +173,6 @@ namespace Cinenic.Renderer.Vulkan {
 				InitialSurface = window.VkSurface!.Create<AllocationCallbacks>(Vk.ToHandle(), null).ToSurface();
 				window.Close();
 			}
-
-			Pipeline = new VkPipeline(this);
 			
 			IsInitialized = true;
 		}

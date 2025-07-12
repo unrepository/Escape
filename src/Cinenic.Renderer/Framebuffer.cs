@@ -23,6 +23,7 @@ namespace Cinenic.Renderer {
 		public abstract void Bind();
 		public abstract void Unbind();
 
+		public abstract void Create();
 		public abstract void AttachTexture(Texture texture);
 		public abstract void Resize(Vector2D<int> size);
 
@@ -31,10 +32,9 @@ namespace Cinenic.Renderer {
 		public abstract void Dispose();
 
 		public static Framebuffer Create(IPlatform platform,
-		                                 Vector2D<uint> size,
-		                                 Texture? baseTexture = null) {
+		                                 Vector2D<uint> size) {
 			return platform switch {
-				GLPlatform glPlatform => new GLFramebuffer(glPlatform, size, baseTexture as GLTexture),
+				GLPlatform glPlatform => new GLFramebuffer(glPlatform, size),
 				_ => throw new NotImplementedException() // PlatformImpl
 			};
 		}
