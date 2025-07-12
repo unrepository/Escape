@@ -1,4 +1,5 @@
 using Cinenic.Renderer.OpenGL;
+using Cinenic.Renderer.Vulkan;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
@@ -22,6 +23,11 @@ namespace Cinenic.Renderer {
 			set => Base.Size = new Vector2D<int>(Base.Size.X, (int) value);
 		}
 		
+		public IPlatform Platform { get; }
+		public RenderPipeline Pipeline { get; }
+		public Framebuffer Framebuffer { get; protected set; }
+		
+		public IWindow Base { get; protected set; }
 		public IInputContext? Input { get; protected set; }
 		
 		public bool IsInitialized { get; set; }
@@ -37,7 +43,10 @@ namespace Cinenic.Renderer {
 
 		protected SortedDictionary<int, List<Action<double>>> RenderQueues { get; } = [];
 		
-		public IWindow Base { get; protected set; }
+		public Window(IPlatform platform, RenderPipeline pipeline, WindowOptions? options = null) {
+			Platform = platform;
+			Pipeline = pipeline;
+		}
 
 		public abstract void Initialize();
 		public abstract double RenderFrame(Action<double>? frameProvider = null);
@@ -84,9 +93,17 @@ namespace Cinenic.Renderer {
 		
 		public abstract void Dispose();
 		
+		[Obsolete]
 		public static Window Create(GLPlatform platform, WindowOptions? options = null)
-			=> new GLWindow(platform, options);
+			=> new GLWindow(platform, null, options);
 
+		public static Window Create(IPlatform platform, RenderPipeline pipeline, WindowOptions? options = null) {
+			return platform switch {
+				VkPlatform vkPlatform => new VkWindow(vkPlatform, pipeline, options),
+				_ => throw new NotImplementedException("Platform_Impl")
+			};
+		}
+		
 		public enum QueuePriority {
 			
 			Lowest,

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Cinenic.Renderer.Shader;
 using NLog;
 using Silk.NET.Core;
@@ -30,7 +31,11 @@ namespace Cinenic.Renderer.Vulkan {
 		public unsafe VkRenderPipeline(VkPlatform platform, RenderQueue queue, ShaderProgram program)
 			: base(platform, queue, program) 
 		{
+			Debug.Assert(queue is VkRenderQueue);
+			Debug.Assert(((VkRenderQueue) queue).Base.Handle != 0, "RenderQueue.Handle is 0. Did you forget to call Initialize()?");
 			_platform = platform;
+
+			program.Build();
 
 		#region Pipeline layout
 			_logger.Debug("Pipeline setup: Create layout");
@@ -56,11 +61,27 @@ namespace Cinenic.Renderer.Vulkan {
 				Topology = PrimitiveTopology.TriangleList,
 				PrimitiveRestartEnable = false
 			};
+			
+			var viewport = new Viewport {
+				X = queue.Viewport.X,
+				Y = queue.Viewport.Y,
+				Width = queue.Viewport.Z,
+				Height = queue.Viewport.W,
+				MinDepth = 0,
+				MaxDepth = 1
+			};
+			
+			var scissor = new Rect2D {
+				Offset = { X = queue.Viewport.X, Y = queue.Viewport.Y },
+				Extent = { Width = (uint) queue.Viewport.Z, Height = (uint) queue.Viewport.W }
+			};
 
 			ViewportInfo = new PipelineViewportStateCreateInfo {
 				SType = StructureType.PipelineViewportStateCreateInfo,
 				ViewportCount = 1,
-				ScissorCount = 1
+				PViewports = &viewport,
+				ScissorCount = 1,
+				PScissors = &scissor
 			};
 
 			RasterizationInfo = new PipelineRasterizationStateCreateInfo {
@@ -98,17 +119,18 @@ namespace Cinenic.Renderer.Vulkan {
 				AlphaBlendOp = BlendOp.Add
 			};
 
-			var blendConstants = new float[4] { 0, 0, 0, 0 };
-			fixed(float* blendConstantsPtr = &blendConstants[0]) {
-				ColorBlendInfo = new PipelineColorBlendStateCreateInfo {
-					SType = StructureType.PipelineColorBlendStateCreateInfo,
-					LogicOpEnable = false,
-					LogicOp = LogicOp.Copy,
-					AttachmentCount = 1,
-					PAttachments = &colorBlendAttachment,
-					BlendConstants = blendConstantsPtr
-				};
-			}
+			ColorBlendInfo = new PipelineColorBlendStateCreateInfo {
+				SType = StructureType.PipelineColorBlendStateCreateInfo,
+				LogicOpEnable = false,
+				LogicOp = LogicOp.Copy,
+				AttachmentCount = 1,
+				PAttachments = &colorBlendAttachment
+			};
+
+			ColorBlendInfo.BlendConstants[0] = 0;
+			ColorBlendInfo.BlendConstants[1] = 0;
+			ColorBlendInfo.BlendConstants[2] = 0;
+			ColorBlendInfo.BlendConstants[3] = 0;
 
 			var pipelineLayoutInfo = new PipelineLayoutCreateInfo {
 				SType = StructureType.PipelineLayoutCreateInfo,
@@ -148,12 +170,13 @@ namespace Cinenic.Renderer.Vulkan {
 							Layout = PipelineLayout,
 							RenderPass = ((VkRenderQueue) Queue).Base,
 							Subpass = 0,
-							BasePipelineHandle = new Pipeline(),
-							BasePipelineIndex = -1
+							BasePipelineHandle = default,
 						}
 					};
 
-					fixed(PipelineShaderStageCreateInfo* ptr = &((VkShaderProgram) Program).Stages.ToArray()[0]) {
+					var programStages = ((VkShaderProgram) Program).Stages.ToArray();
+
+					fixed(PipelineShaderStageCreateInfo* ptr = &programStages[0]) {
 						pipelineInfo.PStages = ptr;
 					}
 			
@@ -185,16 +208,16 @@ namespace Cinenic.Renderer.Vulkan {
 						pipelineInfo.PColorBlendState = ptr;
 					}
 
-					pipeline = new Pipeline();
+					//pipeline = new Pipeline();
 			
 					if(
 						(result = _platform.API.CreateGraphicsPipelines(
 							_platform.PrimaryDevice!.Logical,
-							new PipelineCache(),
+							default,
 							1,
-							&pipelineInfo,
+							pipelineInfo,
 							null,
-							&pipeline
+							out pipeline
 						)) != Result.Success
 					) {
 						throw new PlatformException($"Could not create the graphics pipeline: {result}");
@@ -209,10 +232,51 @@ namespace Cinenic.Renderer.Vulkan {
 		#endregion
 		}
 
+		public override void Begin(Framebuffer renderTarget) {
+			Queue.Begin(renderTarget);
+
+			var vkQueue = (VkRenderQueue) Queue;
+			
+			_platform.API.CmdBindPipeline(
+				vkQueue.CommandBuffer.Value,
+				Queue.Type switch {
+					RenderQueue.Family.Graphics => PipelineBindPoint.Graphics,
+					RenderQueue.Family.Compute => PipelineBindPoint.Compute,
+					_ => throw new NotImplementedException()
+				},
+				Pipeline
+			);
+			
+			var viewport = new Viewport {
+				X = Queue.Viewport.X,
+				Y = Queue.Viewport.Y,
+				Width = Queue.Viewport.Z,
+				Height = Queue.Viewport.W,
+				MinDepth = 0,
+				MaxDepth = 1
+			};
+			
+			var scissor = new Rect2D {
+				Offset = { X = Queue.Viewport.X, Y = Queue.Viewport.Y },
+				Extent = { Width = (uint) Queue.Viewport.Z, Height = (uint) Queue.Viewport.W }
+			};
+
+			unsafe {
+				_platform.API.CmdSetViewport(vkQueue.CommandBuffer.Value, 0, 1, &viewport);
+				_platform.API.CmdSetScissor(vkQueue.CommandBuffer.Value, 0, 1, &scissor);
+			}
+		}
+		
+		public override void End(Framebuffer renderTarget) {
+			Queue.End(renderTarget);
+		}
+
 		public override void Dispose() {
 			GC.SuppressFinalize(this);
 
 			unsafe {
+				_platform.API.DeviceWaitIdle(_platform.PrimaryDevice.Logical);
+				
 				_platform.API.DestroyPipeline(_platform.PrimaryDevice.Logical, Pipeline, null);
 				_platform.API.DestroyPipelineLayout(_platform.PrimaryDevice.Logical, PipelineLayout, null);
 			}

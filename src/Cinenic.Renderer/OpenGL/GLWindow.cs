@@ -12,7 +12,9 @@ namespace Cinenic.Renderer.OpenGL {
 		private readonly GLPlatform _platform;
 		private readonly List<Action> _scheduledActions = [];
 
-		public GLWindow(GLPlatform platform, WindowOptions? options = null) {
+		public GLWindow(GLPlatform platform, RenderPipeline? pipeline = null, WindowOptions? options = null)
+			: base(platform, pipeline, options)
+		{
 			_platform = platform;
 			
 			var windowOptions = options ?? WindowOptions.Default;

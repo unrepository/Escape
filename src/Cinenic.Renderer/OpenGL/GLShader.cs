@@ -17,7 +17,7 @@ namespace Cinenic.Renderer.OpenGL {
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		private readonly GLPlatform _platform;
 
-		public GLShader(GLPlatform platform, ShaderType type, string code) : base(platform, type, code) {
+		public GLShader(GLPlatform platform, Family type, string code) : base(platform, type, code) {
 			_platform = platform;
 		}
 		
@@ -28,7 +28,14 @@ namespace Cinenic.Renderer.OpenGL {
 				throw new ArgumentNullException(nameof(Code), "Cannot compile an empty shader!");
 			}
 
-			Handle = _platform.API.CreateShader(Type);
+			Handle = _platform.API.CreateShader(Type switch {
+				Family.Vertex => ShaderType.FragmentShader,
+				Family.Fragment => ShaderType.FragmentShader,
+				Family.Compute => ShaderType.ComputeShader,
+				Family.Geometry => ShaderType.GeometryShader,
+				Family.TessellationControl => ShaderType.TessControlShader,
+				Family.TessellationEvaluation => ShaderType.TessEvaluationShader
+			});
 
 			if(Handle == 0) {
 				throw new PlatformException("Failed to create a GL shader");

@@ -33,13 +33,13 @@ namespace Cinenic.Compute {
 				_ => throw new NotImplementedException() // PlatformImpl
 			};
 
-			bool hasVertexShader = Program.Shaders.Any(shader => shader.Type == ShaderType.VertexShader);
+			bool hasVertexShader = Program.Shaders.Any(shader => shader.Type == Shader.Family.Vertex);
 			if(!hasVertexShader) {
 				if(Program.Handle != 0) Program.Dispose();
 				
 				Program = ShaderProgram.Create(platform, program.Shaders.Append(Shader.Create(
 					platform,
-					ShaderType.VertexShader,
+					Shader.Family.Vertex,
 					vertexShaderCode
 				)).ToArray());
 			}

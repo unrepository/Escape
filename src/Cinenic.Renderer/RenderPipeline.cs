@@ -15,6 +15,9 @@ namespace Cinenic.Renderer {
 			Queue = queue;
 			Program = program;
 		}
+
+		public abstract void Begin(Framebuffer renderTarget);
+		public abstract void End(Framebuffer renderTarget);
 		
 		public abstract void Dispose();
 

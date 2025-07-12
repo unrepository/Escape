@@ -15,6 +15,7 @@
     <PackageReference Include="Silk.NET.Input.Common" Version="2.22.0" />
     <PackageReference Include="Silk.NET.OpenGL" Version="2.22.0" />
     <PackageReference Include="Silk.NET.OpenGL.Extensions.ARB" Version="2.22.0" />
+    <PackageReference Include="Silk.NET.Shaderc" Version="2.22.0" />
     <PackageReference Include="Silk.NET.Vulkan" Version="2.22.0" />
     <PackageReference Include="Silk.NET.Vulkan.Extensions.EXT" Version="2.22.0" />
     <PackageReference Include="Silk.NET.Vulkan.Extensions.KHR" Version="2.22.0" />

@@ -1,6 +1,13 @@
+using Cinenic.Extensions.CSharp;
+using Cinenic.Renderer;
+using Cinenic.Renderer.Shader;
 using Cinenic.Renderer.Vulkan;
 using NLog;
+using Silk.NET.OpenGL;
+using Silk.NET.Vulkan;
 using Silk.NET.Windowing;
+using Shader = Cinenic.Renderer.Shader.Shader;
+using Window = Cinenic.Renderer.Window;
 
 namespace Cinenic.Sandbox {
 	
@@ -9,7 +16,7 @@ namespace Cinenic.Sandbox {
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 		public static void Start(string[] args) {
-			var platform = new VkPlatform(new VkPlatform.Options() {
+			var platform = new VkPlatform(new VkPlatform.Options {
 				Headless = false
 			});
 			platform.Initialize();
@@ -22,7 +29,49 @@ namespace Cinenic.Sandbox {
 			platform.PrimaryDevice = primaryDevice;
 			_logger.Info("Using primary device 0 ({name})", primaryDevice.Name);
 
-			var window = new VkWindow(platform, WindowOptions.DefaultVulkan);
+			_logger.Info("Create render queue");
+			var queue = new VkRenderQueue(platform, RenderQueue.Family.Graphics, RenderQueue.Format.R8G8B8A8Srgb);
+			queue.CreateAttachment();
+			queue.CreateSubpass(
+				0,
+				ImageLayout.ColorAttachmentOptimal,
+				new SubpassDescription {
+					ColorAttachmentCount = 1
+				},
+				new SubpassDependency {
+					SrcSubpass = 0,
+					DstSubpass = 0,
+					SrcStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+					SrcAccessMask = 0,
+					DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+					DstAccessMask = AccessFlags.ColorAttachmentWriteBit
+				}
+			);
+			queue.Initialize();
+			
+			_logger.Info("Create pipeline");
+			var pipeline = new VkRenderPipeline(platform, queue, ShaderProgram.Create(
+				platform,
+				Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk.vert")),
+				Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
+			));
+			
+			_logger.Info("Create window");
+			var window = Window.Create(platform, pipeline, WindowOptions.DefaultVulkan);
+			
+			window.Base.Render += delta => {
+				window.Base.MakeCurrent();
+				pipeline.Begin(window.Framebuffer);
+				pipeline.End(window.Framebuffer);
+			};
+			
+			_logger.Info("Begin rendering");
+			while(!window.Base.IsClosing) {
+				window.Base.DoEvents();
+				if(!window.Base.IsClosing) window.Base.DoUpdate();
+				if(window.Base.IsClosing) return;
+				window.Base.DoRender();
+			}
 		}
 	}
 }

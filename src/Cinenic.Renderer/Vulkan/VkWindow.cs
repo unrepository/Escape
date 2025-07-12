@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Silk.NET.Core;
+using Silk.NET.Maths;
 using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.KHR;
 using Silk.NET.Windowing;
@@ -9,11 +10,12 @@ namespace Cinenic.Renderer.Vulkan {
 	
 	public class VkWindow : Window {
 
+		public static Format DefaultFormat { get; internal set; }
+		
 		public IWindow Base { get; }
 		
 		public SurfaceKHR Surface { get; }
 		public SwapchainKHR? Swapchain { get; private set; }
-		public VkPipeline Pipeline { get; private set; }
 
 		public Format SwapchainFormat { get; private set; }
 		public Extent2D SwapchainExtent { get; private set; }
@@ -25,7 +27,11 @@ namespace Cinenic.Renderer.Vulkan {
 		private readonly VkDevice _device;
 		private readonly KhrSwapchain _khrSwapchain;
 		
-		public unsafe VkWindow(VkPlatform platform, WindowOptions? options = null) {
+		public unsafe VkWindow(VkPlatform platform, RenderPipeline pipeline, WindowOptions? options = null)
+			: base(platform, pipeline, options)
+		{
+			Debug.Assert(pipeline is VkRenderPipeline);
+			
 			_platform = platform;
 			Debug.Assert(_platform.PrimaryDevice != null);
 
@@ -49,11 +55,10 @@ namespace Cinenic.Renderer.Vulkan {
 			
 			_CreateSwapchain();
 			_CreateImageViews();
-			Pipeline = new VkPipeline(platform);
-			Pipeline.InitializeGraphics(this, (VkShaderProgram) _platform.DefaultProgram);
 			_CreateFramebuffer();
 
-			throw new NotImplementedException();
+			//throw new NotImplementedException();
+			
 		}
 
 		public override void Initialize() {
@@ -99,7 +104,10 @@ namespace Cinenic.Renderer.Vulkan {
 			PresentModeKHR? mode = null;
 
 			foreach(var surfaceFormat in _device.SurfaceFormats!) {
-				if(surfaceFormat is { Format: Format.B8G8R8A8Srgb, ColorSpace: ColorSpaceKHR.SpaceSrgbNonlinearKhr }) {
+				if(
+					surfaceFormat.Format == ((VkRenderQueue) Pipeline.Queue).VkColorFormat
+					&& surfaceFormat.ColorSpace == ((VkRenderQueue) Pipeline.Queue).VkColorSpace
+				) {
 					format = surfaceFormat;
 				}
 			}
@@ -251,7 +259,7 @@ namespace Cinenic.Renderer.Vulkan {
 				fixed(ImageView* attachmentsPtr = &attachments[0]) {
 					var framebufferInfo = new FramebufferCreateInfo {
 						SType = StructureType.FramebufferCreateInfo,
-						RenderPass = Pipeline.MainRenderPass!.Base,
+						RenderPass = ((VkRenderQueue) Pipeline.Queue).Base,
 						AttachmentCount = 1,
 						PAttachments = attachmentsPtr,
 						Width = SwapchainExtent.Width,
@@ -275,6 +283,10 @@ namespace Cinenic.Renderer.Vulkan {
 					}
 				}
 			}
+
+			Framebuffer = new VkFramebuffer(_platform, Vector2D<uint>.Zero) {
+				Swapchain = Swapchain.Value
+			};
 		}
 	}
 }

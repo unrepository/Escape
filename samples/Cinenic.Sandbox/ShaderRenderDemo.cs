@@ -62,7 +62,7 @@ namespace Cinenic.Sandbox {
 		private readonly Framebuffer _framebuffer;
 
 		public ShaderRenderDemo(IPlatform platform) : base(platform, "shader_render") {
-			ShaderProgram.Shaders[1] = Shader.Create(platform, ShaderType.FragmentShader,
+			ShaderProgram.Shaders[1] = Shader.Create(platform, Shader.Family.Fragment,
 				Assembly.GetExecutingAssembly().ReadTextResource("Cinenic.Sandbox.Resources.Shaders.demo.frag"));
 			
 			_framebuffer = Framebuffer.Create(platform, _framebufferSize);

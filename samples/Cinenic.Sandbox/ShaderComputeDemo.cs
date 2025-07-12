@@ -39,7 +39,7 @@ namespace Cinenic.Sandbox {
 				platform,
 				Shader.Create(
 					platform,
-					ShaderType.FragmentShader,
+					Shader.Family.Fragment,
 					Assembly
 						.GetExecutingAssembly()
 						.ReadTextResourceN("Shaders.demo2.frag")

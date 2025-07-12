@@ -4,6 +4,16 @@ using Silk.NET.Vulkan;
 namespace Cinenic.Renderer.Vulkan {
 	
 	public class VkFramebuffer : Framebuffer {
+		
+		public Silk.NET.Vulkan.Framebuffer Base { get; }
+		
+		public SwapchainKHR Swapchain { get; init; }
+
+		public Format SwapchainFormat { get; private set; }
+		public Extent2D SwapchainExtent { get; private set; }
+		public Image[] SwapchainImages { get; private set; }
+		public ImageView[] SwapchainImageViews { get; private set; }
+		public Silk.NET.Vulkan.Framebuffer[] SwapchainFramebuffers { get; private set; }
 
 		public VkFramebuffer(IPlatform platform, Vector2D<uint> size) : base(platform, size) {
 			throw new NotImplementedException();
@@ -34,7 +44,7 @@ namespace Cinenic.Renderer.Vulkan {
 		}
 		
 		public override void Dispose() {
-			throw new NotImplementedException();
+			//throw new NotImplementedException();
 		}
 	}
 }

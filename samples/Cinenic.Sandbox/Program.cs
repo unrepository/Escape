@@ -1,3 +1,3 @@
 using Cinenic.Sandbox;
 
-ModelTestProgram.Start(args);
+VulkanSandbox.Start(args);

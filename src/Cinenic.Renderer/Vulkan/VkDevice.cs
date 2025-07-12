@@ -22,9 +22,9 @@ namespace Cinenic.Renderer.Vulkan {
 		public readonly Queue ComputeQueue;
 		public readonly Queue? SurfaceQueue;
 
-		internal int GraphicsFamily { get; } = -1;
-		internal int ComputeFamily { get; } = -1;
-		internal int SurfaceFamily { get; } = -1;
+		public int GraphicsFamily { get; } = -1;
+		public int ComputeFamily { get; } = -1;
+		public int SurfaceFamily { get; } = -1;
 
 		internal uint[] QueueFamilies {
 			get {

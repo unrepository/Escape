@@ -1,4 +1,5 @@
 using Cinenic.Renderer.OpenGL;
+using Cinenic.Renderer.Vulkan;
 
 namespace Cinenic.Renderer.Shader {
 	
@@ -22,6 +23,7 @@ namespace Cinenic.Renderer.Shader {
 		public static ShaderProgram Create(IPlatform platform, params Shader[] shaders) {
 			return platform switch {
 				GLPlatform glPlatform => new GLShaderProgram(glPlatform, shaders),
+				VkPlatform vkPlatform => new VkShaderProgram(vkPlatform, shaders),
 				_ => throw new NotImplementedException() // PlatformImpl
 			};
 		}

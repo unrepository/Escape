@@ -1,4 +1,5 @@
 using Cinenic.Renderer.OpenGL;
+using Cinenic.Renderer.Vulkan;
 using Silk.NET.OpenGL;
 
 namespace Cinenic.Renderer.Shader {
@@ -7,14 +8,14 @@ namespace Cinenic.Renderer.Shader {
 		
 		public IPlatform Platform { get; }
 		
-		public ShaderType Type { get; }
+		public Family Type { get; }
 		public string Code { get; }
 		
 		public ulong Handle { get; protected set; }
 
 		internal List<uint> DeallocatedDataObjects { get; } = [];
 
-		protected Shader(IPlatform platform, ShaderType type, string code) {
+		protected Shader(IPlatform platform, Family type, string code) {
 			Platform = platform;
 			Type = type;
 			Code = code;
@@ -23,11 +24,22 @@ namespace Cinenic.Renderer.Shader {
 		public abstract ulong Compile();
 		public abstract void Dispose();
 
-		public static Shader Create(IPlatform platform, ShaderType type, string code) {
+		public static Shader Create(IPlatform platform, Family type, string code) {
 			return platform switch {
 				GLPlatform glPlatform => new GLShader(glPlatform, type, code),
+				VkPlatform vkPlatform => new VkShader(vkPlatform, type, code),
 				_ => throw new NotImplementedException() // PlatformImpl
 			};
+		}
+
+		public enum Family {
+			
+			Vertex,
+			Fragment,
+			Compute,
+			Geometry,
+			TessellationControl,
+			TessellationEvaluation
 		}
 	}
 }

@@ -1,4 +1,5 @@
 using System.Numerics;
+using Silk.NET.Maths;
 
 namespace Cinenic.Renderer {
 	
@@ -6,32 +7,38 @@ namespace Cinenic.Renderer {
 		
 		public IPlatform Platform { get; }
 		public Family Type { get; }
+		public Format ColorFormat { get; }
 		
-		public Vector4 Viewport { get; set; }
-		public Vector4 Scissor { get; set; }
+		public virtual Vector4D<int> Viewport { get; set; }
+		public virtual Vector4D<int> Scissor { get; set; }
 		
 		public RenderQueue(
-			IPlatform platform, Family family,
+			IPlatform platform, Family family, Format format,
 			Window window
-		) : this(platform, family) {
-			Viewport = new Vector4(0, 0, window.Width, window.Height);
-			Scissor = new Vector4(0, 0, window.Width, window.Height);
+		) : this(platform, family, format) {
+			Viewport = new Vector4D<int>(0, 0, (int) window.Width, (int) window.Height);
+			Scissor = new Vector4D<int>(0, 0, (int) window.Width, (int) window.Height);
 		}
 
 		public RenderQueue(
-			IPlatform platform, Family family,
-			Vector4 viewport, Vector4 scissor
-		) : this(platform, family) {
+			IPlatform platform, Family family, Format format,
+			Vector4D<int> viewport, Vector4D<int> scissor
+		) : this(platform, family, format) {
 			Viewport = viewport;
 			Scissor = scissor;
 		}
 
-		public RenderQueue(IPlatform platform, Family family) {
+		public RenderQueue(IPlatform platform, Family family, Format format) {
 			Platform = platform;
 			Type = family;
+			ColorFormat = format;
 		}
 
 		public abstract void Initialize();
+
+		public abstract void Begin(Framebuffer renderTarget);
+		public abstract void End(Framebuffer renderTarget);
+		
 		public abstract void Dispose();
 
 		// public static RenderQueue Create(IPlatform platform, Family family) {
@@ -44,6 +51,11 @@ namespace Cinenic.Renderer {
 			
 			Graphics,
 			Compute,
+		}
+
+		public enum Format {
+			
+			R8G8B8A8Srgb
 		}
 	}
 }

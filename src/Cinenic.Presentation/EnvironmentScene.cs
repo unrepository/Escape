@@ -37,11 +37,11 @@ namespace Cinenic.Presentation {
 		public static Shader[] GetDefaultShaderSet(IPlatform platform) {
 			return platform switch {
 				GLPlatform glPlatform => [
-					new GLShader(glPlatform, ShaderType.VertexShader,
+					new GLShader(glPlatform, Shader.Family.Vertex,
 						Assembly.GetExecutingAssembly().ReadTextResource(
 							"Cinenic.Presentation.Resources.Shaders.OpenGL.environment.vert"
 						)),
-					new GLShader(glPlatform, ShaderType.FragmentShader,
+					new GLShader(glPlatform, Shader.Family.Fragment,
 						Assembly.GetExecutingAssembly().ReadTextResource(
 							"Cinenic.Presentation.Resources.Shaders.OpenGL.environment.frag"
 						))
