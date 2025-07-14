@@ -45,6 +45,7 @@
 						stdenv.cc.cc.lib
 						opencl-headers
 						ocl-icd
+						vulkan-validation-layers
 					];
 					
 					LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath libs;
@@ -59,6 +60,8 @@
 						# shader compiler
 						shaderc
 
+						vulkan-tools
+
 						gcc
 						cmake
 						ninja
@@ -71,6 +74,8 @@
 					
 					shellHook = ''
 						export DOTNET_ROOT="${dotnet}/share/dotnet"
+						export VULKAN_SDK="${pkgs.vulkan-headers}"
+						export VK_LAYER_PATH="${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d"
 					'';
 				}));
 		};

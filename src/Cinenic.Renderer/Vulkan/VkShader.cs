@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Cinenic.Renderer.OpenGL;
 using NLog;
@@ -60,10 +61,25 @@ namespace Cinenic.Renderer.Vulkan {
 			
 			_logger.Debug("Shader compilation status: {Status}", status);
 
+			var compiledShaderCode = CompilerAPI.ResultGetBytes(compiledShader);
+			var compiledShaderCodeLength = CompilerAPI.ResultGetLength(compiledShader);
+
+		// #if DEBUG
+		// 	string RandomString(int length) {
+		// 		const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		// 		return new string(Enumerable.Repeat(chars, length)
+		// 									.Select(s => s[new Random().Next(s.Length)]).ToArray());
+		// 	}
+		// 	
+		// 	var arr = new byte[compiledShaderCodeLength];
+		// 	Marshal.Copy((IntPtr) compiledShaderCode, arr, 0, (int) compiledShaderCodeLength);
+		// 	File.WriteAllBytes(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/" + RandomString(16) + ".spv", arr);
+		// #endif
+			
 			var moduleInfo = new ShaderModuleCreateInfo {
 				SType = StructureType.ShaderModuleCreateInfo,
-				CodeSize = (uint) Code.Length,
-				PCode = (uint*) CompilerAPI.ResultGetBytes(compiledShader)
+				CodeSize = compiledShaderCodeLength,
+				PCode = (uint*) compiledShaderCode
 			};
 			
 			Result result;

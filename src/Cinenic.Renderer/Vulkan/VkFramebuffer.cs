@@ -5,18 +5,18 @@ namespace Cinenic.Renderer.Vulkan {
 	
 	public class VkFramebuffer : Framebuffer {
 		
-		public Silk.NET.Vulkan.Framebuffer Base { get; }
+		public Silk.NET.Vulkan.Framebuffer Base { get; init; }
 		
 		public SwapchainKHR Swapchain { get; init; }
 
-		public Format SwapchainFormat { get; private set; }
-		public Extent2D SwapchainExtent { get; private set; }
-		public Image[] SwapchainImages { get; private set; }
-		public ImageView[] SwapchainImageViews { get; private set; }
-		public Silk.NET.Vulkan.Framebuffer[] SwapchainFramebuffers { get; private set; }
+		public Format SwapchainFormat { get; init; }
+		public Extent2D SwapchainExtent { get; init; }
+		public Image[] SwapchainImages { get; init; }
+		public ImageView[] SwapchainImageViews { get; init; }
+		public Silk.NET.Vulkan.Framebuffer[] SwapchainFramebuffers { get; init; }
 
 		public VkFramebuffer(IPlatform platform, Vector2D<uint> size) : base(platform, size) {
-			throw new NotImplementedException();
+			//throw new NotImplementedException();
 		}
 		
 		public override void Bind() {

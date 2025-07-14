@@ -34,7 +34,7 @@ namespace Cinenic.Renderer.Vulkan {
 				var shaderStageInfo = new PipelineShaderStageCreateInfo {
 					SType = StructureType.PipelineShaderStageCreateInfo,
 					Module = ((VkShader) shader).Module,
-					PName = (byte*) Marshal.StringToHGlobalAuto("prog")
+					PName = (byte*) Marshal.StringToHGlobalAuto("main")
 				};
 
 				shaderStageInfo.Stage = shader.Type switch {

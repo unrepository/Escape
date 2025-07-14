@@ -10,9 +10,9 @@ namespace Cinenic.Renderer.Vulkan {
 	
 	public class VkWindow : Window {
 
-		public static Format DefaultFormat { get; internal set; }
+		//public static Format DefaultFormat { get; internal set; }
 		
-		public IWindow Base { get; }
+		public new VkFramebuffer Framebuffer { get; private set; }
 		
 		public SurfaceKHR Surface { get; }
 		public SwapchainKHR? Swapchain { get; private set; }
@@ -46,7 +46,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 			Base = Silk.NET.Windowing.Window.Create(windowOptions);
 			Base.Initialize();
-
+			
 			Surface = Base.VkSurface!.Create<AllocationCallbacks>(_platform.Vk.ToHandle(), null).ToSurface();
 
 			if(!_platform.API.TryGetDeviceExtension(_platform.Vk, _device.Logical, out _khrSwapchain)) {
@@ -182,7 +182,7 @@ namespace Cinenic.Renderer.Vulkan {
 			Result result;
 
 			if(
-				(result = _khrSwapchain.CreateSwapchain(_device.Logical, &swapchainInfo, null, out var swapchain))
+				(result = _khrSwapchain.CreateSwapchain(_device.Logical, swapchainInfo, null, out var swapchain))
 				!= Result.Success
 			) {
 				throw new ExternalException($"Could not create swapchain for window: {result}");
@@ -202,7 +202,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 			SwapchainImages = new Image[imageCount];
 
-			fixed(Image* ptr = &SwapchainImages[0]) {
+			fixed(Image* ptr = SwapchainImages) {
 				if(
 					(result = _khrSwapchain.GetSwapchainImages(_device.Logical, Swapchain.Value, ref imageCount, ptr))
 					!= Result.Success
@@ -210,6 +210,7 @@ namespace Cinenic.Renderer.Vulkan {
 					throw new ExternalException($"Could not retrieve swapchain images: {result}");
 				}
 			}
+
 		#endregion
 		}
 
@@ -252,8 +253,9 @@ namespace Cinenic.Renderer.Vulkan {
 
 		private unsafe void _CreateFramebuffer() {
 			SwapchainFramebuffers = new Silk.NET.Vulkan.Framebuffer[SwapchainImageViews.Length];
-
-			foreach(var imageView in SwapchainImageViews) {
+			
+			for(int i = 0; i < SwapchainImageViews.Length; i++) {
+				var imageView = SwapchainImageViews[i];
 				var attachments = new ImageView[] { imageView };
 
 				fixed(ImageView* attachmentsPtr = &attachments[0]) {
@@ -269,23 +271,29 @@ namespace Cinenic.Renderer.Vulkan {
 
 					Result result;
 
-					fixed(Silk.NET.Vulkan.Framebuffer* swapchainFramebuffersPtr = &SwapchainFramebuffers[0]) {
-						if(
-							(result = _platform.API.CreateFramebuffer(
-								_device.Logical,
-								&framebufferInfo,
-								null,
-								swapchainFramebuffersPtr
-							)) != Result.Success
-						) {
-							throw new PlatformException($"Could not create window framebuffer: {result}");
-						}
+					if(
+						(result = _platform.API.CreateFramebuffer(
+							_device.Logical,
+							framebufferInfo,
+							null,
+							out var swapchainFramebuffer
+						)) != Result.Success
+					) {
+						throw new PlatformException($"Could not create window framebuffer: {result}");
 					}
+
+					SwapchainFramebuffers[i] = swapchainFramebuffer;
 				}
 			}
 
 			Framebuffer = new VkFramebuffer(_platform, Vector2D<uint>.Zero) {
-				Swapchain = Swapchain.Value
+				Base = SwapchainFramebuffers[0],
+				Swapchain = Swapchain.Value,
+				SwapchainImages = SwapchainImages,
+				SwapchainImageViews = SwapchainImageViews,
+				SwapchainExtent = SwapchainExtent,
+				SwapchainFormat = SwapchainFormat,
+				SwapchainFramebuffers = SwapchainFramebuffers
 			};
 		}
 	}

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using NLog;
 using Silk.NET.Core;
 using Silk.NET.Maths;
@@ -11,6 +12,8 @@ using VkColorSpace = Silk.NET.Vulkan.ColorSpaceKHR;
 namespace Cinenic.Renderer.Vulkan {
 	
 	public class VkRenderQueue : RenderQueue {
+
+		//public const int MAX_FRAMES_IN_FLIGHT = 4;
 		
 		public RenderPass Base;
 
@@ -52,13 +55,104 @@ namespace Cinenic.Renderer.Vulkan {
 			}
 		}*/
 
+		public new VkFramebuffer RenderTarget {
+			get => field;
+			set {
+				_logger.Debug("Creating synchronization objects");
+			
+				// synchronization objects
+				var semaphoreInfo = new SemaphoreCreateInfo {
+					SType = StructureType.SemaphoreCreateInfo
+				};
+			
+				var fenceInfo = new FenceCreateInfo {
+					SType = StructureType.FenceCreateInfo,
+					Flags = FenceCreateFlags.SignaledBit
+				};
+
+				Result result;
+
+				unsafe {
+					for(int i = 0; i < value.SwapchainImages.Length; i++) {
+						if(
+							(result = _platform.API.CreateSemaphore(
+								_platform.PrimaryDevice!.Logical,
+								semaphoreInfo,
+								null,
+								out var imageAvailable
+							)) != Result.Success
+						) {
+							throw new PlatformException($"Could not create the image available semaphore: {result}");
+						}
+				
+						if(
+							(result = _platform.API.CreateSemaphore(
+								_platform.PrimaryDevice!.Logical,
+								semaphoreInfo,
+								null,
+								out var renderComplete
+							)) != Result.Success
+						) {
+							throw new PlatformException($"Could not create the render complete semaphore: {result}");
+						}
+				
+						if(
+							(result = _platform.API.CreateFence(
+								_platform.PrimaryDevice!.Logical,
+								fenceInfo,
+								null,
+								out var inFlight
+							)) != Result.Success
+						) {
+							throw new PlatformException($"Could not create the in-flight semaphore: {result}");
+						}
+				
+						_imagesAvailable.Add(imageAvailable);
+						_rendersComplete.Add(renderComplete);
+						_inFlightFrames.Add(inFlight);
+					}
+				}
+				
+				// create command buffers
+				CommandBuffers = new CommandBuffer[value.SwapchainImages.Length];
+
+				unsafe {
+					var bufferAllocateInfo = new CommandBufferAllocateInfo {
+						SType = StructureType.CommandBufferAllocateInfo,
+						CommandPool = CommandPool.Value,
+						Level = CommandBufferLevel.Primary,
+						CommandBufferCount = (uint) CommandBuffers.Length
+					};
+
+					fixed(CommandBuffer* commandBuffersPtr = CommandBuffers) {
+						if(
+							(result = _platform.API.AllocateCommandBuffers(
+								_platform.PrimaryDevice.Logical,
+								bufferAllocateInfo,
+								commandBuffersPtr
+							)) != Result.Success
+						) {
+							throw new PlatformException($"Could not allocate command buffers: {result}");
+						}
+					}
+				}
+
+				CurrentFrame = 0;
+				field = value;
+			}
+		}
+
 		public List<AttachmentDescription> Attachments { get; } = [];
 		public List<SubpassDescription> Subpasses { get; } = [];
 		public List<SubpassDependency> SubpassDependencies { get; } = [];
 
 		public CommandPool? CommandPool { get; private set; }
-		public CommandBuffer? CommandBuffer { get; private set; }
-			
+		//public CommandBuffer? CommandBuffer { get; private set; }
+		public CommandBuffer[] CommandBuffers { get; private set; } = [];
+		public CommandBuffer CommandBuffer => CommandBuffers[CurrentFrame];
+
+		public int CurrentFrame { get; private set; } = 0;
+		
 		internal readonly VkColorFormat VkColorFormat;
 		internal readonly VkColorSpace VkColorSpace;
 		
@@ -66,11 +160,30 @@ namespace Cinenic.Renderer.Vulkan {
 
 		private readonly VkPlatform _platform;
 		
-		private readonly Semaphore _imageAvailable;
-		private readonly Semaphore _renderComplete;
-		private readonly Fence _inFlight;
+		private readonly List<Semaphore> _imagesAvailable = [];
+		private readonly List<Semaphore> _rendersComplete = [];
+		private readonly List<Fence> _inFlightFrames = [];
 
 		private uint _imageIndex;
+		
+		// public VkRenderQueue(
+		// 	VkPlatform platform, Family family, Format format,
+		// 	Window window
+		// ) : this(platform, family, format) {
+		// 	Viewport = new Vector4D<int>(0, 0, (int) window.Width, (int) window.Height);
+		// 	Scissor = new Vector4D<int>(0, 0, (int) window.Width, (int) window.Height);
+		// 	RenderTarget = (VkFramebuffer) window.Framebuffer;
+		// }
+		//
+		// public VkRenderQueue(
+		// 	VkPlatform platform, Family family, Format format,
+		// 	Vector4D<int> viewport, Vector4D<int> scissor,
+		// 	Framebuffer renderTarget
+		// ) : this(platform, family, format) {
+		// 	Viewport = viewport;
+		// 	Scissor = scissor;
+		// 	RenderTarget = (VkFramebuffer) renderTarget;
+		// }
 
 		public unsafe VkRenderQueue(VkPlatform platform, Family family, Format format)
 			: base(platform, family, format)
@@ -79,52 +192,9 @@ namespace Cinenic.Renderer.Vulkan {
 
 			switch(format) {
 				case Format.R8G8B8A8Srgb:
-					VkColorFormat = VkColorFormat.R8G8B8Srgb;
+					VkColorFormat = VkColorFormat.R8G8B8A8Srgb;
 					VkColorSpace = VkColorSpace.SpaceSrgbNonlinearKhr;
 					break;
-			}
-			
-			_logger.Debug("Creating synchronization objects");
-			
-			// TODO just realized Silk.NET stuff sets SType automatically
-			var semaphoreInfo = new SemaphoreCreateInfo { };
-
-			Result result;
-			if(
-				(result = platform.API.CreateSemaphore(
-					platform.PrimaryDevice!.Logical,
-					&semaphoreInfo,
-					null,
-					out _imageAvailable
-				)) != Result.Success
-			) {
-				throw new PlatformException($"Could not create the image available semaphore: {result}");
-			}
-			
-			if(
-				(result = platform.API.CreateSemaphore(
-					platform.PrimaryDevice!.Logical,
-					&semaphoreInfo,
-					null,
-					out _renderComplete
-				)) != Result.Success
-			) {
-				throw new PlatformException($"Could not create the render complete semaphore: {result}");
-			}
-			
-			var fenceInfo = new FenceCreateInfo {
-				Flags = FenceCreateFlags.SignaledBit
-			};
-			
-			if(
-				(result = platform.API.CreateFence(
-					platform.PrimaryDevice!.Logical,
-					&fenceInfo,
-					null,
-					out _inFlight
-				)) != Result.Success
-			) {
-				throw new PlatformException($"Could not create the in-flight semaphore: {result}");
 			}
 		}
 		
@@ -139,29 +209,27 @@ namespace Cinenic.Renderer.Vulkan {
 				SType = StructureType.RenderPassCreateInfo,
 				AttachmentCount = (uint) attachments.Length,
 				SubpassCount = (uint) subpasses.Length,
-				DependencyCount = (uint) dependencies.Length
+				DependencyCount = (uint) dependencies.Length,
 			};
 
-			fixed(AttachmentDescription* attachmentsPtr = attachments) {
-				renderPassInfo.PAttachments = attachmentsPtr;
-			}
-
-			fixed(SubpassDescription* subpassesPtr = subpasses) {
-				renderPassInfo.PSubpasses = subpassesPtr;
-			}
-			
-			fixed(SubpassDependency* dependenciesPtr = dependencies) {
-				renderPassInfo.PDependencies = dependenciesPtr;
-			}
-
-			if(
-				(result = _platform.API.CreateRenderPass(_platform.PrimaryDevice!.Logical, &renderPassInfo, null, out var pass))
-				!= Result.Success
+			fixed(
+				void* attachmentsPtr = attachments,
+				subpassesPtr = subpasses,
+				dependenciesPtr = dependencies
 			) {
-				throw new PlatformException($"Could not create render pass: {result}");
+				renderPassInfo.PAttachments = (AttachmentDescription*) attachmentsPtr;
+				renderPassInfo.PSubpasses = (SubpassDescription*) subpassesPtr;
+				renderPassInfo.PDependencies = (SubpassDependency*) dependenciesPtr;
+				
+				if(
+					(result = _platform.API.CreateRenderPass(_platform.PrimaryDevice!.Logical, renderPassInfo, null, out var pass))
+					!= Result.Success
+				) {
+					throw new PlatformException($"Could not create render pass: {result}");
+				}
+				
+				Base = pass;
 			}
-
-			Base = pass;
 			
 			_logger.Debug("Initialized render pass");
 
@@ -176,14 +244,14 @@ namespace Cinenic.Renderer.Vulkan {
 				_ => throw new NotImplementedException()
 			};
 
-			CommandPool commandPool;
+			//CommandPool commandPool;
 
 			if(
 				(result = _platform.API.CreateCommandPool(
 					_platform.PrimaryDevice!.Logical,
-					&commandPoolInfo,
+					commandPoolInfo,
 					null,
-					&commandPool
+					out var commandPool
 				)) != Result.Success
 			) {
 				throw new PlatformException($"Could not create command pool: {result}");
@@ -191,13 +259,6 @@ namespace Cinenic.Renderer.Vulkan {
 
 			CommandPool = commandPool;
 			_logger.Debug("Created command pool");
-
-			var bufferAllocateInfo = new CommandBufferAllocateInfo {
-				SType = StructureType.CommandBufferAllocateInfo,
-				CommandPool = CommandPool.Value,
-				Level = CommandBufferLevel.Primary,
-				CommandBufferCount = 1
-			};
 		}
 
 		public void CreateAttachment(VkColorFormat? format = null) {
@@ -220,19 +281,21 @@ namespace Cinenic.Renderer.Vulkan {
 			uint attachmentIndex, ImageLayout layout,
 			SubpassDescription description, SubpassDependency? dependency = null)
 		{
-			var attachmentReference = new AttachmentReference {
-				Attachment = attachmentIndex,
-				Layout = layout
-			};
-
 			description.PipelineBindPoint = Type switch {
 				Family.Graphics => PipelineBindPoint.Graphics,
 				Family.Compute => PipelineBindPoint.Compute,
 				_ => throw new NotImplementedException()
 			};
 			
-			description.PColorAttachments = &attachmentReference;
-			description.PInputAttachments = &attachmentReference;
+			var attachmentReference = new AttachmentReference {
+				Attachment = attachmentIndex,
+				Layout = layout
+			};
+
+			var handle = GCHandle.Alloc(attachmentReference, GCHandleType.Pinned);
+			
+			description.PColorAttachments = (AttachmentReference*) handle.AddrOfPinnedObject();
+			description.PInputAttachments = (AttachmentReference*) handle.AddrOfPinnedObject();
 			
 			Subpasses.Add(description);
 			if(dependency.HasValue) SubpassDependencies.Add(dependency.Value);
@@ -244,36 +307,35 @@ namespace Cinenic.Renderer.Vulkan {
 		public unsafe override void Begin(Framebuffer renderTarget) {
 			Debug.Assert(renderTarget is VkFramebuffer);
 			Debug.Assert(CommandPool.HasValue);
-			Debug.Assert(CommandBuffer.HasValue);
+			Debug.Assert(CommandBuffers.Length > 0);
 
 			var vkRenderTarget = (VkFramebuffer) renderTarget;
 
 			// synchronization wait
-			fixed(Fence* fence = &_inFlight) {
-				_platform.API.WaitForFences(
-					_platform.PrimaryDevice!.Logical,
-					1,
-					fence,
-					true,
-					ulong.MaxValue
-				);
-
-				_platform.API.ResetFences(_platform.PrimaryDevice.Logical, 1, fence);
-			}
+			_platform.API.WaitForFences(
+				_platform.PrimaryDevice!.Logical,
+				1,
+				_inFlightFrames[CurrentFrame],
+				true,
+				ulong.MaxValue
+			);
+			
+			_platform.API.ResetFences(_platform.PrimaryDevice.Logical, 1, _inFlightFrames[CurrentFrame]);
 			
 			// acquire frame
-			VkExtension.Get<KhrSwapchain>(_platform, _platform.PrimaryDevice)
-					   .AcquireNextImage(
-						   _platform.PrimaryDevice.Logical,
-						   vkRenderTarget.Swapchain,
-						   ulong.MaxValue,
-						   _imageAvailable,
-						   new Fence(),
-						   ref _imageIndex
-					   );
-
+			VkExtension
+				.Get<KhrSwapchain>(_platform, _platform.PrimaryDevice)
+				.AcquireNextImage(
+					_platform.PrimaryDevice.Logical,
+					vkRenderTarget.Swapchain,
+					ulong.MaxValue,
+					_imagesAvailable[CurrentFrame],
+					default,
+					ref _imageIndex
+				);
+			
 			// reset command buffer
-			_platform.API.ResetCommandBuffer(CommandBuffer.Value, 0);
+			_platform.API.ResetCommandBuffer(CommandBuffer, 0);
 			
 			// begin command buffer recording and render pass
 			var cmdBeginInfo = new CommandBufferBeginInfo {
@@ -283,9 +345,32 @@ namespace Cinenic.Renderer.Vulkan {
 			};
 
 			Result result;
-			if((result = _platform.API.BeginCommandBuffer(CommandBuffer.Value, &cmdBeginInfo)) != Result.Success) {
+			if((result = _platform.API.BeginCommandBuffer(CommandBuffer, &cmdBeginInfo)) != Result.Success) {
 				throw new PlatformException($"Could not begin the command buffer: {result}");
 			}
+			
+			// dumb shit image transition?
+			/*var memoryBarrier = new ImageMemoryBarrier {
+				SType = StructureType.ImageMemoryBarrier,
+				OldLayout = ImageLayout.PresentSrcKhr,
+				NewLayout = ImageLayout.ColorAttachmentOptimal,
+				SrcQueueFamilyIndex = 0,
+				DstQueueFamilyIndex = 0,
+				Image = vkRenderTarget.SwapchainImages[CurrentFrame],
+				SubresourceRange = new ImageSubresourceRange(ImageAspectFlags.ColorBit, 0, 1, 0, 1),
+				SrcAccessMask = AccessFlags.ColorAttachmentWriteBit,
+				DstAccessMask = AccessFlags.MemoryReadBit
+			};
+			
+			_platform.API.CmdPipelineBarrier(
+				CommandBuffer,
+				PipelineStageFlags.ColorAttachmentOutputBit,
+				PipelineStageFlags.BottomOfPipeBit,
+				0,
+				0, null,
+				0, null,
+				1, &memoryBarrier
+			);*/
 			
 			var passBeginInfo = new RenderPassBeginInfo {
 				SType = StructureType.RenderPassBeginInfo,
@@ -297,76 +382,107 @@ namespace Cinenic.Renderer.Vulkan {
 				},
 				ClearValueCount = 1
 			};
-
-			passBeginInfo.PClearValues[0] = new ClearValue(
-				new ClearColorValue(0, 0, 0, 0),
-				new ClearDepthStencilValue(0, 0)
-			);
 			
-			_platform.API.CmdBeginRenderPass(CommandBuffer.Value, &passBeginInfo, SubpassContents.Inline);
+			var clearColor = new ClearValue { Color = new ClearColorValue { Float32_0 = 0, Float32_1 = 0, Float32_2 = 0, Float32_3 = 0 } };
+			passBeginInfo.PClearValues = &clearColor;
+			
+			_platform.API.CmdBeginRenderPass(CommandBuffer, &passBeginInfo, SubpassContents.Inline);
+			
 		}
 		
 		public unsafe override void End(Framebuffer renderTarget) {
 			Debug.Assert(renderTarget is VkFramebuffer);
 			Debug.Assert(CommandPool.HasValue);
-			Debug.Assert(CommandBuffer.HasValue);
+			Debug.Assert(CommandBuffers.Length > 0);
 
 			var vkRenderTarget = (VkFramebuffer) renderTarget;
 			
 			// end render pass & command buffer
-			_platform.API.CmdEndRenderPass(CommandBuffer!.Value);
+			_platform.API.CmdEndRenderPass(CommandBuffer);
+			
+			// dumb shit image transition?
+			var memoryBarrier = new ImageMemoryBarrier {
+				SType = StructureType.ImageMemoryBarrier,
+				OldLayout = ImageLayout.Undefined,
+				NewLayout = ImageLayout.PresentSrcKhr,
+				SrcQueueFamilyIndex = 0,
+				DstQueueFamilyIndex = 0,
+				Image = vkRenderTarget.SwapchainImages[CurrentFrame],
+				SubresourceRange = new ImageSubresourceRange(ImageAspectFlags.ColorBit, 0, 1, 0, 1),
+				SrcAccessMask = AccessFlags.ColorAttachmentWriteBit,
+				DstAccessMask = AccessFlags.MemoryReadBit
+			};
+			
+			_platform.API.CmdPipelineBarrier(
+				CommandBuffer,
+				PipelineStageFlags.ColorAttachmentOutputBit,
+				PipelineStageFlags.BottomOfPipeBit,
+				0,
+				0, null,
+				0, null,
+				1, &memoryBarrier
+			);
 
 			Result result;
-			if((result = _platform.API.EndCommandBuffer(CommandBuffer.Value)) != Result.Success) {
+			if((result = _platform.API.EndCommandBuffer(CommandBuffer)) != Result.Success) {
 				throw new PlatformException($"Could not end the command buffer: {result}");
 			}
 			
 			// synchronization
-			fixed(Semaphore* imageAvailablePtr = &_imageAvailable) {
-				fixed(Semaphore* renderCompletePtr = &_renderComplete) {
-					var submitInfo = new SubmitInfo {
-						WaitSemaphoreCount = 1,
-						PWaitSemaphores = imageAvailablePtr,
-						SignalSemaphoreCount = 1,
-						PSignalSemaphores = renderCompletePtr
-					};
+			var imageAvailable = _imagesAvailable[CurrentFrame];
+			var renderComplete = _rendersComplete[CurrentFrame];
+			
+			var commandBuffer = CommandBuffer;
+				
+			var submitInfo = new SubmitInfo {
+				SType = StructureType.SubmitInfo,
+				WaitSemaphoreCount = 1,
+				PWaitSemaphores = &imageAvailable,
+				SignalSemaphoreCount = 1,
+				PSignalSemaphores = &renderComplete,
+				CommandBufferCount = 1,
+				PCommandBuffers = &commandBuffer
+			};
 
-					// TODO AllCommandsBit/AllGraphicsBit test
-					submitInfo.PWaitDstStageMask[0] = PipelineStageFlags.ColorAttachmentOutputBit;
+			// TODO AllCommandsBit/AllGraphicsBit test
+			var waitDstStageMasks = new[] { PipelineStageFlags.ColorAttachmentOutputBit };
+			//submitInfo.PWaitDstStageMask = waitDstStageMasks;
 
-					if(
-						(result = _platform.API.QueueSubmit(
-							_platform.PrimaryDevice!.GraphicsQueue,
-							1,
-							submitInfo,
-							_inFlight
-						)) != Result.Success
-					) {
-						throw new PlatformException($"Could not submit graphics queue: {result}");
-					}
+			fixed(PipelineStageFlags* waitDstStageMasksPtr = waitDstStageMasks) {
+				submitInfo.PWaitDstStageMask = waitDstStageMasksPtr;
+					
+				if(
+					(result = _platform.API.QueueSubmit(
+						_platform.PrimaryDevice!.GraphicsQueue,
+						1,
+						submitInfo,
+						_inFlightFrames[CurrentFrame]
+					)) != Result.Success
+				) {
+					throw new PlatformException($"Could not submit graphics queue: {result}");
 				}
 			}
 			
 			// presentation
-			var targetSwapchain = vkRenderTarget.Swapchain;
-			
-			var presentInfo = new PresentInfoKHR {
-				WaitSemaphoreCount = 1,
-				SwapchainCount = 1,
-				PSwapchains = &targetSwapchain,
-				PResults = null
-			};
-			
-			fixed(Semaphore* renderCompletePtr = &_renderComplete) {
-				presentInfo.PWaitSemaphores = renderCompletePtr;
-			}
-
 			fixed(uint* imageIndexPtr = &_imageIndex) {
-				presentInfo.PImageIndices = imageIndexPtr;
+				var targetSwapchain = vkRenderTarget.Swapchain;
+				
+				var presentInfo = new PresentInfoKHR {
+					SType = StructureType.PresentInfoKhr,
+					WaitSemaphoreCount = 1,
+					PWaitSemaphores = &renderComplete,
+					SwapchainCount = 1,
+					PSwapchains = &targetSwapchain,
+					PImageIndices = (uint*) imageIndexPtr,
+					PResults = null
+				};
+				
+				VkExtension
+					.Get<KhrSwapchain>(_platform, _platform.PrimaryDevice)
+					.QueuePresent(_platform.PrimaryDevice.SurfaceQueue.Value, presentInfo);
 			}
 
-			VkExtension.Get<KhrSwapchain>(_platform, _platform.PrimaryDevice)
-					   .QueuePresent(_platform.PrimaryDevice.SurfaceQueue.Value, &presentInfo);
+			CurrentFrame = (CurrentFrame + 1) % RenderTarget.SwapchainImages.Length;
 		}
 
 		public override void Dispose() {
@@ -377,9 +493,12 @@ namespace Cinenic.Renderer.Vulkan {
 				
 				_platform.API.DestroyRenderPass(device, Base, null);
 				_platform.API.DestroyCommandPool(device, CommandPool.Value, null);
-				_platform.API.DestroySemaphore(device, _imageAvailable, null);
-				_platform.API.DestroySemaphore(device, _renderComplete, null);
-				_platform.API.DestroyFence(device, _inFlight, null);
+
+				for(int i = 0; i < RenderTarget.SwapchainImages.Length; i++) {
+					_platform.API.DestroySemaphore(device, _imagesAvailable[i], null);
+					_platform.API.DestroySemaphore(device, _rendersComplete[i], null);
+					_platform.API.DestroyFence(device, _inFlightFrames[i], null);
+				}
 			}
 		}
 	}

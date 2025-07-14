@@ -259,7 +259,7 @@ namespace Cinenic.Renderer.Vulkan {
 			ComputeQueue = cq;
 			
 			// surface is optional
-			if(SurfaceFamily > 0) {
+			if(!Headless) {
 				_platform.API.GetDeviceQueue(Logical, (uint) SurfaceFamily, 0, out var pq);
 				SurfaceQueue = pq;
 			}

@@ -8,13 +8,13 @@ namespace Cinenic.Renderer.Vulkan {
 	
 	public class VkRenderPipeline : RenderPipeline {
 		
-		internal readonly PipelineDynamicStateCreateInfo DynamicStateInfo;
-		internal readonly PipelineVertexInputStateCreateInfo VertexInputInfo;
-		internal readonly PipelineInputAssemblyStateCreateInfo InputAssemblyInfo;
-		internal readonly PipelineViewportStateCreateInfo ViewportInfo;
-		internal readonly PipelineRasterizationStateCreateInfo RasterizationInfo;
-		internal readonly PipelineMultisampleStateCreateInfo MultisampleInfo;
-		internal readonly PipelineColorBlendStateCreateInfo ColorBlendInfo;
+		// internal readonly PipelineDynamicStateCreateInfo DynamicStateInfo;
+		// internal readonly PipelineVertexInputStateCreateInfo VertexInputInfo;
+		// internal readonly PipelineInputAssemblyStateCreateInfo InputAssemblyInfo;
+		// internal readonly PipelineViewportStateCreateInfo ViewportInfo;
+		// internal readonly PipelineRasterizationStateCreateInfo RasterizationInfo;
+		// internal readonly PipelineMultisampleStateCreateInfo MultisampleInfo;
+		// internal readonly PipelineColorBlendStateCreateInfo ColorBlendInfo;
 
 		internal readonly PipelineLayout PipelineLayout;
 		internal readonly Pipeline Pipeline;
@@ -32,203 +32,181 @@ namespace Cinenic.Renderer.Vulkan {
 			: base(platform, queue, program) 
 		{
 			Debug.Assert(queue is VkRenderQueue);
-			Debug.Assert(((VkRenderQueue) queue).Base.Handle != 0, "RenderQueue.Handle is 0. Did you forget to call Initialize()?");
+			//Debug.Assert(((VkRenderQueue) queue).Base.Handle != 0, "RenderQueue.Handle is 0. Did you forget to call Initialize()?");
 			_platform = platform;
 
 			program.Build();
 
 		#region Pipeline layout
 			_logger.Debug("Pipeline setup: Create layout");
-			
+
 			fixed(DynamicState* dynamicStatesPtr = &_dynamicStates[0]) {
-				DynamicStateInfo = new PipelineDynamicStateCreateInfo {
+				var dynamicStateInfo = new PipelineDynamicStateCreateInfo {
 					SType = StructureType.PipelineDynamicStateCreateInfo,
 					DynamicStateCount = (uint) _dynamicStates.Length,
 					PDynamicStates = dynamicStatesPtr
 				};
-			}
 
-			VertexInputInfo = new PipelineVertexInputStateCreateInfo {
-				SType = StructureType.PipelineVertexInputStateCreateInfo,
-				VertexBindingDescriptionCount = 0,
-				PVertexBindingDescriptions = null,
-				VertexAttributeDescriptionCount = 0,
-				PVertexAttributeDescriptions = null
-			};
+				var vertexInputInfo = new PipelineVertexInputStateCreateInfo {
+					SType = StructureType.PipelineVertexInputStateCreateInfo,
+					VertexBindingDescriptionCount = 0,
+					PVertexBindingDescriptions = null,
+					VertexAttributeDescriptionCount = 0,
+					PVertexAttributeDescriptions = null
+				};
 
-			InputAssemblyInfo = new PipelineInputAssemblyStateCreateInfo {
-				SType = StructureType.PipelineInputAssemblyStateCreateInfo,
-				Topology = PrimitiveTopology.TriangleList,
-				PrimitiveRestartEnable = false
-			};
-			
-			var viewport = new Viewport {
-				X = queue.Viewport.X,
-				Y = queue.Viewport.Y,
-				Width = queue.Viewport.Z,
-				Height = queue.Viewport.W,
-				MinDepth = 0,
-				MaxDepth = 1
-			};
-			
-			var scissor = new Rect2D {
-				Offset = { X = queue.Viewport.X, Y = queue.Viewport.Y },
-				Extent = { Width = (uint) queue.Viewport.Z, Height = (uint) queue.Viewport.W }
-			};
+				var inputAssemblyInfo = new PipelineInputAssemblyStateCreateInfo {
+					SType = StructureType.PipelineInputAssemblyStateCreateInfo,
+					Topology = PrimitiveTopology.TriangleList,
+					PrimitiveRestartEnable = false
+				};
 
-			ViewportInfo = new PipelineViewportStateCreateInfo {
-				SType = StructureType.PipelineViewportStateCreateInfo,
-				ViewportCount = 1,
-				PViewports = &viewport,
-				ScissorCount = 1,
-				PScissors = &scissor
-			};
+				var viewport = new Viewport {
+					X = queue.Viewport.X,
+					Y = queue.Viewport.Y,
+					Width = queue.Viewport.Z,
+					Height = queue.Viewport.W,
+					MinDepth = 0,
+					MaxDepth = 1
+				};
 
-			RasterizationInfo = new PipelineRasterizationStateCreateInfo {
-				SType = StructureType.PipelineRasterizationStateCreateInfo,
-				DepthClampEnable = false,
-				RasterizerDiscardEnable = false,
-				PolygonMode = PolygonMode.Fill,
-				LineWidth = 1.0f,
-				CullMode = CullModeFlags.BackBit,
-				FrontFace = FrontFace.Clockwise,
-				DepthBiasEnable = false,
-				DepthBiasConstantFactor = 0.0f,
-				DepthBiasClamp = 0.0f,
-				DepthBiasSlopeFactor = 0.0f
-			};
+				var scissor = new Rect2D {
+					Offset = { X = queue.Viewport.X, Y = queue.Viewport.Y },
+					Extent = { Width = (uint) queue.Viewport.Z, Height = (uint) queue.Viewport.W }
+				};
 
-			MultisampleInfo = new PipelineMultisampleStateCreateInfo {
-				SType = StructureType.PipelineMultisampleStateCreateInfo,
-				SampleShadingEnable = false,
-				RasterizationSamples = SampleCountFlags.Count1Bit,
-				MinSampleShading = 1.0f,
-				PSampleMask = null,
-				AlphaToCoverageEnable = false,
-				AlphaToOneEnable = false
-			};
+				var viewportInfo = new PipelineViewportStateCreateInfo {
+					SType = StructureType.PipelineViewportStateCreateInfo,
+					ViewportCount = 1,
+					PViewports = &viewport,
+					ScissorCount = 1,
+					PScissors = &scissor
+				};
 
-			var colorBlendAttachment = new PipelineColorBlendAttachmentState {
-				ColorWriteMask = ColorComponentFlags.RBit | ColorComponentFlags.GBit | ColorComponentFlags.BBit | ColorComponentFlags.ABit,
-				BlendEnable = false,
-				SrcColorBlendFactor = BlendFactor.One,
-				DstColorBlendFactor = BlendFactor.Zero,
-				ColorBlendOp = BlendOp.Add,
-				SrcAlphaBlendFactor = BlendFactor.One,
-				DstAlphaBlendFactor = BlendFactor.Zero,
-				AlphaBlendOp = BlendOp.Add
-			};
+				var rasterizationInfo = new PipelineRasterizationStateCreateInfo {
+					SType = StructureType.PipelineRasterizationStateCreateInfo,
+					DepthClampEnable = false,
+					RasterizerDiscardEnable = false,
+					PolygonMode = PolygonMode.Fill,
+					LineWidth = 1.0f,
+					CullMode = CullModeFlags.BackBit,
+					FrontFace = FrontFace.Clockwise,
+					DepthBiasEnable = false,
+					DepthBiasConstantFactor = 0.0f,
+					DepthBiasClamp = 0.0f,
+					DepthBiasSlopeFactor = 0.0f
+				};
 
-			ColorBlendInfo = new PipelineColorBlendStateCreateInfo {
-				SType = StructureType.PipelineColorBlendStateCreateInfo,
-				LogicOpEnable = false,
-				LogicOp = LogicOp.Copy,
-				AttachmentCount = 1,
-				PAttachments = &colorBlendAttachment
-			};
+				var multisampleInfo = new PipelineMultisampleStateCreateInfo {
+					SType = StructureType.PipelineMultisampleStateCreateInfo,
+					SampleShadingEnable = false,
+					RasterizationSamples = SampleCountFlags.Count1Bit,
+					MinSampleShading = 1.0f,
+					PSampleMask = null,
+					AlphaToCoverageEnable = false,
+					AlphaToOneEnable = false
+				};
 
-			ColorBlendInfo.BlendConstants[0] = 0;
-			ColorBlendInfo.BlendConstants[1] = 0;
-			ColorBlendInfo.BlendConstants[2] = 0;
-			ColorBlendInfo.BlendConstants[3] = 0;
+				var colorBlendAttachment = new PipelineColorBlendAttachmentState {
+					ColorWriteMask = ColorComponentFlags.RBit | ColorComponentFlags.GBit | ColorComponentFlags.BBit | ColorComponentFlags.ABit,
+					BlendEnable = false,
+					SrcColorBlendFactor = BlendFactor.One,
+					DstColorBlendFactor = BlendFactor.Zero,
+					ColorBlendOp = BlendOp.Add,
+					SrcAlphaBlendFactor = BlendFactor.One,
+					DstAlphaBlendFactor = BlendFactor.Zero,
+					AlphaBlendOp = BlendOp.Add
+				};
 
-			var pipelineLayoutInfo = new PipelineLayoutCreateInfo {
-				SType = StructureType.PipelineLayoutCreateInfo,
-				SetLayoutCount = 0,
-				PSetLayouts = null,
-				PushConstantRangeCount = 0,
-				PPushConstantRanges = null
-			};
+				var colorBlendInfo = new PipelineColorBlendStateCreateInfo {
+					SType = StructureType.PipelineColorBlendStateCreateInfo,
+					LogicOpEnable = false,
+					LogicOp = LogicOp.Copy,
+					AttachmentCount = 1,
+					PAttachments = &colorBlendAttachment
+				};
 
-			Result result;
+				colorBlendInfo.BlendConstants[0] = 0;
+				colorBlendInfo.BlendConstants[1] = 0;
+				colorBlendInfo.BlendConstants[2] = 0;
+				colorBlendInfo.BlendConstants[3] = 0;
 
-			fixed(PipelineLayout* pipelineLayoutPtr = &PipelineLayout) {
+				var pipelineLayoutInfo = new PipelineLayoutCreateInfo {
+					SType = StructureType.PipelineLayoutCreateInfo,
+					SetLayoutCount = 0,
+					PSetLayouts = null,
+					PushConstantRangeCount = 0,
+					PPushConstantRanges = null
+				};
+
+				Result result;
+
 				if(
 					(result = _platform.API.CreatePipelineLayout(
 						_platform.PrimaryDevice!.Logical,
-						&pipelineLayoutInfo,
+						pipelineLayoutInfo,
 						null,
-						pipelineLayoutPtr)
+						out PipelineLayout)
 					)
 					!= Result.Success
 				) {
 					throw new PlatformException($"Could not create pipeline layout: {result}");
 				}
-			}
-		#endregion
+			#endregion
 
-		#region Pipeline
-			_logger.Debug("Pipeline setup: Create pipeline ({Family})", Queue.Type);
-			Pipeline pipeline;
-			
-			switch(Queue.Type) {
-				case RenderQueue.Family.Graphics:
-					var pipelineInfo = Queue.Type switch {
-						RenderQueue.Family.Graphics => new GraphicsPipelineCreateInfo {
-							SType = StructureType.GraphicsPipelineCreateInfo,
-							StageCount = (uint) ((VkShaderProgram) Program).Stages.Count,
-							Layout = PipelineLayout,
-							RenderPass = ((VkRenderQueue) Queue).Base,
-							Subpass = 0,
-							BasePipelineHandle = default,
+			#region Pipeline
+				_logger.Debug("Pipeline setup: Create pipeline ({Family})", Queue.Type);
+				Pipeline pipeline;
+
+				switch(Queue.Type) {
+					case RenderQueue.Family.Graphics:
+						var pipelineInfo = Queue.Type switch {
+							RenderQueue.Family.Graphics => new GraphicsPipelineCreateInfo {
+								SType = StructureType.GraphicsPipelineCreateInfo,
+								StageCount = (uint) ((VkShaderProgram) Program).Stages.Count,
+								Layout = PipelineLayout,
+								RenderPass = ((VkRenderQueue) Queue).Base,
+								Subpass = 0,
+								BasePipelineHandle = default,
+							}
+						};
+
+						var programStages = ((VkShaderProgram) Program).Stages.ToArray();
+
+						fixed(PipelineShaderStageCreateInfo* ptr = &programStages[0]) {
+							pipelineInfo.PStages = ptr;
+
+							pipelineInfo.PDynamicState = &dynamicStateInfo;
+							pipelineInfo.PVertexInputState = &vertexInputInfo;
+							pipelineInfo.PInputAssemblyState = &inputAssemblyInfo;
+							pipelineInfo.PViewportState = &viewportInfo;
+							pipelineInfo.PRasterizationState = &rasterizationInfo;
+							pipelineInfo.PMultisampleState = &multisampleInfo;
+							pipelineInfo.PColorBlendState = &colorBlendInfo;
+
+							result = _platform.API.CreateGraphicsPipelines(
+								_platform.PrimaryDevice!.Logical,
+								default,
+								1,
+								pipelineInfo,
+								null,
+								out pipeline
+							);
 						}
-					};
 
-					var programStages = ((VkShaderProgram) Program).Stages.ToArray();
+						if(
+							(result) != Result.Success
+						) {
+							throw new PlatformException($"Could not create the graphics pipeline: {result}");
+						}
 
-					fixed(PipelineShaderStageCreateInfo* ptr = &programStages[0]) {
-						pipelineInfo.PStages = ptr;
-					}
-			
-					fixed(PipelineDynamicStateCreateInfo* ptr = &DynamicStateInfo) {
-						pipelineInfo.PDynamicState = ptr;
-					}
-			
-					fixed(PipelineVertexInputStateCreateInfo* ptr = &VertexInputInfo) {
-						pipelineInfo.PVertexInputState = ptr;
-					}
-			
-					fixed(PipelineInputAssemblyStateCreateInfo* ptr = &InputAssemblyInfo) {
-						pipelineInfo.PInputAssemblyState = ptr;
-					}
-			
-					fixed(PipelineViewportStateCreateInfo* ptr = &ViewportInfo) {
-						pipelineInfo.PViewportState = ptr;
-					}
-			
-					fixed(PipelineRasterizationStateCreateInfo* ptr = &RasterizationInfo) {
-						pipelineInfo.PRasterizationState = ptr;
-					}
-			
-					fixed(PipelineMultisampleStateCreateInfo* ptr = &MultisampleInfo) {
-						pipelineInfo.PMultisampleState = ptr;
-					}
-			
-					fixed(PipelineColorBlendStateCreateInfo* ptr = &ColorBlendInfo) {
-						pipelineInfo.PColorBlendState = ptr;
-					}
+						break;
+					default:
+						throw new NotImplementedException(Queue.Type.ToString());
+				}
 
-					//pipeline = new Pipeline();
-			
-					if(
-						(result = _platform.API.CreateGraphicsPipelines(
-							_platform.PrimaryDevice!.Logical,
-							default,
-							1,
-							pipelineInfo,
-							null,
-							out pipeline
-						)) != Result.Success
-					) {
-						throw new PlatformException($"Could not create the graphics pipeline: {result}");
-					}
-					
-					break;
-				default:
-					throw new NotImplementedException(Queue.Type.ToString());
+				Pipeline = pipeline;
 			}
-			
-			Pipeline = pipeline;
 		#endregion
 		}
 
@@ -238,7 +216,7 @@ namespace Cinenic.Renderer.Vulkan {
 			var vkQueue = (VkRenderQueue) Queue;
 			
 			_platform.API.CmdBindPipeline(
-				vkQueue.CommandBuffer.Value,
+				vkQueue.CommandBuffer,
 				Queue.Type switch {
 					RenderQueue.Family.Graphics => PipelineBindPoint.Graphics,
 					RenderQueue.Family.Compute => PipelineBindPoint.Compute,
@@ -262,8 +240,8 @@ namespace Cinenic.Renderer.Vulkan {
 			};
 
 			unsafe {
-				_platform.API.CmdSetViewport(vkQueue.CommandBuffer.Value, 0, 1, &viewport);
-				_platform.API.CmdSetScissor(vkQueue.CommandBuffer.Value, 0, 1, &scissor);
+				_platform.API.CmdSetViewport(vkQueue.CommandBuffer, 0, 1, &viewport);
+				_platform.API.CmdSetScissor(vkQueue.CommandBuffer, 0, 1, &scissor);
 			}
 		}
 		
