@@ -24,7 +24,7 @@ namespace VulkanTriangle
     public class HelloTriangleApplication
     {
         public const bool EnableValidationLayers = true;
-        public const int MaxFramesInFlight = 8;
+        public const int MaxFramesInFlight = 4;
         public const bool EventBasedRendering = false;
 
         public void Run()

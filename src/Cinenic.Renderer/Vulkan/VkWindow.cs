@@ -159,11 +159,11 @@ namespace Cinenic.Renderer.Vulkan {
 				PreTransform = surfaceCapabilities.CurrentTransform,
 				CompositeAlpha = CompositeAlphaFlagsKHR.OpaqueBitKhr,
 				PresentMode = mode.Value,
-				Clipped = Vk.True,
+				Clipped = true
 			};
 
 			if(Swapchain.HasValue) {
-				swapchainInfo.OldSwapchain = Swapchain.Value;
+				swapchainInfo.OldSwapchain = /*Swapchain.Value*/ default;
 			}
 			
 			var queueFamilies = _device.QueueFamilies;
@@ -172,9 +172,12 @@ namespace Cinenic.Renderer.Vulkan {
 				swapchainInfo.ImageSharingMode = SharingMode.Concurrent;
 				swapchainInfo.QueueFamilyIndexCount = (uint) queueFamilies.Length;
 
-				fixed(uint* ptr = &queueFamilies[0]) {
-					swapchainInfo.PQueueFamilyIndices = ptr;
-				}
+				// fixed(uint* ptr = queueFamilies) {
+				// 	swapchainInfo.PQueueFamilyIndices = ptr;
+				// }
+				
+				var queueFamiliesHandle = GCHandle.Alloc(queueFamilies, GCHandleType.Pinned);
+				swapchainInfo.PQueueFamilyIndices = (uint*) queueFamiliesHandle.AddrOfPinnedObject();
 			} else {
 				swapchainInfo.ImageSharingMode = SharingMode.Exclusive;
 			}
@@ -210,7 +213,6 @@ namespace Cinenic.Renderer.Vulkan {
 					throw new ExternalException($"Could not retrieve swapchain images: {result}");
 				}
 			}
-
 		#endregion
 		}
 
@@ -218,7 +220,7 @@ namespace Cinenic.Renderer.Vulkan {
 			SwapchainImageViews = new ImageView[SwapchainImages.Length];
 
 			for(int i = 0; i < SwapchainImages.Length; i++) {
-				var imageViewCreateInfo = new ImageViewCreateInfo() {
+				var imageViewCreateInfo = new ImageViewCreateInfo {
 					SType = StructureType.ImageViewCreateInfo,
 					Image = SwapchainImages[i],
 					ViewType = ImageViewType.Type2D,
@@ -238,16 +240,16 @@ namespace Cinenic.Renderer.Vulkan {
 					}
 				};
 
-				fixed(ImageView* ptr = &SwapchainImageViews[i]) {
-					Result result;
+				Result result;
 					
-					if(
-						(result = _platform.API.CreateImageView(_device.Logical, imageViewCreateInfo, null, ptr))
-						!= Result.Success
-					) {
-						throw new ExternalException($"Could not retrieve swapchain images: {result}");
-					}
+				if(
+					(result = _platform.API.CreateImageView(_device.Logical, imageViewCreateInfo, null, out var imageView))
+					!= Result.Success
+				) {
+					throw new ExternalException($"Could not retrieve swapchain images: {result}");
 				}
+
+				SwapchainImageViews[i] = imageView;
 			}
 		}
 
@@ -262,7 +264,7 @@ namespace Cinenic.Renderer.Vulkan {
 					var framebufferInfo = new FramebufferCreateInfo {
 						SType = StructureType.FramebufferCreateInfo,
 						RenderPass = ((VkRenderQueue) Pipeline.Queue).Base,
-						AttachmentCount = 1,
+						AttachmentCount = (uint) ((VkRenderQueue) Pipeline.Queue).Attachments.Count,
 						PAttachments = attachmentsPtr,
 						Width = SwapchainExtent.Width,
 						Height = SwapchainExtent.Height,

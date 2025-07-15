@@ -43,6 +43,9 @@ namespace Cinenic.Renderer.Vulkan {
 		public VkPlatform(PlatformOptions? options = null) {
 			CurrentOptions = options as Options ?? new Options();
 			API = Silk.NET.Vulkan.Vk.GetApi();
+			
+			CurrentOptions.Extensions.Add("VK_EXT_validation_features");
+			CurrentOptions.Layers.Add("VK_LAYER_KHRONOS_validation");
 
 		#region Layer validation
 			uint layerCount = 0;
@@ -109,9 +112,20 @@ namespace Cinenic.Renderer.Vulkan {
 				EngineVersion = new Version32(1, 0, 0),
 				ApiVersion = Silk.NET.Vulkan.Vk.Version10,
 			};
+			
+			var features = new ValidationFeaturesEXT
+			{
+				SType = StructureType.ValidationFeaturesExt,
+				EnabledValidationFeatureCount = 1
+			};
+			
+			var enabled = stackalloc ValidationFeatureEnableEXT[1];
+			enabled[0] = ValidationFeatureEnableEXT.SynchronizationValidationExt;
+			features.PEnabledValidationFeatures = enabled;
 
 			var instanceInfo = new InstanceCreateInfo() {
 				SType = StructureType.InstanceCreateInfo,
+				PNext = &features,
 				PApplicationInfo = &appInfo,
 				EnabledExtensionCount = (uint) _vkExtensions.Count,
 				PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(_vkExtensions),

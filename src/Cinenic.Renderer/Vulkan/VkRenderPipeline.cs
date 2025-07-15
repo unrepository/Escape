@@ -173,7 +173,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 						var programStages = ((VkShaderProgram) Program).Stages.ToArray();
 
-						fixed(PipelineShaderStageCreateInfo* ptr = &programStages[0]) {
+						fixed(PipelineShaderStageCreateInfo* ptr = programStages) {
 							pipelineInfo.PStages = ptr;
 
 							pipelineInfo.PDynamicState = &dynamicStateInfo;
