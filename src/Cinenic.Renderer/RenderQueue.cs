@@ -9,29 +9,24 @@ namespace Cinenic.Renderer {
 		public Family Type { get; }
 		public Format ColorFormat { get; }
 		
-		public Vector4D<int> Viewport { get; set; }
-		public Vector4D<int> Scissor { get; set; }
+		public Vector4D<int> Viewport { get; set; } = Vector4D<int>.Zero;
+		public Vector4D<int> Scissor { get; set; } = Vector4D<int>.Zero;
 		
-		public Framebuffer RenderTarget { get; set; }
+		public RenderQueue(
+			IPlatform platform, Family family, Format format,
+			Window window
+		) : this(platform, family, format) {
+			Viewport = new Vector4D<int>(0, 0, (int) window.Width, (int) window.Height);
+			Scissor = new Vector4D<int>(0, 0, (int) window.Width, (int) window.Height);
+		}
 		
-		// public RenderQueue(
-		// 	IPlatform platform, Family family, Format format,
-		// 	Window window
-		// ) : this(platform, family, format) {
-		// 	Viewport = new Vector4D<int>(0, 0, (int) window.Width, (int) window.Height);
-		// 	Scissor = new Vector4D<int>(0, 0, (int) window.Width, (int) window.Height);
-		// 	RenderTarget = window.Framebuffer;
-		// }
-		//
-		// public RenderQueue(
-		// 	IPlatform platform, Family family, Format format,
-		// 	Vector4D<int> viewport, Vector4D<int> scissor,
-		// 	Framebuffer renderTarget
-		// ) : this(platform, family, format) {
-		// 	Viewport = viewport;
-		// 	Scissor = scissor;
-		// 	RenderTarget = renderTarget;
-		// }
+		public RenderQueue(
+			IPlatform platform, Family family, Format format,
+			Vector4D<int> viewport, Vector4D<int> scissor
+		) : this(platform, family, format) {
+			Viewport = viewport;
+			Scissor = scissor;
+		}
 
 		public RenderQueue(IPlatform platform, Family family, Format format) {
 			Platform = platform;
@@ -41,8 +36,8 @@ namespace Cinenic.Renderer {
 
 		public abstract void Initialize();
 
-		public abstract void Begin(Framebuffer renderTarget);
-		public abstract void End(Framebuffer renderTarget);
+		public abstract bool Begin(Framebuffer renderTarget);
+		public abstract bool End(Framebuffer renderTarget);
 		
 		public abstract void Dispose();
 

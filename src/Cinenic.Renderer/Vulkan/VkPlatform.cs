@@ -9,6 +9,8 @@ using Silk.NET.Vulkan.Extensions.EXT;
 using Silk.NET.Vulkan.Extensions.KHR;
 using Silk.NET.Windowing;
 
+using static Cinenic.Renderer.Vulkan.VkHelpers;
+
 namespace Cinenic.Renderer.Vulkan {
 	
 	public unsafe class VkPlatform : IPlatform {
@@ -43,23 +45,26 @@ namespace Cinenic.Renderer.Vulkan {
 		public VkPlatform(PlatformOptions? options = null) {
 			CurrentOptions = options as Options ?? new Options();
 			API = Silk.NET.Vulkan.Vk.GetApi();
-			
-			CurrentOptions.Extensions.Add("VK_EXT_validation_features");
-			CurrentOptions.Layers.Add("VK_LAYER_KHRONOS_validation");
+
+			if(CurrentOptions.EnableValidationLayers) {
+				CurrentOptions.Extensions.Add("VK_EXT_validation_features");
+				CurrentOptions.Layers.Add("VK_LAYER_KHRONOS_validation");
+			}
 
 		#region Layer validation
 			uint layerCount = 0;
-			Result result;
 
-			if((result = API.EnumerateInstanceLayerProperties(ref layerCount, null)) != Result.Success) {
-				throw new ExternalException($"Could not enumerate instance layer properties: {result}", (int) result);
-			}
+			VkCheck(
+				API.EnumerateInstanceLayerProperties(ref layerCount, null),
+				"Could not enumerate instance layer properties"
+			);
 
 			var layerProperties = new LayerProperties[layerCount];
 
-			if((result = API.EnumerateInstanceLayerProperties(ref layerCount, ref layerProperties[0])) != Result.Success) {
-				throw new ExternalException($"Could not enumerate instance layer properties: {result}", (int) result);
-			}
+			VkCheck(
+				API.EnumerateInstanceLayerProperties(ref layerCount, ref layerProperties[0]),
+				"Could not enumerate instance layer properties"
+			);
 			
 			foreach(var layer in CurrentOptions.Layers) {
 				var exists = layerProperties.Any(
@@ -104,7 +109,7 @@ namespace Cinenic.Renderer.Vulkan {
 		}
 
 		public void Initialize() {
-			var appInfo = new ApplicationInfo() {
+			var appInfo = new ApplicationInfo {
 				SType = StructureType.ApplicationInfo,
 				PApplicationName = (byte*) Marshal.StringToHGlobalAnsi("CINENIC"),
 				ApplicationVersion = new Version32(1, 0, 0),
@@ -112,20 +117,9 @@ namespace Cinenic.Renderer.Vulkan {
 				EngineVersion = new Version32(1, 0, 0),
 				ApiVersion = Silk.NET.Vulkan.Vk.Version10,
 			};
-			
-			var features = new ValidationFeaturesEXT
-			{
-				SType = StructureType.ValidationFeaturesExt,
-				EnabledValidationFeatureCount = 1
-			};
-			
-			var enabled = stackalloc ValidationFeatureEnableEXT[1];
-			enabled[0] = ValidationFeatureEnableEXT.SynchronizationValidationExt;
-			features.PEnabledValidationFeatures = enabled;
 
-			var instanceInfo = new InstanceCreateInfo() {
+			var instanceInfo = new InstanceCreateInfo {
 				SType = StructureType.InstanceCreateInfo,
-				PNext = &features,
 				PApplicationInfo = &appInfo,
 				EnabledExtensionCount = (uint) _vkExtensions.Count,
 				PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(_vkExtensions),
@@ -133,11 +127,23 @@ namespace Cinenic.Renderer.Vulkan {
 				PpEnabledLayerNames = (byte**) SilkMarshal.StringArrayToPtr(_vkLayers),
 			};
 
-			Result result;
-
-			if((result = API.CreateInstance(&instanceInfo, null, out var vk)) != Result.Success) {
-				throw new ExternalException($"Failed to initialize Vulkan: {result}", (int) result);
+			if(CurrentOptions.EnableValidationLayers) {
+				var features = new ValidationFeaturesEXT {
+					SType = StructureType.ValidationFeaturesExt,
+					EnabledValidationFeatureCount = 1
+				};
+			
+				var enabled = stackalloc ValidationFeatureEnableEXT[1];
+				enabled[0] = ValidationFeatureEnableEXT.SynchronizationValidationExt;
+				
+				features.PEnabledValidationFeatures = enabled;
+				instanceInfo.PNext = &features;
 			}
+
+			VkCheck(
+				API.CreateInstance(&instanceInfo, null, out var vk),
+				"Failed to initialise Vulkan"
+			);
 
 			Vk = vk;
 
@@ -165,16 +171,16 @@ namespace Cinenic.Renderer.Vulkan {
 					};
 
 					fixed(DebugUtilsMessengerEXT* debugMessenger = &_debugMessenger) {
-						if(
-							(result = debugUtils.CreateDebugUtilsMessenger(
+						VkCheck(
+							debugUtils.CreateDebugUtilsMessenger(
 								Vk,
 								&messengerInfo,
 								null,
 								debugMessenger
-							)) != Result.Success
-						) {
-							_logger.Error("Couldn't create the debug messenger: {Result}", result);
-						}
+							),
+							"Could not create the debug messenger",
+							fatal: false
+						);
 					}
 				} else {
 					_logger.Error("Failed to load extension {ExtensionName}", ExtDebugUtils.ExtensionName);
@@ -234,7 +240,7 @@ namespace Cinenic.Renderer.Vulkan {
 			API.DestroyInstance(Vk, null);
 		}
 		
-		private uint DebugMessageCallback(
+		private static uint DebugMessageCallback(
 			DebugUtilsMessageSeverityFlagsEXT severityFlags, DebugUtilsMessageTypeFlagsEXT typeFlags,
 			DebugUtilsMessengerCallbackDataEXT* callbackData, void* userData
 		) {
@@ -248,6 +254,7 @@ namespace Cinenic.Renderer.Vulkan {
 			public List<string> Layers { get; set; } = [];
 
 			public bool Headless { get; set; } = false;
+			public bool EnableValidationLayers { get; set; } = true;
 			
 			public override void ParseCommandLine(string[] args) {
 				throw new NotImplementedException();

@@ -32,8 +32,8 @@ namespace Cinenic.Sandbox {
 
 			_logger.Info("Create render queue");
 			var queue = new VkRenderQueue(platform, RenderQueue.Family.Graphics, RenderQueue.Format.R8G8B8A8Srgb);
-			queue.Viewport = new Vector4D<int>(0, 0, 640, 480);
-			queue.Scissor = new Vector4D<int>(0, 0, 640, 480);
+			//queue.Viewport = new Vector4D<int>(0, 0, 640, 480);
+			//queue.Scissor = new Vector4D<int>(0, 0, 640, 480);
 			queue.CreateAttachment();
 			queue.CreateSubpass(
 				0,
@@ -60,17 +60,17 @@ namespace Cinenic.Sandbox {
 			));
 			
 			_logger.Info("Create window");
-			//var window = Window.Create(platform, pipeline, WindowOptions.DefaultVulkan);
-			var window = new VkWindow(platform, pipeline);
+			var window = Window.Create(platform, pipeline, WindowOptions.DefaultVulkan);
+			//var window = new VkWindow(platform, pipeline);
 			window.Title = "Sandbox";
-
-			queue.RenderTarget = window.Framebuffer;
 			
 			window.Base.Render += delta => {
 				window.Base.MakeCurrent();
-				pipeline.Begin(window.Framebuffer);
+				queue.Viewport = new Vector4D<int>(0, 0, window.Base.FramebufferSize.X, window.Base.FramebufferSize.Y);
+				queue.Scissor = queue.Viewport;
+				pipeline.Begin(ref window.Framebuffer);
 				platform.API.CmdDraw(queue.CommandBuffer, 3, 1, 0, 0);
-				pipeline.End(window.Framebuffer);
+				pipeline.End(ref window.Framebuffer);
 			};
 			
 			_logger.Info("Begin rendering");

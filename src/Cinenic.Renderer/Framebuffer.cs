@@ -20,7 +20,9 @@ namespace Cinenic.Renderer {
 		public IReadOnlyList<Texture> GetTextureAttachments()
 			=> TextureAttachments;
 		
+		[Obsolete("Use framebuffer as parameter in RenderPipeline.Begin()")]
 		public abstract void Bind();
+		[Obsolete]
 		public abstract void Unbind();
 
 		public abstract void Create();

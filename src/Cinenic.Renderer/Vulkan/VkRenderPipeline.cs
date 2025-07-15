@@ -4,17 +4,11 @@ using NLog;
 using Silk.NET.Core;
 using Silk.NET.Vulkan;
 
+using static Cinenic.Renderer.Vulkan.VkHelpers;
+
 namespace Cinenic.Renderer.Vulkan {
 	
 	public class VkRenderPipeline : RenderPipeline {
-		
-		// internal readonly PipelineDynamicStateCreateInfo DynamicStateInfo;
-		// internal readonly PipelineVertexInputStateCreateInfo VertexInputInfo;
-		// internal readonly PipelineInputAssemblyStateCreateInfo InputAssemblyInfo;
-		// internal readonly PipelineViewportStateCreateInfo ViewportInfo;
-		// internal readonly PipelineRasterizationStateCreateInfo RasterizationInfo;
-		// internal readonly PipelineMultisampleStateCreateInfo MultisampleInfo;
-		// internal readonly PipelineColorBlendStateCreateInfo ColorBlendInfo;
 
 		internal readonly PipelineLayout PipelineLayout;
 		internal readonly Pipeline Pipeline;
@@ -139,19 +133,15 @@ namespace Cinenic.Renderer.Vulkan {
 					PPushConstantRanges = null
 				};
 
-				Result result;
-
-				if(
-					(result = _platform.API.CreatePipelineLayout(
+				VkCheck(
+					_platform.API.CreatePipelineLayout(
 						_platform.PrimaryDevice!.Logical,
 						pipelineLayoutInfo,
 						null,
-						out PipelineLayout)
-					)
-					!= Result.Success
-				) {
-					throw new PlatformException($"Could not create pipeline layout: {result}");
-				}
+						out PipelineLayout
+					),
+					"Could not create the pipeline layout"
+				);
 			#endregion
 
 			#region Pipeline
@@ -165,7 +155,7 @@ namespace Cinenic.Renderer.Vulkan {
 								SType = StructureType.GraphicsPipelineCreateInfo,
 								StageCount = (uint) ((VkShaderProgram) Program).Stages.Count,
 								Layout = PipelineLayout,
-								RenderPass = ((VkRenderQueue) Queue).Base,
+								RenderPass = ((VkRenderQueue) Queue).RenderPass,
 								Subpass = 0,
 								BasePipelineHandle = default,
 							}
@@ -184,22 +174,19 @@ namespace Cinenic.Renderer.Vulkan {
 							pipelineInfo.PMultisampleState = &multisampleInfo;
 							pipelineInfo.PColorBlendState = &colorBlendInfo;
 
-							result = _platform.API.CreateGraphicsPipelines(
-								_platform.PrimaryDevice!.Logical,
-								default,
-								1,
-								pipelineInfo,
-								null,
-								out pipeline
+							VkCheck(
+								_platform.API.CreateGraphicsPipelines(
+									_platform.PrimaryDevice!.Logical,
+									default,
+									1,
+									pipelineInfo,
+									null,
+									out pipeline
+								),
+								"Could not create the graphics pipeline"
 							);
 						}
-
-						if(
-							(result) != Result.Success
-						) {
-							throw new PlatformException($"Could not create the graphics pipeline: {result}");
-						}
-
+						
 						break;
 					default:
 						throw new NotImplementedException(Queue.Type.ToString());
@@ -210,10 +197,17 @@ namespace Cinenic.Renderer.Vulkan {
 		#endregion
 		}
 
-		public override void Begin(Framebuffer renderTarget) {
-			Queue.Begin(renderTarget);
-
+		public override void Begin(ref Framebuffer renderTarget) {
+			var vkRenderTarget = (VkFramebuffer) renderTarget;
 			var vkQueue = (VkRenderQueue) Queue;
+			
+			if(!Queue.Begin(renderTarget)) {
+				RecreateFramebuffer(ref renderTarget);
+				RecreateQueue(ref vkQueue);
+
+				vkRenderTarget = (VkFramebuffer) renderTarget;
+				Queue = vkQueue;
+			}
 			
 			_platform.API.CmdBindPipeline(
 				vkQueue.CommandBuffer,
@@ -228,33 +222,83 @@ namespace Cinenic.Renderer.Vulkan {
 			var viewport = new Viewport {
 				X = Queue.Viewport.X,
 				Y = Queue.Viewport.Y,
-				Width = Queue.Viewport.Z,
-				Height = Queue.Viewport.W,
+				Width = Queue.Viewport.Z > 0 ? Queue.Viewport.Z : vkRenderTarget.SwapchainExtent.Width,
+				Height = Queue.Viewport.W > 0 ? Queue.Viewport.W : vkRenderTarget.SwapchainExtent.Height,
 				MinDepth = 0,
 				MaxDepth = 1
 			};
 			
 			var scissor = new Rect2D {
-				Offset = { X = Queue.Viewport.X, Y = Queue.Viewport.Y },
-				Extent = { Width = (uint) Queue.Viewport.Z, Height = (uint) Queue.Viewport.W }
+				Offset = {
+					X = Queue.Scissor.X,
+					Y = Queue.Scissor.Y
+				},
+				Extent = {
+					Width = (uint) (Queue.Scissor.Z > 0 ? Queue.Scissor.Z : viewport.Width),
+					Height = (uint) (Queue.Scissor.W > 0 ? Queue.Scissor.W : viewport.Height)
+				}
 			};
-
+			
 			unsafe {
 				_platform.API.CmdSetViewport(vkQueue.CommandBuffer, 0, 1, &viewport);
 				_platform.API.CmdSetScissor(vkQueue.CommandBuffer, 0, 1, &scissor);
 			}
 		}
 		
-		public override void End(Framebuffer renderTarget) {
-			Queue.End(renderTarget);
+		public override void End(ref Framebuffer renderTarget) {
+			var vkQueue = (VkRenderQueue) Queue;
+			
+			if(!Queue.End(renderTarget)) {
+				RecreateFramebuffer(ref renderTarget);
+				RecreateQueue(ref vkQueue);
+				Queue = vkQueue;
+			}
+		}
+
+		public void RecreateQueue(ref VkRenderQueue vkQueue) {
+			//_logger.Trace("Recreating render queue");
+
+			_platform.API.DeviceWaitIdle(_platform.PrimaryDevice!.Logical);
+			
+			Queue.Dispose();
+			
+			var newQueue = new VkRenderQueue(_platform, vkQueue.Type, vkQueue.ColorFormat) {
+				Attachments = vkQueue.Attachments,
+				Subpasses = vkQueue.Subpasses,
+				SubpassDependencies = vkQueue.SubpassDependencies,
+				Viewport = vkQueue.Viewport,
+				Scissor = vkQueue.Scissor
+			};
+			newQueue.Initialize();
+			
+			Queue = newQueue;
+			vkQueue = newQueue;
+		}
+		
+		public void RecreateFramebuffer(ref Framebuffer renderTarget) {
+			Debug.Assert(renderTarget is VkFramebuffer);
+			//_logger.Trace("Recreating framebuffer");
+
+			_platform.API.DeviceWaitIdle(_platform.PrimaryDevice!.Logical);
+			renderTarget.Dispose();
+			
+			VkFramebuffer newFramebuffer;
+
+			if(renderTarget is VkWindow.WindowFramebuffer windowFramebuffer) {
+				newFramebuffer = new VkWindow.WindowFramebuffer(_platform, windowFramebuffer.Window, windowFramebuffer.Size);
+			} else {
+				newFramebuffer = new VkFramebuffer(_platform, renderTarget.Size);
+			}
+			
+			renderTarget = newFramebuffer;
 		}
 
 		public override void Dispose() {
 			GC.SuppressFinalize(this);
 
+			_platform.API.DeviceWaitIdle(_platform.PrimaryDevice.Logical);
+			
 			unsafe {
-				_platform.API.DeviceWaitIdle(_platform.PrimaryDevice.Logical);
-				
 				_platform.API.DestroyPipeline(_platform.PrimaryDevice.Logical, Pipeline, null);
 				_platform.API.DestroyPipelineLayout(_platform.PrimaryDevice.Logical, PipelineLayout, null);
 			}

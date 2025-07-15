@@ -7,8 +7,8 @@ namespace Cinenic.Renderer {
 
 		public IPlatform Platform { get; }
 		
-		public RenderQueue Queue { get; }
-		public ShaderProgram Program { get; }
+		public RenderQueue Queue { get; protected set; }
+		public ShaderProgram Program { get; protected set; }
 
 		public RenderPipeline(IPlatform platform, RenderQueue queue, ShaderProgram program) {
 			Platform = platform;
@@ -16,8 +16,8 @@ namespace Cinenic.Renderer {
 			Program = program;
 		}
 
-		public abstract void Begin(Framebuffer renderTarget);
-		public abstract void End(Framebuffer renderTarget);
+		public abstract void Begin(ref Framebuffer renderTarget);
+		public abstract void End(ref Framebuffer renderTarget);
 		
 		public abstract void Dispose();
 

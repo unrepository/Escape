@@ -1,19 +1,20 @@
 using Silk.NET.Maths;
 using Silk.NET.Vulkan;
 
+// TODO
 namespace Cinenic.Renderer.Vulkan {
 	
 	public class VkFramebuffer : Framebuffer {
 		
 		public Silk.NET.Vulkan.Framebuffer Base { get; init; }
 		
-		public SwapchainKHR Swapchain { get; init; }
+		public SwapchainKHR Swapchain { get; protected set; }
 
-		public Format SwapchainFormat { get; init; }
-		public Extent2D SwapchainExtent { get; init; }
-		public Image[] SwapchainImages { get; init; }
-		public ImageView[] SwapchainImageViews { get; init; }
-		public Silk.NET.Vulkan.Framebuffer[] SwapchainFramebuffers { get; init; }
+		public Format SwapchainFormat { get; protected set; }
+		public Extent2D SwapchainExtent { get; protected set; }
+		public Image[] SwapchainImages { get; protected set; }
+		public ImageView[] SwapchainImageViews { get; protected set; }
+		public Silk.NET.Vulkan.Framebuffer[] SwapchainFramebuffers { get; protected set; }
 
 		public VkFramebuffer(IPlatform platform, Vector2D<uint> size) : base(platform, size) {
 			//throw new NotImplementedException();
@@ -42,9 +43,9 @@ namespace Cinenic.Renderer.Vulkan {
 		public override byte[] Read(int attachment = 0, Rectangle<uint>? area = null) {
 			throw new NotImplementedException();
 		}
-		
+
 		public override void Dispose() {
-			//throw new NotImplementedException();
+			GC.SuppressFinalize(this);
 		}
 	}
 }

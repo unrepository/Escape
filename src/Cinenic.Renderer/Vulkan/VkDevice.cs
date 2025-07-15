@@ -4,6 +4,8 @@ using Silk.NET.Core.Native;
 using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.KHR;
 
+using static Cinenic.Renderer.Vulkan.VkHelpers;
+
 namespace Cinenic.Renderer.Vulkan {
 
 	public unsafe class VkDevice : IDevice {
@@ -122,30 +124,25 @@ namespace Cinenic.Renderer.Vulkan {
 			
 		#region Check extension support
 			uint deviceExtensionCount = 0;
-			Result result;
 
-			if(
-				(result = _platform.API.EnumerateDeviceExtensionProperties(
+			VkCheck(
+				_platform.API.EnumerateDeviceExtensionProperties(
 					Physical, (byte*) null,
 					ref deviceExtensionCount, null
-				))
-				!= Result.Success
-			) {
-				throw new ExternalException($"Could not enumerate device extension properties: {result}");
-			}
+				),
+				"Could not enumerate device extension properties"
+			);
 
 			var deviceExtensions = new ExtensionProperties[deviceExtensionCount];
 
-			fixed(ExtensionProperties* ptr = &deviceExtensions[0]) {
-				if(
-					(result = _platform.API.EnumerateDeviceExtensionProperties(
+			fixed(ExtensionProperties* ptr = deviceExtensions) {
+				VkCheck(
+					_platform.API.EnumerateDeviceExtensionProperties(
 						Physical, (byte*) null,
 						ref deviceExtensionCount, ptr
-					))
-					!= Result.Success
-				) {
-					throw new ExternalException($"Could not enumerate device extension properties: {result}");
-				}
+					),
+					"Could not enumerate device extension properties"
+				);
 			}
 
 			var availableExtensions =
@@ -245,9 +242,10 @@ namespace Cinenic.Renderer.Vulkan {
 				deviceInfo.PQueueCreateInfos = ptr;
 			}
 
-			if((result = _platform.API.CreateDevice(Physical, deviceInfo, null, out var logicalDevice)) != Result.Success) {
-				throw new ExternalException($"Failed to create a logical device: {result}");
-			}
+			VkCheck(
+				_platform.API.CreateDevice(Physical, deviceInfo, null, out var logicalDevice),
+				"Failed to create a logical device"
+			);
 
 			Logical = logicalDevice;
 		#endregion
