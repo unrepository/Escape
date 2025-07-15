@@ -53,24 +53,34 @@ namespace Cinenic.Sandbox {
 			queue.Initialize();
 			
 			_logger.Info("Create pipeline");
-			var pipeline = new VkRenderPipeline(platform, queue, ShaderProgram.Create(
+			var pipeline1 = new VkRenderPipeline(platform, queue, ShaderProgram.Create(
 				platform,
 				Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk.vert")),
 				Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
 			));
 			
+			var pipeline2 = new VkRenderPipeline(platform, queue, ShaderProgram.Create(
+				platform,
+				Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk2.vert")),
+				Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
+			));
+			
 			_logger.Info("Create window");
-			var window = Window.Create(platform, pipeline, WindowOptions.DefaultVulkan);
-			//var window = new VkWindow(platform, pipeline);
+			var window = Window.Create(platform, pipeline1, WindowOptions.DefaultVulkan);
 			window.Title = "Sandbox";
 			
 			window.Base.Render += delta => {
 				window.Base.MakeCurrent();
 				queue.Viewport = new Vector4D<int>(0, 0, window.Base.FramebufferSize.X, window.Base.FramebufferSize.Y);
 				queue.Scissor = queue.Viewport;
-				pipeline.Begin(ref window.Framebuffer);
+				window.Pipeline.Begin(ref window.Framebuffer);
 				platform.API.CmdDraw(queue.CommandBuffer, 3, 1, 0, 0);
-				pipeline.End(ref window.Framebuffer);
+				window.Pipeline.End(ref window.Framebuffer);
+
+				if(window.Base.Time % 1 <= delta) {
+					if(window.Pipeline == pipeline1) window.Pipeline = pipeline2;
+					else window.Pipeline = pipeline1;
+				}
 			};
 			
 			_logger.Info("Begin rendering");

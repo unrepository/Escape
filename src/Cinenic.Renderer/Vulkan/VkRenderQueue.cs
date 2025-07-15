@@ -382,6 +382,8 @@ namespace Cinenic.Renderer.Vulkan {
 				.Get<KhrSwapchain>(_platform, _platform.PrimaryDevice)
 				.QueuePresent(_platform.PrimaryDevice.SurfaceQueue.Value, presentInfo);
 
+			CurrentFrame = (CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+			
 			if(result == Result.ErrorOutOfDateKhr || result == Result.SuboptimalKhr) {
 				return false;
 			}
@@ -390,7 +392,6 @@ namespace Cinenic.Renderer.Vulkan {
 				throw new PlatformException($"Failed to present queue: {result}");
 			}
 			
-			CurrentFrame = (CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 			return true;
 		}
 

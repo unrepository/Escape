@@ -24,7 +24,7 @@ namespace Cinenic.Renderer {
 		}
 		
 		public IPlatform Platform { get; }
-		public RenderPipeline Pipeline { get; }
+		public RenderPipeline Pipeline { get; set; }
 		public Framebuffer Framebuffer;
 		
 		public IWindow Base { get; protected set; }

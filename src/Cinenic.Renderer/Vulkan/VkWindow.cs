@@ -37,9 +37,9 @@ namespace Cinenic.Renderer.Vulkan {
 			windowOptions.API = GraphicsAPI.DefaultVulkan;
 
 			Base = Silk.NET.Windowing.Window.Create(windowOptions);
-			Base.FramebufferResize += _ => {
+			Base.FramebufferResize += newSize => {
 				((VkRenderPipeline) pipeline).RecreateFramebuffer(ref Framebuffer);
-				Base.DoRender();
+				//Base.DoEvents();
 			};
 			Base.Initialize();
 
