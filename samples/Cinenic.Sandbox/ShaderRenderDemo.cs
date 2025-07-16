@@ -40,7 +40,7 @@ namespace Cinenic.Sandbox {
 			var window = Window.Create(platform, windowOptions);
 
 			platform.Initialize();
-			window.Initialize();
+			window.Initialize(null /* TODO */);
 			
 			var scene = new ShaderRenderDemo(platform);
 			window.PushScene(scene);
@@ -65,7 +65,7 @@ namespace Cinenic.Sandbox {
 			ShaderProgram.Shaders[1] = Shader.Create(platform, Shader.Family.Fragment,
 				Assembly.GetExecutingAssembly().ReadTextResource("Cinenic.Sandbox.Resources.Shaders.demo.frag"));
 			
-			_framebuffer = Framebuffer.Create(platform, _framebufferSize);
+			_framebuffer = Framebuffer.Create(platform, null /* TODO */, _framebufferSize);
 		}
 
 		public override void Initialize(Window window) {

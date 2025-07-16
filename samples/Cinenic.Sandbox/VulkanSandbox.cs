@@ -66,20 +66,25 @@ namespace Cinenic.Sandbox {
 			));
 			
 			_logger.Info("Create window");
-			var window = Window.Create(platform, pipeline1, WindowOptions.DefaultVulkan);
+			var window = Window.Create(platform, WindowOptions.DefaultVulkan);
 			window.Title = "Sandbox";
+			window.Initialize(queue);
+
+			queue.RenderTarget = window.Framebuffer;
+
+			var pipeline = pipeline1;
 			
 			window.Base.Render += delta => {
 				window.Base.MakeCurrent();
 				queue.Viewport = new Vector4D<int>(0, 0, window.Base.FramebufferSize.X, window.Base.FramebufferSize.Y);
 				queue.Scissor = queue.Viewport;
-				window.Pipeline.Begin(ref window.Framebuffer);
+				pipeline.Begin();
 				platform.API.CmdDraw(queue.CommandBuffer, 3, 1, 0, 0);
-				window.Pipeline.End(ref window.Framebuffer);
+				pipeline.End();
 
 				if(window.Base.Time % 1 <= delta) {
-					if(window.Pipeline == pipeline1) window.Pipeline = pipeline2;
-					else window.Pipeline = pipeline1;
+					if(pipeline == pipeline1) pipeline = pipeline2;
+					else pipeline = pipeline1;
 				}
 			};
 			

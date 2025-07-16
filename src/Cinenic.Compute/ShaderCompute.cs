@@ -44,7 +44,7 @@ namespace Cinenic.Compute {
 				)).ToArray());
 			}
 			
-			Framebuffer = Framebuffer.Create(platform, framebufferSize);
+			Framebuffer = Framebuffer.Create(platform, null /* TODO */, framebufferSize);
 		}
 
 		public void Render() {

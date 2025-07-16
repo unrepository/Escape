@@ -9,8 +9,8 @@ namespace Cinenic.Renderer.OpenGL {
 
 		private readonly GLPlatform _platform;
 		
-		public GLFramebuffer(GLPlatform platform, Vector2D<uint> size, GLTexture? baseTexture = null)
-			: base(platform, size)
+		public GLFramebuffer(GLPlatform platform, RenderQueue queue, Vector2D<uint> size, GLTexture? baseTexture = null)
+			: base(platform, queue, size)
 		{
 			_platform = platform;
 			Handle = platform.API.GenFramebuffer();

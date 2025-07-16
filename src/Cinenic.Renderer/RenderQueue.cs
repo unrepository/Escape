@@ -12,7 +12,10 @@ namespace Cinenic.Renderer {
 		public Vector4D<int> Viewport { get; set; } = Vector4D<int>.Zero;
 		public Vector4D<int> Scissor { get; set; } = Vector4D<int>.Zero;
 		
-		public RenderQueue(
+		public List<IRenderable> Queue { get; set; } = [];
+		public Framebuffer? RenderTarget;
+		
+		/*public RenderQueue(
 			IPlatform platform, Family family, Format format,
 			Window window
 		) : this(platform, family, format) {
@@ -26,7 +29,7 @@ namespace Cinenic.Renderer {
 		) : this(platform, family, format) {
 			Viewport = viewport;
 			Scissor = scissor;
-		}
+		}*/
 
 		public RenderQueue(IPlatform platform, Family family, Format format) {
 			Platform = platform;
@@ -36,8 +39,15 @@ namespace Cinenic.Renderer {
 
 		public abstract void Initialize();
 
-		public abstract bool Begin(Framebuffer renderTarget);
-		public abstract bool End(Framebuffer renderTarget);
+		public abstract bool Begin();
+		
+		public virtual void Render(TimeSpan delta) {
+			foreach(var renderable in Queue) {
+				renderable.Render(this, delta); // TODO smth like painter
+			}
+		}
+		
+		public abstract bool End();
 		
 		public abstract void Dispose();
 

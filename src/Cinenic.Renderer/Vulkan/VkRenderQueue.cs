@@ -17,7 +17,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 		public const int MAX_FRAMES_IN_FLIGHT = 2;
 		
-		public RenderPass RenderPass { get; private set; }
+		public Silk.NET.Vulkan.RenderPass Base { get; private set; }
 		
 		public List<AttachmentDescription> Attachments { get; init; } = [];
 		public List<SubpassDescription> Subpasses { get; init; } = [];
@@ -199,7 +199,7 @@ namespace Cinenic.Renderer.Vulkan {
 					"Could not create the render pass"
 				);
 				
-				RenderPass = pass;
+				Base = pass;
 			}
 			
 			_logger.Debug("Initialized render pass");
@@ -248,12 +248,14 @@ namespace Cinenic.Renderer.Vulkan {
 				this, attachmentIndex, layout, description.PipelineBindPoint);
 		}
 
-		public unsafe override bool Begin(Framebuffer renderTarget) {
-			Debug.Assert(renderTarget is VkFramebuffer);
+		public unsafe override bool Begin() {
+			if(RenderTarget is null) return false;
+			
+			Debug.Assert(RenderTarget is VkFramebuffer);
 			Debug.Assert(CommandPool.HasValue);
 			Debug.Assert(CommandBuffers.Length > 0);
 
-			var vkRenderTarget = (VkFramebuffer) renderTarget;
+			var vkRenderTarget = (VkFramebuffer) RenderTarget;
 
 			// synchronization wait
 			_platform.API.WaitForFences(
@@ -306,11 +308,17 @@ namespace Cinenic.Renderer.Vulkan {
 			
 			var passBeginInfo = new RenderPassBeginInfo {
 				SType = StructureType.RenderPassBeginInfo,
-				RenderPass = RenderPass,
+				RenderPass = Base,
 				Framebuffer = vkRenderTarget.SwapchainFramebuffers[CurrentImage],
 				RenderArea = {
-					Offset = { X = Viewport.X, Y = Viewport.Y },
-					Extent = { Width = (uint) Viewport.Z, Height = (uint) Viewport.W }
+					Offset = {
+						X = Viewport.X,
+						Y = Viewport.Y
+					},
+					Extent = {
+						Width = (uint) Viewport.Z > 0 ? (uint) Viewport.Z : vkRenderTarget.SwapchainExtent.Width,
+						Height = (uint) Viewport.W > 0 ? (uint) Viewport.W : vkRenderTarget.SwapchainExtent.Height
+					}
 				},
 				ClearValueCount = 1
 			};
@@ -321,13 +329,15 @@ namespace Cinenic.Renderer.Vulkan {
 			_platform.API.CmdBeginRenderPass(CommandBuffer, &passBeginInfo, SubpassContents.Inline);
 			return true;
 		}
-		
-		public unsafe override bool End(Framebuffer renderTarget) {
-			Debug.Assert(renderTarget is VkFramebuffer);
+
+		public unsafe override bool End() {
+			if(RenderTarget is null) return false;
+			
+			Debug.Assert(RenderTarget is VkFramebuffer);
 			Debug.Assert(CommandPool.HasValue);
 			Debug.Assert(CommandBuffers.Length > 0);
 
-			var vkRenderTarget = (VkFramebuffer) renderTarget;
+			var vkRenderTarget = (VkFramebuffer) RenderTarget;
 			
 			// end render pass & command buffer
 			_platform.API.CmdEndRenderPass(CommandBuffer);
@@ -401,7 +411,7 @@ namespace Cinenic.Renderer.Vulkan {
 			unsafe {
 				var device = _platform.PrimaryDevice!.Logical;
 				
-				_platform.API.DestroyRenderPass(device, RenderPass, null);
+				_platform.API.DestroyRenderPass(device, Base, null);
 				_platform.API.DestroyCommandPool(device, CommandPool.Value, null);
 				
 				for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {

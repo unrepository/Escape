@@ -3,7 +3,7 @@ using Cinenic.Renderer.Shader;
 using NLog;
 using Silk.NET.Core;
 using Silk.NET.Vulkan;
-
+using Silk.NET.Windowing;
 using static Cinenic.Renderer.Vulkan.VkHelpers;
 
 namespace Cinenic.Renderer.Vulkan {
@@ -22,10 +22,9 @@ namespace Cinenic.Renderer.Vulkan {
 
 		private readonly VkPlatform _platform;
 
-		public unsafe VkRenderPipeline(VkPlatform platform, RenderQueue queue, ShaderProgram program)
+		public unsafe VkRenderPipeline(VkPlatform platform, VkRenderQueue queue, ShaderProgram program)
 			: base(platform, queue, program) 
 		{
-			Debug.Assert(queue is VkRenderQueue);
 			//Debug.Assert(((VkRenderQueue) queue).Base.Handle != 0, "RenderQueue.Handle is 0. Did you forget to call Initialize()?");
 			_platform = platform;
 
@@ -56,17 +55,23 @@ namespace Cinenic.Renderer.Vulkan {
 				};
 
 				var viewport = new Viewport {
-					X = queue.Viewport.X,
-					Y = queue.Viewport.Y,
-					Width = queue.Viewport.Z,
-					Height = queue.Viewport.W,
+					X = Queue.Viewport.X,
+					Y = Queue.Viewport.Y,
+					Width = Queue.Viewport.Z > 0 ? Queue.Viewport.Z : 640,
+					Height = Queue.Viewport.W > 0 ? Queue.Viewport.W : 480,
 					MinDepth = 0,
 					MaxDepth = 1
 				};
-
+			
 				var scissor = new Rect2D {
-					Offset = { X = queue.Viewport.X, Y = queue.Viewport.Y },
-					Extent = { Width = (uint) queue.Viewport.Z, Height = (uint) queue.Viewport.W }
+					Offset = {
+						X = Queue.Scissor.X,
+						Y = Queue.Scissor.Y
+					},
+					Extent = {
+						Width = (uint) (Queue.Scissor.Z > 0 ? Queue.Scissor.Z : viewport.Width),
+						Height = (uint) (Queue.Scissor.W > 0 ? Queue.Scissor.W : viewport.Height)
+					}
 				};
 
 				var viewportInfo = new PipelineViewportStateCreateInfo {
@@ -155,7 +160,7 @@ namespace Cinenic.Renderer.Vulkan {
 								SType = StructureType.GraphicsPipelineCreateInfo,
 								StageCount = (uint) ((VkShaderProgram) Program).Stages.Count,
 								Layout = PipelineLayout,
-								RenderPass = ((VkRenderQueue) Queue).RenderPass,
+								RenderPass = ((VkRenderQueue) Queue).Base,
 								Subpass = 0,
 								BasePipelineHandle = default,
 							}
@@ -197,17 +202,40 @@ namespace Cinenic.Renderer.Vulkan {
 		#endregion
 		}
 
-		public override void Begin(ref Framebuffer renderTarget) {
-			var vkRenderTarget = (VkFramebuffer) renderTarget;
-			var vkQueue = (VkRenderQueue) Queue;
-			
-			if(!Queue.Begin(renderTarget)) {
-				RecreateFramebuffer(ref renderTarget);
-				RecreateQueue(ref vkQueue);
+		public override bool Begin() {
+			Debug.Assert(Queue is VkRenderQueue);
+			Debug.Assert(Queue.RenderTarget is not null, "Queue.RenderTarget is null! Did you forget to assign it?");
 
-				vkRenderTarget = (VkFramebuffer) renderTarget;
-				Queue = vkQueue;
+			if(Queue.RenderTarget is VkWindow.WindowFramebuffer windowFramebuffer) {
+				windowFramebuffer.Window.Base.DoUpdate();
+				if(!windowFramebuffer.Window.Base.IsClosing) windowFramebuffer.Window.Base.DoEvents();
+				if(windowFramebuffer.Window.Base.IsClosing) {
+					Queue.RenderTarget.Dispose();
+					Queue.RenderTarget = null;
+					return false;
+				}
+				windowFramebuffer.Window.Base.MakeCurrent();
 			}
+			
+			if(!Queue.Begin()) {
+				RecreateFramebuffer(
+					_platform,
+					(VkFramebuffer) Queue.RenderTarget,
+					out var newFramebuffer
+				);
+				
+				RecreateQueue(
+					_platform,
+					(VkRenderQueue) Queue,
+					out var newQueue
+				);
+				
+				Queue = newQueue;
+				Queue.RenderTarget = newFramebuffer;
+			}
+
+			var vkQueue = (VkRenderQueue) Queue;
+			var vkRenderTarget = (VkFramebuffer) Queue.RenderTarget;
 			
 			_platform.API.CmdBindPipeline(
 				vkQueue.CommandBuffer,
@@ -243,54 +271,62 @@ namespace Cinenic.Renderer.Vulkan {
 				_platform.API.CmdSetViewport(vkQueue.CommandBuffer, 0, 1, &viewport);
 				_platform.API.CmdSetScissor(vkQueue.CommandBuffer, 0, 1, &scissor);
 			}
+
+			return true;
 		}
 		
-		public override void End(ref Framebuffer renderTarget) {
-			var vkQueue = (VkRenderQueue) Queue;
+		public override bool End() {
+			Debug.Assert(Queue is VkRenderQueue);
+			Debug.Assert(Queue.RenderTarget is not null, "Queue.RenderTarget is null! Did you forget to assign it?");
 			
-			if(!Queue.End(renderTarget)) {
-				RecreateFramebuffer(ref renderTarget);
-				RecreateQueue(ref vkQueue);
-				Queue = vkQueue;
+			if(!Queue.End()) {
+				RecreateFramebuffer(
+					_platform,
+					(VkFramebuffer) Queue.RenderTarget,
+					out var newFramebuffer
+				);
+				
+				RecreateQueue(
+					_platform,
+					(VkRenderQueue) Queue,
+					out var newQueue
+				);
+				
+				Queue = newQueue;
+				Queue.RenderTarget = newFramebuffer;
+			}
+
+			return true;
+		}
+		
+		public static void RecreateFramebuffer(VkPlatform platform, in VkFramebuffer oldFramebuffer, out VkFramebuffer newFramebuffer) {
+			platform.API.DeviceWaitIdle(platform.PrimaryDevice!.Logical);
+			oldFramebuffer.Dispose();
+
+			if(oldFramebuffer is VkWindow.WindowFramebuffer windowFramebuffer) {
+				newFramebuffer = new VkWindow.WindowFramebuffer(
+					platform,
+					(VkRenderQueue) windowFramebuffer.Queue,
+					windowFramebuffer.Window,
+					windowFramebuffer.Size
+				);
+			} else {
+				newFramebuffer = new VkFramebuffer(platform, (VkRenderQueue) oldFramebuffer.Queue, oldFramebuffer.Size);
 			}
 		}
 
-		public void RecreateQueue(ref VkRenderQueue vkQueue) {
-			//_logger.Trace("Recreating render queue");
-
-			_platform.API.DeviceWaitIdle(_platform.PrimaryDevice!.Logical);
+		public static void RecreateQueue(VkPlatform platform, in VkRenderQueue oldQueue, out VkRenderQueue newQueue) {
+			platform.API.DeviceWaitIdle(platform.PrimaryDevice!.Logical);
+			oldQueue.Dispose();
 			
-			Queue.Dispose();
-			
-			var newQueue = new VkRenderQueue(_platform, vkQueue.Type, vkQueue.ColorFormat) {
-				Attachments = vkQueue.Attachments,
-				Subpasses = vkQueue.Subpasses,
-				SubpassDependencies = vkQueue.SubpassDependencies,
-				Viewport = vkQueue.Viewport,
-				Scissor = vkQueue.Scissor
+			newQueue = new VkRenderQueue(platform, oldQueue.Type, oldQueue.ColorFormat) {
+				Attachments = oldQueue.Attachments,
+				Subpasses = oldQueue.Subpasses,
+				SubpassDependencies = oldQueue.SubpassDependencies,
+				Viewport = oldQueue.Viewport,
+				Scissor = oldQueue.Scissor
 			};
 			newQueue.Initialize();
-			
-			Queue = newQueue;
-			vkQueue = newQueue;
-		}
-		
-		public void RecreateFramebuffer(ref Framebuffer renderTarget) {
-			Debug.Assert(renderTarget is VkFramebuffer);
-			//_logger.Trace("Recreating framebuffer");
-
-			_platform.API.DeviceWaitIdle(_platform.PrimaryDevice!.Logical);
-			renderTarget.Dispose();
-			
-			VkFramebuffer newFramebuffer;
-
-			if(renderTarget is VkWindow.WindowFramebuffer windowFramebuffer) {
-				newFramebuffer = new VkWindow.WindowFramebuffer(_platform, windowFramebuffer.Window, windowFramebuffer.Size);
-			} else {
-				newFramebuffer = new VkFramebuffer(_platform, renderTarget.Size);
-			}
-			
-			renderTarget = newFramebuffer;
 		}
 
 		public override void Dispose() {

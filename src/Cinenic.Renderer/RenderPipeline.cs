@@ -6,9 +6,10 @@ namespace Cinenic.Renderer {
 	public abstract class RenderPipeline : IDisposable {
 
 		public IPlatform Platform { get; }
-		
-		public RenderQueue Queue { get; protected set; }
-		public ShaderProgram Program { get; protected set; }
+
+		public RenderQueue Queue;
+		//public Framebuffer RenderTarget { get; set; }
+		public ShaderProgram Program { get; }
 
 		public RenderPipeline(IPlatform platform, RenderQueue queue, ShaderProgram program) {
 			Platform = platform;
@@ -16,8 +17,8 @@ namespace Cinenic.Renderer {
 			Program = program;
 		}
 
-		public abstract void Begin(ref Framebuffer renderTarget);
-		public abstract void End(ref Framebuffer renderTarget);
+		public abstract bool Begin();
+		public abstract bool End();
 		
 		public abstract void Dispose();
 
@@ -26,11 +27,5 @@ namespace Cinenic.Renderer {
 		// 		_ => throw new NotImplementedException() // Platform_Impl
 		// 	};
 		// }
-
-		public enum Family {
-			
-			Graphics,
-			Compute,
-		}
 	}
 }

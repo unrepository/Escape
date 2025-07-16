@@ -1,4 +1,5 @@
 using Cinenic.Renderer.OpenGL;
+using Cinenic.Renderer.Vulkan;
 using Silk.NET.Maths;
 
 namespace Cinenic.Renderer {
@@ -6,14 +7,16 @@ namespace Cinenic.Renderer {
 	public abstract class Framebuffer : IDisposable {
 		
 		public IPlatform Platform { get; }
+		public RenderQueue Queue { get; }
 		
 		public uint Handle { get; protected set; }
 		public Vector2D<uint> Size { get; protected init; }
 
 		protected List<Texture> TextureAttachments { get; } = [];
 
-		protected Framebuffer(IPlatform platform, Vector2D<uint> size) {
+		protected Framebuffer(IPlatform platform, RenderQueue queue, Vector2D<uint> size) {
 			Platform = platform;
+			Queue = queue;
 			Size = size;
 		}
 
@@ -33,10 +36,14 @@ namespace Cinenic.Renderer {
 		
 		public abstract void Dispose();
 
-		public static Framebuffer Create(IPlatform platform,
-		                                 Vector2D<uint> size) {
+		public static Framebuffer Create(
+			IPlatform platform,
+			RenderQueue queue,
+			Vector2D<uint> size
+		) {
 			return platform switch {
-				GLPlatform glPlatform => new GLFramebuffer(glPlatform, size),
+				GLPlatform glPlatform => new GLFramebuffer(glPlatform, queue, size),
+				VkPlatform vkPlatform => new VkFramebuffer(vkPlatform, queue, size),
 				_ => throw new NotImplementedException() // PlatformImpl
 			};
 		}

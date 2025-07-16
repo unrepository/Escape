@@ -14,16 +14,14 @@ namespace Cinenic.Renderer.Vulkan {
 
 		//public static Format DefaultFormat { get; internal set; }
 		
-		public SurfaceKHR Surface { get; }
+		public SurfaceKHR Surface { get; private set; }
 
 		private readonly VkPlatform _platform;
 		private readonly VkDevice _device;
 		
-		public unsafe VkWindow(VkPlatform platform, RenderPipeline pipeline, WindowOptions? options = null)
-			: base(platform, pipeline, options)
+		public unsafe VkWindow(VkPlatform platform, WindowOptions? options = null)
+			: base(platform, options)
 		{
-			Debug.Assert(pipeline is VkRenderPipeline);
-			
 			_platform = platform;
 			Debug.Assert(_platform.PrimaryDevice != null);
 
@@ -37,18 +35,29 @@ namespace Cinenic.Renderer.Vulkan {
 			windowOptions.API = GraphicsAPI.DefaultVulkan;
 
 			Base = Silk.NET.Windowing.Window.Create(windowOptions);
+		}
+
+		public override void Initialize(RenderQueue queue) {
+			Debug.Assert(queue is VkRenderQueue);
+			var vkQueue = (VkRenderQueue) queue;
+			
 			Base.FramebufferResize += newSize => {
-				((VkRenderPipeline) pipeline).RecreateFramebuffer(ref Framebuffer);
+				VkRenderPipeline.RecreateFramebuffer(
+					_platform,
+					(VkFramebuffer) queue.RenderTarget,
+					out var newFramebuffer
+				);
+
+				queue.RenderTarget = newFramebuffer;
 				//Base.DoEvents();
 			};
 			Base.Initialize();
 
-			Surface = Base.VkSurface!.Create<AllocationCallbacks>(_platform.Vk.ToHandle(), null).ToSurface();
-			Framebuffer = new WindowFramebuffer(_platform, this, new Vector2D<uint>(Width, Height));
-		}
-
-		public override void Initialize() {
-			throw new NotImplementedException();
+			unsafe {
+				Surface = Base.VkSurface!.Create<AllocationCallbacks>(_platform.Vk.ToHandle(), null).ToSurface();
+			}
+			
+			Framebuffer = new WindowFramebuffer(_platform, vkQueue, this, new Vector2D<uint>(Width, Height));
 		}
 
 		public override double RenderFrame(Action<double>? frameProvider = null) {
@@ -75,7 +84,9 @@ namespace Cinenic.Renderer.Vulkan {
 			private readonly VkPlatform _platform;
 			private readonly VkDevice _device;
 			
-			public WindowFramebuffer(VkPlatform platform, VkWindow window, Vector2D<uint> size) : base(platform, size) {
+			public WindowFramebuffer(VkPlatform platform, VkRenderQueue queue, VkWindow window, Vector2D<uint> size)
+				: base(platform, queue, size)
+			{
 				_platform = platform;
 				Window = window;
 				_device = platform.PrimaryDevice!;
@@ -84,7 +95,7 @@ namespace Cinenic.Renderer.Vulkan {
 				_CreateImageViews();
 				_CreateFramebuffers();
 			}
-			
+
 			private unsafe void _CreateSwapchain() {
 			#region Pick settings
 				SurfaceFormatKHR? format = null;
@@ -92,8 +103,8 @@ namespace Cinenic.Renderer.Vulkan {
 
 				foreach(var surfaceFormat in _device.SurfaceFormats!) {
 					if(
-						surfaceFormat.Format == ((VkRenderQueue) Window.Pipeline.Queue).VkColorFormat
-						&& surfaceFormat.ColorSpace == ((VkRenderQueue) Window.Pipeline.Queue).VkColorSpace
+						surfaceFormat.Format == ((VkRenderQueue) Queue).VkColorFormat
+						&& surfaceFormat.ColorSpace == ((VkRenderQueue) Queue).VkColorSpace
 					) {
 						format = surfaceFormat;
 					}
@@ -238,8 +249,8 @@ namespace Cinenic.Renderer.Vulkan {
 					fixed(ImageView* attachmentsPtr = &attachments[0]) {
 						var framebufferInfo = new FramebufferCreateInfo {
 							SType = StructureType.FramebufferCreateInfo,
-							RenderPass = ((VkRenderQueue) Window.Pipeline.Queue).RenderPass,
-							AttachmentCount = (uint) ((VkRenderQueue) Window.Pipeline.Queue).Attachments.Count,
+							RenderPass = ((VkRenderQueue) Queue).Base,
+							AttachmentCount = (uint) ((VkRenderQueue) Queue).Attachments.Count,
 							PAttachments = attachmentsPtr,
 							Width = SwapchainExtent.Width,
 							Height = SwapchainExtent.Height,

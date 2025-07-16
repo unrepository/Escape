@@ -12,8 +12,8 @@ namespace Cinenic.Renderer.OpenGL {
 		private readonly GLPlatform _platform;
 		private readonly List<Action> _scheduledActions = [];
 
-		public GLWindow(GLPlatform platform, RenderPipeline? pipeline = null, WindowOptions? options = null)
-			: base(platform, pipeline, options)
+		public GLWindow(GLPlatform platform, WindowOptions? options = null)
+			: base(platform, options)
 		{
 			_platform = platform;
 			
@@ -66,7 +66,7 @@ namespace Cinenic.Renderer.OpenGL {
 			Base.Initialize();
 		}
 
-		public override void Initialize() {
+		public override void Initialize(RenderQueue queue) {
 			Debug.Assert(!IsInitialized);
 			
 			Base.MakeCurrent();

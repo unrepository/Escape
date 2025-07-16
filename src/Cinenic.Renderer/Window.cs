@@ -24,7 +24,6 @@ namespace Cinenic.Renderer {
 		}
 		
 		public IPlatform Platform { get; }
-		public RenderPipeline Pipeline { get; set; }
 		public Framebuffer Framebuffer;
 		
 		public IWindow Base { get; protected set; }
@@ -43,12 +42,11 @@ namespace Cinenic.Renderer {
 
 		protected SortedDictionary<int, List<Action<double>>> RenderQueues { get; } = [];
 		
-		public Window(IPlatform platform, RenderPipeline pipeline, WindowOptions? options = null) {
+		public Window(IPlatform platform, WindowOptions? options = null) {
 			Platform = platform;
-			Pipeline = pipeline;
 		}
 
-		public abstract void Initialize();
+		public abstract void Initialize(RenderQueue queue);
 		public abstract double RenderFrame(Action<double>? frameProvider = null);
 
 		public abstract void ScheduleLater(Action action);
@@ -92,14 +90,11 @@ namespace Cinenic.Renderer {
 		}
 		
 		public abstract void Dispose();
-		
-		[Obsolete]
-		public static Window Create(GLPlatform platform, WindowOptions? options = null)
-			=> new GLWindow(platform, null, options);
 
-		public static Window Create(IPlatform platform, RenderPipeline pipeline, WindowOptions? options = null) {
+		public static Window Create(IPlatform platform, WindowOptions? options = null) {
 			return platform switch {
-				VkPlatform vkPlatform => new VkWindow(vkPlatform, pipeline, options),
+				GLPlatform glPlatform => new GLWindow(glPlatform, options),
+				VkPlatform vkPlatform => new VkWindow(vkPlatform, options),
 				_ => throw new NotImplementedException("Platform_Impl")
 			};
 		}

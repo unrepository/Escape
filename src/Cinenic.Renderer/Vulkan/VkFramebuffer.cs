@@ -16,7 +16,7 @@ namespace Cinenic.Renderer.Vulkan {
 		public ImageView[] SwapchainImageViews { get; protected set; }
 		public Silk.NET.Vulkan.Framebuffer[] SwapchainFramebuffers { get; protected set; }
 
-		public VkFramebuffer(IPlatform platform, Vector2D<uint> size) : base(platform, size) {
+		public VkFramebuffer(VkPlatform platform, RenderQueue queue, Vector2D<uint> size) : base(platform, queue, size) {
 			//throw new NotImplementedException();
 		}
 		

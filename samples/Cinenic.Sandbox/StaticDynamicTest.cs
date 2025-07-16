@@ -37,7 +37,7 @@ namespace Cinenic.Sandbox {
 			var window = Window.Create(platform, windowOptions);
 
 			platform.Initialize();
-			window.Initialize();
+			window.Initialize(null /* TODO */);
 			
 			var scene = new StaticDynamicTest(platform);
 			window.PushScene(scene);
