@@ -48,7 +48,7 @@ namespace Cinenic.Compute {
 		}
 
 		public void Render() {
-			Program.Bind();
+			Program.Bind(null /* TODO */);
 			Framebuffer.Bind();
 
 			switch(_platform) {

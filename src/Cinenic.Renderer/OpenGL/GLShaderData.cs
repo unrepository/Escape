@@ -8,8 +8,7 @@ namespace Cinenic.Renderer.OpenGL {
 	
 	public class GLShaderData<T> : IShaderData<T> {
 		
-		public uint Handle { get; private set; }
-		
+		public ulong Handle { get; private set; }
 		public uint Binding { get; init; }
 
 		public T? Data {
@@ -31,21 +30,19 @@ namespace Cinenic.Renderer.OpenGL {
 
 			void* dataPtr = null;
 			
-			//if(Data is not null) {
-				fixed(void* ptr = &_data) {
-					dataPtr = ptr;
-				}
-			//}
+			fixed(void* ptr = &_data) {
+				dataPtr = ptr;
+			}
 			
-			_platform.API.NamedBufferData(Handle, Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
-			_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, Binding, Handle);
+			_platform.API.NamedBufferData((uint) Handle, Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
+			_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, Binding, (uint) Handle);
 		}
 
 		public unsafe void Read() {
 			Debug.Assert(Handle != 0);
 
 			void* ptr = null;
-			_platform.API.GetNamedBufferSubData(Handle, 0, Size, ptr);
+			_platform.API.GetNamedBufferSubData((uint) Handle, 0, Size, ptr);
 
 			fixed(void* dataPtr = &_data) {
 				Buffer.MemoryCopy(ptr, dataPtr, Size, Size);
@@ -54,7 +51,7 @@ namespace Cinenic.Renderer.OpenGL {
 
 		public void Dispose() {
 			GC.SuppressFinalize(this);
-			if(Handle != 0) _platform.API.DeleteBuffer(Handle);
+			if(Handle != 0) _platform.API.DeleteBuffer((uint) Handle);
 			Handle = 0;
 		}
 	}

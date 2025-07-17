@@ -44,7 +44,7 @@ namespace Cinenic {
 					queue = vkQueue;
 					break;
 				default:
-					throw new NotImplementedException("Platform_Impl");
+					throw new NotImplementedException("PlatformImpl");
 			}
 
 			Queues[id] = queue;

@@ -15,7 +15,7 @@ namespace Cinenic.Renderer.Shader {
 			Shaders = shaders;
 		}
 
-		public abstract void Bind();
+		public abstract void Bind(RenderPipeline pipeline);
 		public abstract uint Build();
 
 		public abstract void Dispose();

@@ -28,7 +28,7 @@ namespace Cinenic.Presentation {
 		}
 
 		protected override void Paint(double delta) {
-			ShaderProgram.Bind();
+			ShaderProgram.Bind(null /* TODO */);
 			
 			Camera?.Update();
 			Painter.Paint();

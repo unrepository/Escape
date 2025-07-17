@@ -95,7 +95,7 @@ namespace Cinenic.Renderer {
 			return platform switch {
 				GLPlatform glPlatform => new GLWindow(glPlatform, options),
 				VkPlatform vkPlatform => new VkWindow(vkPlatform, options),
-				_ => throw new NotImplementedException("Platform_Impl")
+				_ => throw new NotImplementedException("PlatformImpl")
 			};
 		}
 		

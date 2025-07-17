@@ -40,7 +40,6 @@ namespace Cinenic {
 				var targetDelta = TimeSpan.FromSeconds(1.0 / UpdatesPerSecond);
 
 				if(sinceLastUpdate >= targetDelta) {
-					Console.WriteLine(sinceLastUpdate.TotalMilliseconds);
 					UpdateManager.Update(sinceLastUpdate);
 					LastUpdate = currentTime;
 				} else {

@@ -28,7 +28,7 @@ namespace Cinenic {
 					pipeline = new VkRenderPipeline(vkPlatform, (VkRenderQueue) queue, program);
 					break;
 				default:
-					throw new NotImplementedException("Platform_Impl");
+					throw new NotImplementedException("PlatformImpl");
 			}
 
 			Pipelines[id] = pipeline;

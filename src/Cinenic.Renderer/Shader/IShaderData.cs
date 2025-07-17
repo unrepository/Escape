@@ -1,12 +1,12 @@
 using Cinenic.Renderer.OpenGL;
+using Cinenic.Renderer.Vulkan;
 
 namespace Cinenic.Renderer.Shader {
 	
 	public interface IShaderData<T> : IDisposable {
 		
-		public uint Handle { get; }
-		
-		public uint Binding { get; init; }
+		public ulong Handle { get; }
+		public uint Binding { get; }
 		
 		public T? Data { get; set; }
 		public uint Size { get; set; }
@@ -17,6 +17,7 @@ namespace Cinenic.Renderer.Shader {
 
 	public static class IShaderData {
 		
+		[Obsolete]
 		public static IShaderData<T> Create<T>(IPlatform platform, uint binding, T? data, uint size) {
 			return platform switch {
 				GLPlatform glPlatform => new GLShaderData<T>(glPlatform) {
@@ -25,6 +26,20 @@ namespace Cinenic.Renderer.Shader {
 					Size = size
 				},
 				_ => throw new NotImplementedException() // PlatformImpl
+			};
+		}
+		
+		public unsafe static IShaderData<T> Create<T>(IPlatform platform, ShaderProgram program, uint binding, T? data, uint? size = null) {
+			uint realSize = size ?? (uint) sizeof(T);
+			
+			return platform switch {
+				GLPlatform glPlatform => new GLShaderData<T>(glPlatform) {
+					Binding = binding,
+					Data = data,
+					Size = realSize
+				},
+				VkPlatform vkPlatform => new VkShaderData<T>(vkPlatform, program, binding, data, realSize),
+				_ => throw new NotImplementedException("PlatformImpl")
 			};
 		}
 	}

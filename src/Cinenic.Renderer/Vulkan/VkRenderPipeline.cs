@@ -130,23 +130,27 @@ namespace Cinenic.Renderer.Vulkan {
 				colorBlendInfo.BlendConstants[2] = 0;
 				colorBlendInfo.BlendConstants[3] = 0;
 
-				var pipelineLayoutInfo = new PipelineLayoutCreateInfo {
-					SType = StructureType.PipelineLayoutCreateInfo,
-					SetLayoutCount = 0,
-					PSetLayouts = null,
-					PushConstantRangeCount = 0,
-					PPushConstantRanges = null
-				};
+				var setLayouts = ((VkShaderProgram) program).DescriptorSetLayouts.ToArray();
 
-				VkCheck(
-					_platform.API.CreatePipelineLayout(
-						_platform.PrimaryDevice!.Logical,
-						pipelineLayoutInfo,
-						null,
-						out PipelineLayout
-					),
-					"Could not create the pipeline layout"
-				);
+				fixed(DescriptorSetLayout* setLayoutsPtr = setLayouts) {
+					var pipelineLayoutInfo = new PipelineLayoutCreateInfo {
+						SType = StructureType.PipelineLayoutCreateInfo,
+						SetLayoutCount = (uint) setLayouts.Length,
+						PSetLayouts = setLayoutsPtr,
+						PushConstantRangeCount = 0,
+						PPushConstantRanges = null
+					};
+
+					VkCheck(
+						_platform.API.CreatePipelineLayout(
+							_platform.PrimaryDevice!.Logical,
+							pipelineLayoutInfo,
+							null,
+							out PipelineLayout
+						),
+						"Could not create the pipeline layout"
+					);
+				}
 			#endregion
 
 			#region Pipeline
@@ -246,6 +250,8 @@ namespace Cinenic.Renderer.Vulkan {
 				},
 				Pipeline
 			);
+			
+			Program.Bind(this);
 			
 			var viewport = new Viewport {
 				X = Queue.Viewport.X,

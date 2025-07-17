@@ -14,7 +14,7 @@ namespace Cinenic.Renderer.OpenGL {
 			_platform = platform;
 		}
 
-		public override void Bind() {
+		public override void Bind(RenderPipeline pipeline) {
 			if(Handle == 0) Build();
 			
 			if(_emptyVao == 0) _emptyVao = _platform.API.GenVertexArray();
