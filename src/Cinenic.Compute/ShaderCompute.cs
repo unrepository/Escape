@@ -30,7 +30,7 @@ namespace Cinenic.Compute {
 
 			var vertexShaderCode = platform switch {
 				GLPlatform => Assembly.GetExecutingAssembly().ReadTextResourceN("Shaders.OpenGL.compute.vert"),
-				_ => throw new NotImplementedException() // PlatformImpl
+				_ => throw new NotImplementedException("PlatformImpl")
 			};
 
 			bool hasVertexShader = Program.Shaders.Any(shader => shader.Type == Shader.Family.Vertex);

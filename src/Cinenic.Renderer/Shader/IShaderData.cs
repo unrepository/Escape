@@ -25,7 +25,7 @@ namespace Cinenic.Renderer.Shader {
 					Data = data,
 					Size = size
 				},
-				_ => throw new NotImplementedException() // PlatformImpl
+				_ => throw new NotImplementedException("PlatformImpl")
 			};
 		}
 		

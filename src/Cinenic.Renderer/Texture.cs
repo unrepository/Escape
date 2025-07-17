@@ -33,7 +33,7 @@ namespace Cinenic.Renderer {
 		) {
 			return platform switch {
 				GLPlatform glPlatform => new GLTexture(glPlatform, size, filter, wrapMode),
-				_ => throw new NotImplementedException() // PlatformImpl
+				_ => throw new NotImplementedException("PlatformImpl")
 			};
 		}
 

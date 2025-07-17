@@ -44,7 +44,7 @@ namespace Cinenic.Renderer {
 			return platform switch {
 				GLPlatform glPlatform => new GLFramebuffer(glPlatform, queue, size),
 				VkPlatform vkPlatform => new VkFramebuffer(vkPlatform, queue, size),
-				_ => throw new NotImplementedException() // PlatformImpl
+				_ => throw new NotImplementedException("PlatformImpl")
 			};
 		}
 	}

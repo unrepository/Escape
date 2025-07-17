@@ -24,7 +24,7 @@ namespace Cinenic.Renderer.Shader {
 			return platform switch {
 				GLPlatform glPlatform => new GLShaderProgram(glPlatform, shaders),
 				VkPlatform vkPlatform => new VkShaderProgram(vkPlatform, shaders),
-				_ => throw new NotImplementedException() // PlatformImpl
+				_ => throw new NotImplementedException("PlatformImpl")
 			};
 		}
 	}

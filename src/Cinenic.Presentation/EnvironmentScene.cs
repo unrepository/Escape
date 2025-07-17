@@ -23,7 +23,7 @@ namespace Cinenic.Presentation {
 
 			Painter = platform switch {
 				GLPlatform glPlatform => new GLPainter(glPlatform),
-				_ => throw new NotImplementedException() // PlatformImpl
+				_ => throw new NotImplementedException("PlatformImpl")
 			};
 		}
 
@@ -46,7 +46,7 @@ namespace Cinenic.Presentation {
 							"Cinenic.Presentation.Resources.Shaders.OpenGL.environment.frag"
 						))
 				],
-				_ => throw new NotImplementedException() // PlatformImpl
+				_ => throw new NotImplementedException("PlatformImpl")
 			};
 		}
 	}
