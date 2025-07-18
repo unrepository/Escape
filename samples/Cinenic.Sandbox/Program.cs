@@ -1,3 +1,3 @@
 using Cinenic.Sandbox;
 
-VulkanSSBOTest.Start(args);
+WorldSandbox.Start(args);

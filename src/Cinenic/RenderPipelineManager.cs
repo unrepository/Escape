@@ -8,7 +8,7 @@ using Framebuffer = Cinenic.Renderer.Framebuffer;
 
 namespace Cinenic {
 	
-	public static class PipelineManager {
+	public static class RenderPipelineManager {
 		
 		public static Dictionary<string, RenderPipeline> Pipelines { get; } = [];
 		public static Dictionary<RenderPipeline, bool> PipelineStates { get; } = [];

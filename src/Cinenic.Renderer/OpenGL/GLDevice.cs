@@ -6,6 +6,8 @@ namespace Cinenic.Renderer.OpenGL {
 		public string Name => throw new NotSupportedException();
 		public bool Headless => throw new NotSupportedException();
 
+		public void Initialize() { }
+
 		public void Dispose() {
 			GC.SuppressFinalize(this);
 		}

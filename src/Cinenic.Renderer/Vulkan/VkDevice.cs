@@ -17,12 +17,12 @@ namespace Cinenic.Renderer.Vulkan {
 
 		public PhysicalDeviceFeatures Features { get; }
 
-		public Device Logical { get; }
+		public Device Logical { get; private set; }
 		public PhysicalDevice Physical { get; }
 		
-		public readonly Queue GraphicsQueue;
-		public readonly Queue ComputeQueue;
-		public readonly Queue? SurfaceQueue;
+		public Queue GraphicsQueue { get; private set; }
+		public Queue ComputeQueue { get; private set; }
+		public Queue? SurfaceQueue { get; private set; }
 
 		public int GraphicsFamily { get; } = -1;
 		public int ComputeFamily { get; } = -1;
@@ -45,8 +45,9 @@ namespace Cinenic.Renderer.Vulkan {
 		internal readonly PresentModeKHR[]? PresentModes;
 		
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
 		private readonly VkPlatform _platform;
+
+		private List<string> _enabledExtensions = [];
 
 		public VkDevice(VkPlatform platform, PhysicalDevice nativeDevice, IList<string>? extensions = null) {
 			extensions ??= [];
@@ -149,8 +150,6 @@ namespace Cinenic.Renderer.Vulkan {
 				deviceExtensions.Select(p => Marshal.PtrToStringAnsi((nint) p.ExtensionName) ?? "")
 				                .ToArray();
 			
-			var enabledExtensions = new List<string>();
-			
 			foreach(var extension in extensions) {
 				if(!availableExtensions.Contains(extension)) {
 					_logger.Warn("{DeviceName}: Some extensions are unavailable: {MissingExtension}",
@@ -158,10 +157,10 @@ namespace Cinenic.Renderer.Vulkan {
 					continue;
 				}
 				
-				enabledExtensions.Add(extension);
+				_enabledExtensions.Add(extension);
 			}
 
-			if(!enabledExtensions.Contains(KhrSwapchain.ExtensionName)) {
+			if(!_enabledExtensions.Contains(KhrSwapchain.ExtensionName)) {
 				_logger.Warn("{DeviceName}: {ExtensionName} unavailable, switching to headless mode",
 					Name, KhrSwapchain.ExtensionName);
 				Headless = true;
@@ -195,7 +194,9 @@ namespace Cinenic.Renderer.Vulkan {
 				}
 			}
 		#endregion
+		}
 
+		public void Initialize() {
 		#region Logical device creation
 			var queueInfos = new List<DeviceQueueCreateInfo>();
 			
@@ -234,8 +235,8 @@ namespace Cinenic.Renderer.Vulkan {
 				SType = StructureType.DeviceCreateInfo,
 				QueueCreateInfoCount = (uint) queueInfos.Count,
 				PEnabledFeatures = &deviceFeatures,
-				EnabledExtensionCount = (uint) enabledExtensions.Count,
-				PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(enabledExtensions)
+				EnabledExtensionCount = (uint) _enabledExtensions.Count,
+				PpEnabledExtensionNames = (byte**) SilkMarshal.StringArrayToPtr(_enabledExtensions)
 			};
 
 			fixed(DeviceQueueCreateInfo* ptr = &queueInfos.ToArray()[0]) {

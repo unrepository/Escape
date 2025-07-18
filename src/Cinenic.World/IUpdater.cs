@@ -1,20 +1,20 @@
 using Cinenic.Renderer;
 
-namespace Cinenic {
+namespace Cinenic.World {
 	
-	public interface IUpdateable {
+	public interface IUpdater {
 		
 		public string Id { get; }
 
 		public void Update(TimeSpan delta);
 	}
 
-	public class WindowUpdateable : IUpdateable {
+	public class WindowUpdater : IUpdater {
 
 		public string Id { get; }
 		public Window Window { get; }
 
-		public WindowUpdateable(Window window) {
+		public WindowUpdater(Window window) {
 			Id = window.GetHashCode().ToString();
 			Window = window;
 		}
@@ -25,8 +25,8 @@ namespace Cinenic {
 			// if(Window.Base.IsClosing) UpdateManager.SetEnabled(this, false);
 		}
 
-		public static implicit operator WindowUpdateable(Window window) {
-			return new WindowUpdateable(window);
+		public static implicit operator WindowUpdater(Window window) {
+			return new WindowUpdater(window);
 		}
 	}
 }

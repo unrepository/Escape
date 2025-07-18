@@ -201,6 +201,11 @@ namespace Cinenic.Renderer.Vulkan {
 			var nativeDevices = API.GetPhysicalDevices(Vk);
 			var devices = new List<VkDevice>();
 
+			if(CurrentOptions.DeviceOverride > -1) {
+				devices.Add(new VkDevice(this, nativeDevices.ToArray()[CurrentOptions.DeviceOverride]));
+				return devices;
+			}
+			
 			foreach(var nativeDevice in nativeDevices) {
 				devices.Add(new VkDevice(this, nativeDevice));
 			}
@@ -224,7 +229,9 @@ namespace Cinenic.Renderer.Vulkan {
 				index = 0;
 			}
 
-			return new VkDevice(this, nativeDevices.ElementAt(index));
+			var device = new VkDevice(this, nativeDevices.ElementAt(index));
+			device.Initialize();
+			return device;
 		}
 		
 		public void Dispose() {
@@ -255,6 +262,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 			public bool Headless { get; set; } = false;
 			public bool EnableValidationLayers { get; set; } = true;
+			public int DeviceOverride { get; set; } = -1;
 			
 			public override void ParseCommandLine(string[] args) {
 				throw new NotImplementedException();

@@ -12,6 +12,9 @@ namespace Cinenic.Renderer {
 		public uint Handle { get; protected set; }
 		public Vector2D<uint> Size { get; protected init; }
 
+		public delegate void ResizeEventHandler(Vector2D<int> newSize);
+		public event ResizeEventHandler Resized;
+		
 		protected List<Texture> TextureAttachments { get; } = [];
 
 		protected Framebuffer(IPlatform platform, RenderQueue queue, Vector2D<uint> size) {
@@ -35,6 +38,10 @@ namespace Cinenic.Renderer {
 		public abstract byte[] Read(int attachment = 0, Rectangle<uint>? area = null);
 		
 		public abstract void Dispose();
+
+		protected void OnResized(Vector2D<int> newSize) {
+			Resized(newSize);
+		}
 
 		public static Framebuffer Create(
 			IPlatform platform,

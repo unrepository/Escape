@@ -2,5 +2,10 @@ using System.Numerics;
 
 namespace Cinenic.World.Components {
 
-	public record struct Transform3D(Vector3 Position, Quaternion Rotation, Vector3 Scale);
+	public struct Transform3D(Vector3 position, Quaternion rotation, Vector3 scale) {
+
+		public Vector3 Position = position;
+		public Quaternion Rotation = rotation;
+		public Vector3 Scale = scale;
+	}
 }

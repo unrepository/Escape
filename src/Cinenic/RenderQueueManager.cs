@@ -6,7 +6,7 @@ using Framebuffer = Cinenic.Renderer.Framebuffer;
 
 namespace Cinenic {
 	
-	public static class QueueManager {
+	public static class RenderQueueManager {
 		
 		public static Dictionary<string, RenderQueue> Queues { get; } = [];
 

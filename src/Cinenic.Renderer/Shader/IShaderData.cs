@@ -1,5 +1,6 @@
 using Cinenic.Renderer.OpenGL;
 using Cinenic.Renderer.Vulkan;
+using NLog;
 
 namespace Cinenic.Renderer.Shader {
 	
@@ -16,6 +17,8 @@ namespace Cinenic.Renderer.Shader {
 	}
 
 	public static class IShaderData {
+
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		
 		[Obsolete]
 		public static IShaderData<T> Create<T>(IPlatform platform, uint binding, T? data, uint size) {

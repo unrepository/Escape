@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Numerics;
 using Silk.NET.Maths;
 
@@ -12,8 +13,9 @@ namespace Cinenic.Renderer {
 		public Vector4D<int> Viewport { get; set; } = Vector4D<int>.Zero;
 		public Vector4D<int> Scissor { get; set; } = Vector4D<int>.Zero;
 		
-		public List<IRenderable> Queue { get; set; } = [];
 		public Framebuffer? RenderTarget;
+		
+		protected SortedDictionary<int, List<IRenderer>> Queue { get; set; } = [];
 		
 		/*public RenderQueue(
 			IPlatform platform, Family family, Format format,
@@ -42,12 +44,44 @@ namespace Cinenic.Renderer {
 		public abstract bool Begin();
 		
 		public virtual void Render(TimeSpan delta) {
-			foreach(var renderable in Queue) {
-				renderable.Render(this, delta); // TODO smth like painter
+			foreach(var (priority, renderers) in Queue) {
+				foreach(var renderer in renderers) {
+					renderer.Render(this, delta);
+				}
 			}
 		}
 		
 		public abstract bool End();
+
+		public void Enqueue(IRenderer renderer) {
+			if(Queue.TryGetValue(renderer.Priority, out var renderers)) {
+				renderers.Add(renderer);
+				return;
+			}
+
+			Queue[renderer.Priority] = [ renderer ];
+		}
+
+		public bool Dequeue(IRenderer renderer) {
+			if(!Queue.TryGetValue(renderer.Priority, out var renderers)) {
+				return false;
+			}
+
+			return renderers.Remove(renderer);
+		}
+
+		// public int Dequeue(IRenderer renderer) {
+		// 	int dequeued = 0;
+		//
+		// 	foreach(var renderers in Queue.Values) {
+		// 		dequeued += renderers.RemoveAll(r => r == renderer);
+		// 	}
+		//
+		// 	return dequeued;
+		// }
+
+		public ReadOnlyDictionary<int, List<IRenderer>> GetQueue() => new(Queue);
+		public void ClearQueue() => Queue.Clear();
 		
 		public abstract void Dispose();
 

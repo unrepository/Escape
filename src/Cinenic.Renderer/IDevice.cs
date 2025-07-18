@@ -6,5 +6,7 @@ namespace Cinenic.Renderer {
 		public string Name { get; }
 		
 		public bool Headless { get; }
+
+		public void Initialize();
 	}
 }

@@ -11,6 +11,9 @@ namespace Cinenic {
 		
 		public static TimeSpan LastUpdate { get; private set; }
 		public static TimeSpan LastRender { get; private set; }
+		
+		public static TimeSpan UpdateDelta { get; private set; }
+		public static TimeSpan RenderDelta { get; private set; }
 
 		private static Stopwatch _updateStopwatch = new();
 		private static Stopwatch _renderStopwatch = new();
@@ -40,6 +43,7 @@ namespace Cinenic {
 				var targetDelta = TimeSpan.FromSeconds(1.0 / UpdatesPerSecond);
 
 				if(sinceLastUpdate >= targetDelta) {
+					UpdateDelta = sinceLastUpdate;
 					UpdateManager.Update(sinceLastUpdate);
 					LastUpdate = currentTime;
 				} else {
@@ -55,11 +59,12 @@ namespace Cinenic {
 			while(IsRunning) {
 				var currentTime = _renderStopwatch.Elapsed;
 				var sinceLastRender = currentTime - LastRender;
-				
+
+				RenderDelta = sinceLastRender;
 				RenderManager.Render(sinceLastRender);
 				LastRender = currentTime;
 
-				if(PipelineManager.PipelineStates.All(kv => !kv.Value)) {
+				if(RenderPipelineManager.PipelineStates.All(kv => !kv.Value)) {
 					// nothing left to render, so we quit
 					Stop();
 				}

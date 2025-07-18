@@ -3,6 +3,7 @@ using Cinenic;
 using Cinenic.Extensions.CSharp;
 using Cinenic.Renderer;
 using Cinenic.Renderer.Shader;
+using Cinenic.Renderer.Shader.Pipelines;
 using Cinenic.Renderer.Vulkan;
 using Cinenic.World;
 using Cinenic.World.Components;
@@ -35,7 +36,7 @@ public static class VulkanSSBOTest {
 		_logger.Info("Using primary device 0 ({name})", primaryDevice.Name);
 		
 		_logger.Info("Create queues");
-		var queue1 = QueueManager.Create(platform, "world");
+		var queue1 = RenderQueueManager.Create(platform, "world");
 		
 		_logger.Info("Create shader program");
 		var mainShader = ShaderProgram.Create(
@@ -66,7 +67,7 @@ public static class VulkanSSBOTest {
 		colorData.Push();
 		
 		_logger.Info("Create pipelines");
-		var pipeline1 = PipelineManager.Create(platform, "main", queue1, mainShader);
+		var pipeline1 = RenderPipelineManager.Create(platform, "main", queue1, mainShader);
 		
 		_logger.Info("Create window");
 		var window = Window.Create(platform, WindowOptions.DefaultVulkan);
@@ -74,7 +75,7 @@ public static class VulkanSSBOTest {
 		window.Initialize(queue1);
 		queue1.RenderTarget = window.Framebuffer;
 		
-		UpdateManager.Add((WindowUpdateable) window);
+		UpdateManager.Add((WindowUpdater) window);
 		
 		_logger.Info("Create world");
 		using var world = World.Create();
@@ -82,10 +83,10 @@ public static class VulkanSSBOTest {
 		var triangle =
 			world
 				.Entity("triangle")
-				.Set(new Renderable(delta => { platform.API.CmdDraw(((VkRenderQueue) pipeline1.Queue).CommandBuffer, 3, 1, 0, 0); }));
+				.Set(new Renderable(delta => { platform.API.CmdDraw(((VkRenderQueue) pipeline1.Queue).CommandBuffer, 3, 1, 0, 0); return null; }));
 		
-		var wr = new WorldRenderer("world", world);
-		RenderManager.Add(queue1, wr);
+		// var wr = new WorldRenderer("world", world);
+		// RenderManager.Add(queue1, wr);
 		
 		_logger.Info("Begin loop");
 		CINENIC.Run();

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Silk.NET.Core;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Vulkan;
 using Silk.NET.Vulkan.Extensions.KHR;
@@ -41,6 +42,10 @@ namespace Cinenic.Renderer.Vulkan {
 			Debug.Assert(queue is VkRenderQueue);
 			var vkQueue = (VkRenderQueue) queue;
 			
+			Base.Load += () => {
+				Input = Base.CreateInput();
+			};
+			
 			Base.FramebufferResize += newSize => {
 				VkRenderPipeline.RecreateFramebuffer(
 					_platform,
@@ -51,6 +56,7 @@ namespace Cinenic.Renderer.Vulkan {
 				queue.RenderTarget = newFramebuffer;
 				//Base.DoEvents();
 			};
+			
 			Base.Initialize();
 
 			unsafe {
@@ -94,6 +100,32 @@ namespace Cinenic.Renderer.Vulkan {
 				_CreateSwapchain();
 				_CreateImageViews();
 				_CreateFramebuffers();
+				
+				window.Base.FramebufferResize += OnResized;
+			}
+			
+			public override void Dispose() {
+				GC.SuppressFinalize(this);
+
+				unsafe {
+					if(Swapchain.Handle != 0) {
+						VkExtension
+							.Get<KhrSwapchain>(_platform, _device)
+							.DestroySwapchain(_device.Logical, Swapchain, null);
+					}
+
+					foreach(var image in SwapchainImages) {
+						_platform.API.DestroyImage(_device.Logical, image, null);
+					}
+
+					foreach(var imageView in SwapchainImageViews) {
+						_platform.API.DestroyImageView(_device.Logical, imageView, null);
+					}
+
+					foreach(var framebuffer in SwapchainFramebuffers) {
+						_platform.API.DestroyFramebuffer(_device.Logical, framebuffer, null);
+					}
+				}
 			}
 
 			private unsafe void _CreateSwapchain() {
@@ -280,30 +312,6 @@ namespace Cinenic.Renderer.Vulkan {
 				// 	SwapchainFormat = SwapchainFormat,
 				// 	SwapchainFramebuffers = SwapchainFramebuffers
 				// };
-			}
-
-			public override void Dispose() {
-				GC.SuppressFinalize(this);
-
-				unsafe {
-					if(Swapchain.Handle != 0) {
-						VkExtension
-							.Get<KhrSwapchain>(_platform, _device)
-							.DestroySwapchain(_device.Logical, Swapchain, null);
-					}
-
-					foreach(var image in SwapchainImages) {
-						_platform.API.DestroyImage(_device.Logical, image, null);
-					}
-
-					foreach(var imageView in SwapchainImageViews) {
-						_platform.API.DestroyImageView(_device.Logical, imageView, null);
-					}
-
-					foreach(var framebuffer in SwapchainFramebuffers) {
-						_platform.API.DestroyFramebuffer(_device.Logical, framebuffer, null);
-					}
-				}
 			}
 		}
 	}

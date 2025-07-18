@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Cinenic.Renderer\Cinenic.Renderer.csproj" />
+      <ProjectReference Include="..\Cinenic.World\Cinenic.World.csproj" />
     </ItemGroup>
 
 </Project>
