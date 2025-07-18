@@ -115,22 +115,26 @@ public static class WorldSandbox {
 		using var world = World.Create();
 		
 		_logger.Info("Create renderable entity");
-		world
+		var cube = world
 			.Entity("renderable cube")
 			.Set(new Transform3D(Vector3.Zero, Quaternion.Zero, Vector3.One))
 			.Set(new Renderable(delta => {
 				return _cubeModel;
 			}));
+		cube.GetMut<Transform3D>().RotationDeg = new Vector3(-45, 30, 70);
+		
+		UpdateManager.Add(new TestRotationUpdater("test rotation", world, cube));
 		
 		_logger.Info("Create camera entity");
 		var camera = world
 			.Entity("camera")
-			.Set(new Transform3D(new Vector3(-2, 2, -2), Quaternion.Zero, Vector3.One))
+			.Set(new Transform3D(new Vector3(-2, 0, -2), Quaternion.Zero, Vector3.One))
 			.Set(new Camera3D(
 				new PerspectiveCamera3D(window.Framebuffer) {
 					FieldOfView = 70
 				}
 			));
+		camera.GetMut<Transform3D>().LookAt(Vector3.Zero);
 
 		world.Set(default(flecs.EcsRest));
 
@@ -173,9 +177,32 @@ public static class WorldSandbox {
 			_cameraPitch = Math.Clamp(_cameraPitch, -89.9f, 89.9f);
 			
 			camera.GetMut<Transform3D>().Rotation = Quaternion.CreateFromYawPitchRoll(_cameraYaw, _cameraPitch, 0);
+			//Console.WriteLine(camera.Get<Transform3D>().Rotation);
 		};
 		
 		_logger.Info("Begin loop");
 		CINENIC.Run();
+	}
+
+	private class TestRotationUpdater : WorldUpdater {
+
+		private TimeSpan _time = TimeSpan.Zero;
+		private Entity _entity;
+
+		public TestRotationUpdater(string id, World world, Entity entity) : base(id, world) {
+			_entity = entity;
+		}
+
+		public override void Update(TimeSpan delta) {
+			_time += delta;
+
+			float t = (float) _time.TotalSeconds * 1f;
+			
+			_entity.GetMut<Transform3D>().RotationRad = new Vector3(
+				0 /*MathF.Sin(t)*/,
+				MathF.Cos(t) * MathF.PI * 0.5f,
+				0 /*MathF.Sin(t * 0.5f)*/
+			);
+		}
 	}
 }

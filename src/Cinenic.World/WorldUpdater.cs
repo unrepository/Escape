@@ -12,7 +12,7 @@ namespace Cinenic.World {
 			World = world;
 		}
 		
-		public void Update(TimeSpan delta) {
+		public virtual void Update(TimeSpan delta) {
 			World.Progress((float) delta.TotalSeconds);
 		}
 	}

@@ -23,7 +23,7 @@ namespace Cinenic.World {
 				.System<Components.Camera3D, Components.Transform3D>("Camera3D-Transform3D synchronization")
 				.Each((ref Components.Camera3D c3d, ref Components.Transform3D t3d) => {
 					c3d.Camera.Position = t3d.Position;
-					c3d.Camera.Target = t3d.Position + Vector3.Transform(-Vector3.UnitZ, t3d.Rotation);
+					c3d.Camera.Target = t3d.Position + Vector3.Transform(Vector3.UnitZ, t3d.Rotation);
 				});
 			
 			world
