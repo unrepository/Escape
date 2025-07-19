@@ -6,24 +6,45 @@ using Cinenic.Renderer.Shader;
 using Cinenic.Renderer.Shader.Pipelines;
 using Silk.NET.Vulkan;
 
+using static Cinenic.Renderer.Vulkan.VkHelpers;
+
 namespace Cinenic.Renderer.Vulkan {
 	
 	public class VkObjectRenderer : ObjectRenderer {
-
+		
 		private List<RenderableModel> _models = [];
 		
 		private List<Vertex> _totalVertices = [];
 		private List<uint> _totalIndices = [];
 		private List<Material.Data> _totalMaterials = [];
 		private List<Matrix4x4> _totalMatrices = [];
-		
-		public VkObjectRenderer(string id, DefaultSceneShaderPipeline shaderPipeline) : base(id, shaderPipeline) { }
+
+		private DescriptorSet _textureDescriptorSet;
+		private Dictionary<int, VkTexture> _textureIndexMap = [];
+
+		public VkObjectRenderer(string id, DefaultSceneShaderPipeline shaderPipeline) : base(id, shaderPipeline) {
+			var descriptor = CreateDescriptorSet(
+				(VkPlatform) shaderPipeline.Platform,
+				(VkShaderProgram) shaderPipeline.Program,
+				[0],
+				1024,
+				DescriptorType.CombinedImageSampler,
+				ShaderStageFlags.FragmentBit
+			);
+
+			_textureDescriptorSet = descriptor.Set;
+		}
 
 		public override void AddObject(RenderableModel model, Matrix4x4 matrix) {
 			foreach(var mesh in model.Meshes) {
 				_totalVertices.AddRange(mesh.Vertices);
 				_totalIndices.AddRange(mesh.Indices);
 				_totalMaterials.Add(mesh.Material.CreateData());
+				
+				// if(mesh.Material.AlbedoTexture is VkTexture albedoTexture) _textureIndexMap.TryAdd(albedoTexture.Index, albedoTexture);
+				// if(mesh.Material.NormalTexture is VkTexture normalTexture) _textureIndexMap.TryAdd(normalTexture.Index, normalTexture);
+				// if(mesh.Material.MetallicTexture is VkTexture metallicTexture) _textureIndexMap.TryAdd(metallicTexture.Index, metallicTexture);
+				// if(mesh.Material.RoughnessTexture is VkTexture roughnessTexture) _textureIndexMap.TryAdd(roughnessTexture.Index, roughnessTexture);
 			}
 			
 			_totalMatrices.Add(matrix);
@@ -98,20 +119,26 @@ namespace Cinenic.Renderer.Vulkan {
 						MaterialOffset = materialOffset,
 						MatrixOffset = matrixOffset
 					};
+
+					if(mesh.Material.AlbedoTexture is VkTexture albedoTexture) pc.AlbedoTextureIndex = albedoTexture.Index;
+					if(mesh.Material.NormalTexture is VkTexture normalTexture) pc.AlbedoTextureIndex = normalTexture.Index;
+					if(mesh.Material.MetallicTexture is VkTexture metallicTexture) pc.AlbedoTextureIndex = metallicTexture.Index;
+					if(mesh.Material.RoughnessTexture is VkTexture roughnessTexture) pc.AlbedoTextureIndex = roughnessTexture.Index;
 					
 					vkPlatform.API.CmdPushConstants(
 						vkQueue.CommandBuffer,
 						((VkRenderPipeline) queue.Pipeline!).PipelineLayout,
-						ShaderStageFlags.VertexBit,
+						ShaderStageFlags.All,
 						0,
 						(uint) sizeof(PushConstants),
 						&pc
 					);
 					
-					mesh.Material.AlbedoTexture?.Bind(queue, (uint) Material.TextureType.Albedo);
-					mesh.Material.NormalTexture?.Bind(queue, (uint) Material.TextureType.Normal);
-					mesh.Material.MetallicTexture?.Bind(queue, (uint) Material.TextureType.Metallic);
-					mesh.Material.RoughnessTexture?.Bind(queue, (uint) Material.TextureType.Roughness);
+					// this doesn't bind the textures per-se, but rather adds them to the textures descriptor array (if they aren't already)...
+					mesh.Material.AlbedoTexture?.Bind(queue, 0);
+					mesh.Material.NormalTexture?.Bind(queue, 0);
+					mesh.Material.MetallicTexture?.Bind(queue, 0);
+					mesh.Material.RoughnessTexture?.Bind(queue, 0);
 					
 					// fixed(DescriptorSet* descriptorSetsPtr = ((VkShaderProgram) vkQueue.Pipeline.ShaderPipeline.Program)._descriptorSetsArray) {
 					// 	vkPlatform.API.CmdBindDescriptorSets(
@@ -174,6 +201,11 @@ namespace Cinenic.Renderer.Vulkan {
 			[FieldOffset(4)] public uint IndexOffset;
 			[FieldOffset(8)] public uint MaterialOffset;
 			[FieldOffset(12)] public uint MatrixOffset;
+			
+			[FieldOffset(16)] public int AlbedoTextureIndex;
+			[FieldOffset(20)] public int NormalTextureIndex;
+			[FieldOffset(24)] public int MetallicTextureIndex;
+			[FieldOffset(28)] public int RoughnessTextureIndex;
 		}
 	}
 }

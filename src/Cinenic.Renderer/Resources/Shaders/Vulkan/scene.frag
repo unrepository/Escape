@@ -13,24 +13,32 @@ struct Material {
 	int useTextures;
 };
 
-layout(set = 0, binding = 1) uniform sampler2D albedoTexture;
-layout(set = 0, binding = 2) uniform sampler2D normalTexture;
-layout(set = 0, binding = 4) uniform sampler2D metallicTexture;
-layout(set = 0, binding = 8) uniform sampler2D roughnessTexture;
+layout(push_constant) uniform PushConstants {
+	uint vertexOffset;
+	uint indexOffset;
+	uint materialOffset;
+	uint matrixOffset;
+	int albedoTextureIndex;
+	int normalTextureIndex;
+	int metallicTextureIndex;
+	int roughnessTextureIndex;
+} pc;
+
+layout(set = 0, binding = 0) uniform sampler2D textures[1024];
 
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) in Vertex vertex;
 layout(location = 10) flat in Material material;
 
 void main() {
-	bool hasAlbedo = (material.useTextures & (1 << 0)) != 0;
-	bool hasNormal = (material.useTextures & (1 << 1)) != 0;
-	bool hasMetallic = (material.useTextures & (1 << 2)) != 0;
-	bool hasRoughness = (material.useTextures & (1 << 3)) != 0;
+//	bool hasAlbedo = (material.useTextures & (1 << 0)) != 0;
+//	bool hasNormal = (material.useTextures & (1 << 1)) != 0;
+//	bool hasMetallic = (material.useTextures & (1 << 2)) != 0;
+//	bool hasRoughness = (material.useTextures & (1 << 3)) != 0;
 
 	fragColor = material.albedo;
 
-	if(hasAlbedo) {
-		fragColor *= texture(albedoTexture, vertex.uv).rgba;
+	if(pc.albedoTextureIndex > 0) {
+		fragColor *= texture(textures[pc.albedoTextureIndex], vertex.uv).rgba;
 	}
 }

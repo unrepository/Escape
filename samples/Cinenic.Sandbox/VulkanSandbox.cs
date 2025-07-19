@@ -18,6 +18,8 @@ namespace Cinenic.Sandbox {
 		public IPlatform Platform { get; }
 		public ShaderProgram Program { get; }
 
+		public DescriptorSet VkTexturesDescriptor { get; }
+
 		public TestShader1Pipeline(VkPlatform platform) {
 			Platform = platform;
 			
@@ -29,7 +31,6 @@ namespace Cinenic.Sandbox {
 		}
 		
 		public void VkBindTextureUnit(uint unit, ImageView imageView, Sampler sampler) { }
-		public void VkBindTextureDescriptors(VkRenderQueue queue) { }
 		
 		public void PushData() { }
 		public void Dispose() { }
@@ -39,6 +40,8 @@ namespace Cinenic.Sandbox {
 
 		public IPlatform Platform { get; }
 		public ShaderProgram Program { get; }
+
+		public DescriptorSet VkTexturesDescriptor { get; }
 
 		public TestShader2Pipeline(VkPlatform platform) {
 			Platform = platform;
@@ -51,7 +54,6 @@ namespace Cinenic.Sandbox {
 		}
 
 		public void VkBindTextureUnit(uint unit, ImageView imageView, Sampler sampler) { }
-		public void VkBindTextureDescriptors(VkRenderQueue queue) { }
 
 		public void PushData() { }
 		public void Dispose() { }

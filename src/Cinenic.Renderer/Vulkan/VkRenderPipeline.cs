@@ -133,7 +133,7 @@ namespace Cinenic.Renderer.Vulkan {
 				var pushConstantRange = new PushConstantRange {
 					Offset = 0,
 					Size = 64,
-					StageFlags = ShaderStageFlags.VertexBit
+					StageFlags = ShaderStageFlags.All
 				};
 				
 				var setLayouts = ((VkShaderProgram) shaderPipeline.Program).DescriptorSetLayouts.ToArray();

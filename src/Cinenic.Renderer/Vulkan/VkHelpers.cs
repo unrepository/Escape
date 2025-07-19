@@ -146,6 +146,7 @@ namespace Cinenic.Renderer.Vulkan {
 			VkPlatform platform,
 			VkShaderProgram? program,
 			uint[] bindings,
+			uint descriptorCount,
 			DescriptorType type,
 			ShaderStageFlags stageFlags,
 			DescriptorBindingFlags bindingFlags = DescriptorBindingFlags.None
@@ -156,7 +157,7 @@ namespace Cinenic.Renderer.Vulkan {
 			// create descriptor pool
 			var descriptorPoolSize = new DescriptorPoolSize {
 				Type = type,
-				DescriptorCount = (uint) bindings.Length
+				DescriptorCount = descriptorCount
 			};
 
 			var descriptorPoolInfo = new DescriptorPoolCreateInfo {
@@ -175,7 +176,7 @@ namespace Cinenic.Renderer.Vulkan {
 				var descriptorLayoutBinding = new DescriptorSetLayoutBinding {
 					Binding = bindings[i],
 					DescriptorType = type,
-					DescriptorCount = 1,
+					DescriptorCount = descriptorCount,
 					StageFlags = stageFlags
 				};
 
@@ -192,7 +193,7 @@ namespace Cinenic.Renderer.Vulkan {
 				void* descriptorLayoutBindingsPtr = descriptorLayoutBindings,
 				descriptorBindingFlagsPtr = descriptorBindingFlags
 			) {
-				var descriptorSetLayoutBindingFlagsInfo = new DescriptorSetLayoutBindingFlagsCreateInfo {
+				var descriptorLayoutBindingFlagsInfo = new DescriptorSetLayoutBindingFlagsCreateInfo {
 					SType = StructureType.DescriptorSetLayoutBindingFlagsCreateInfo,
 					BindingCount = (uint) bindings.Length,
 					PBindingFlags = (DescriptorBindingFlags*) descriptorBindingFlagsPtr
@@ -202,7 +203,7 @@ namespace Cinenic.Renderer.Vulkan {
 					SType = StructureType.DescriptorSetLayoutCreateInfo,
 					BindingCount = (uint) bindings.Length,
 					PBindings = (DescriptorSetLayoutBinding*) descriptorLayoutBindingsPtr,
-					PNext = &descriptorSetLayoutBindingFlagsInfo
+					PNext = &descriptorLayoutBindingFlagsInfo
 				};
 
 				platform.API.CreateDescriptorSetLayout(device, descriptorLayoutInfo, null, out descriptorLayout);

@@ -13,6 +13,11 @@ namespace Cinenic.Renderer.Vulkan {
 	
 	public unsafe class VkTexture : Texture {
 
+		public const uint MAX_TEXTURES = 1024;
+		
+		internal static int LastIndex { get; private set; } = 0;
+		internal int Index { get; }
+		
 		private readonly VkPlatform _platform;
 
 		private Buffer _buffer;
@@ -31,6 +36,13 @@ namespace Cinenic.Renderer.Vulkan {
 		{
 			_platform = platform;
 			_bufferSize = size.X * size.Y * (uint) format;
+
+			Index = LastIndex + 1;
+			LastIndex++;
+
+			if(Index > MAX_TEXTURES) {
+				throw new IndexOutOfRangeException($"MAX_TEXTURES limit exceeded! {Index} > {MAX_TEXTURES}");
+			}
 			
 			AllocateBuffer(
 				platform,
@@ -260,6 +272,25 @@ namespace Cinenic.Renderer.Vulkan {
 							),
 							"Could not create texture sampler"
 						);
+						
+						// update textures descriptor
+						var descriptorImageInfo = new DescriptorImageInfo {
+							ImageLayout = ImageLayout.ShaderReadOnlyOptimal,
+							ImageView = _imageView,
+							Sampler = _sampler
+						};
+
+						var writeDescriptorSet = new WriteDescriptorSet {
+							SType = StructureType.WriteDescriptorSet,
+							DstSet = queue.Pipeline.ShaderPipeline.VkTexturesDescriptor,
+							DstBinding = unit,
+							DstArrayElement = (uint) Index,
+							DescriptorType = DescriptorType.CombinedImageSampler,
+							DescriptorCount = 1,
+							PImageInfo = &descriptorImageInfo
+						};
+			
+						_platform.API.UpdateDescriptorSets(device, 1, writeDescriptorSet, 0, null);
 					}
 				);
 				
@@ -268,7 +299,7 @@ namespace Cinenic.Renderer.Vulkan {
 			}
 			
 			//vkQueue.CreateSingleTimeAction(_ => {
-				queue.Pipeline.ShaderPipeline.VkBindTextureUnit(unit, _imageView, _sampler);
+			//	queue.Pipeline.ShaderPipeline.VkBindTextureUnit(unit, _imageView, _sampler);
 			//});
 		}
 		

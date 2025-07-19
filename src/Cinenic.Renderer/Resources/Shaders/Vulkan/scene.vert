@@ -40,6 +40,10 @@ layout(push_constant) uniform PushConstants {
 	uint indexOffset;
 	uint materialOffset;
 	uint matrixOffset;
+	int albedoTextureIndex;
+	int normalTextureIndex;
+	int metallicTextureIndex;
+	int roughnessTextureIndex;
 } pc;
 
 layout(location = 1) out Vertex outVertex;

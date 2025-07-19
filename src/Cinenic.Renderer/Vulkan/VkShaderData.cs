@@ -204,6 +204,7 @@ namespace Cinenic.Renderer.Vulkan {
 				platform,
 				program,
 				[ binding ],
+				1,
 				DescriptorType.StorageBuffer,
 				ShaderStageFlags.All
 			);

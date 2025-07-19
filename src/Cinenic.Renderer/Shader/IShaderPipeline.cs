@@ -11,6 +11,7 @@ namespace Cinenic.Renderer.Shader {
 		public void PushData();
 		
 	#region Vulkan
+		public DescriptorSet VkTexturesDescriptor { get; }
 		public void VkBindTextureUnit(uint unit, ImageView imageView, Sampler sampler);
 	#endregion
 	}

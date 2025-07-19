@@ -19,6 +19,7 @@ namespace Cinenic.Renderer.Shader.Pipelines {
 		public IShaderArrayData<Matrix4x4> MatrixData;
 
 	#region Vulkan
+		public DescriptorSet VkTexturesDescriptor { get; }
 		private DescriptorSet _textureDescriptorSet;
 	#endregion
 		
@@ -45,17 +46,29 @@ namespace Cinenic.Renderer.Shader.Pipelines {
 				var textureDescriptor = VkHelpers.CreateDescriptorSet(
 					vkPlatform,
 					vkProgram,
-					[
-						(uint) Material.TextureType.Albedo,
-						(uint) Material.TextureType.Normal,
-						(uint) Material.TextureType.Metallic,
-						(uint) Material.TextureType.Roughness
-					],
+					[0],
+					1024,
 					DescriptorType.CombinedImageSampler,
 					ShaderStageFlags.FragmentBit
 				);
 
-				_textureDescriptorSet = textureDescriptor.Set;
+				VkTexturesDescriptor = textureDescriptor.Set;
+
+				// var textureDescriptor = VkHelpers.CreateDescriptorSet(
+				// 	vkPlatform,
+				// 	vkProgram,
+				// 	[
+				// 		(uint) Material.TextureType.Albedo,
+				// 		(uint) Material.TextureType.Normal,
+				// 		(uint) Material.TextureType.Metallic,
+				// 		(uint) Material.TextureType.Roughness
+				// 	],
+				// 	1,
+				// 	DescriptorType.CombinedImageSampler,
+				// 	ShaderStageFlags.FragmentBit
+				// );
+				//
+				// _textureDescriptorSet = textureDescriptor.Set;
 			}
 		#endregion
 
@@ -76,6 +89,7 @@ namespace Cinenic.Renderer.Shader.Pipelines {
 		}
 
 	#region Vulkan
+		[Obsolete]
 		public unsafe void VkBindTextureUnit(uint unit, ImageView imageView, Sampler sampler) {
 			var platform = (VkPlatform) Platform;
 			var device = platform.PrimaryDevice.Logical;

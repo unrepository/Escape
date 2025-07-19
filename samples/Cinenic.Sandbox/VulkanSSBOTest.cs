@@ -21,6 +21,8 @@ class SSBOTestShaderPipeline : IShaderPipeline {
 	public IPlatform Platform { get; }
 	public ShaderProgram Program { get; }
 
+	public DescriptorSet VkTexturesDescriptor { get; }
+
 	public SSBOTestShaderPipeline(VkPlatform platform) {
 		Platform = platform;
 		
@@ -32,7 +34,6 @@ class SSBOTestShaderPipeline : IShaderPipeline {
 	}
 	
 	public void VkBindTextureUnit(uint unit, ImageView imageView, Silk.NET.Vulkan.Sampler sampler) { }
-	public void VkBindTextureDescriptors(VkRenderQueue queue) { }
 		
 	public void PushData() { }
 	public void Dispose() { }
