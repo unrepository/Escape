@@ -16,7 +16,28 @@ using Silk.NET.Windowing;
 using Shader = Cinenic.Renderer.Shader.Shader;
 using Window = Cinenic.Renderer.Window;
 
+class SSBOTestShaderPipeline : IShaderPipeline {
+
+	public IPlatform Platform { get; }
+	public ShaderProgram Program { get; }
+
+	public SSBOTestShaderPipeline(VkPlatform platform) {
+		Platform = platform;
+		
+		Program = ShaderProgram.Create(
+			platform,
+			Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk3.vert")),
+			Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
+		);
+	}
 	
+	public void VkBindTextureUnit(uint unit, ImageView imageView, Silk.NET.Vulkan.Sampler sampler) { }
+	public void VkBindTextureDescriptors(VkRenderQueue queue) { }
+		
+	public void PushData() { }
+	public void Dispose() { }
+}
+
 public static class VulkanSSBOTest {
 	
 	private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -38,12 +59,8 @@ public static class VulkanSSBOTest {
 		_logger.Info("Create queues");
 		var queue1 = RenderQueueManager.Create(platform, "world");
 		
-		_logger.Info("Create shader program");
-		var mainShader = ShaderProgram.Create(
-			platform,
-			Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk3.vert")),
-			Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
-		);
+		_logger.Info("Create shader pipeline");
+		var mainShaderPipeline = new SSBOTestShaderPipeline(platform);
 		
 		_logger.Info("Create buffers");
 		var positions = new Vector2[] {
@@ -59,15 +76,15 @@ public static class VulkanSSBOTest {
 			new(0, 0, 1, 0)
 		};
 
-		var positionData = IShaderArrayData.Create(platform, mainShader, 0, positions);
-		var colorData = IShaderArrayData.Create(platform, mainShader, 1, colors);
+		var positionData = IShaderArrayData.Create(platform, mainShaderPipeline.Program, 0, positions);
+		var colorData = IShaderArrayData.Create(platform, mainShaderPipeline.Program, 1, colors);
 		
 		_logger.Info("Initial shader data push");
 		positionData.Push();
 		colorData.Push();
 		
 		_logger.Info("Create pipelines");
-		var pipeline1 = RenderPipelineManager.Create(platform, "main", queue1, mainShader);
+		var pipeline1 = RenderPipelineManager.Create(platform, "main", queue1, mainShaderPipeline);
 		
 		_logger.Info("Create window");
 		var window = Window.Create(platform, WindowOptions.DefaultVulkan);

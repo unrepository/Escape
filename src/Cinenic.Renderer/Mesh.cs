@@ -1,12 +1,24 @@
+using Cinenic.Extensions.CSharp;
+
 namespace Cinenic.Renderer {
 	
-	public class Mesh {
+	public class Mesh : ITypeCloneable<Mesh> {
 
 		public Vertex[] Vertices = [];
 		public uint[] Indices = [];
 
-		public Material Material;
+		public Material Material = new Material();
+		
+		[Obsolete]
 		public Texture[] Textures = [];
+
+		public Mesh Clone() {
+			return new() {
+				Vertices = (Vertex[]) Vertices.Clone(),
+				Indices = (uint[]) Indices.Clone(),
+				Material = Material.Clone()
+			};
+		}
 
 		/*public static bool operator ==(Mesh a, Mesh b) => a.Equals(b);
 		public static bool operator !=(Mesh a, Mesh b) => !a.Equals(b);

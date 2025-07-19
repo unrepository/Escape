@@ -154,12 +154,12 @@ namespace Cinenic.Presentation.Drawing {
 				index = index < 0 ? drawList.Materials.Count - 1 : index;
 				drawList.Textures[index] = [diffuse, normal, roughness, metallic];
 
-				var use = Material.TextureType.Diffuse;
+				var use = Material.TextureType.Albedo;
 				if(normal is not null) use |= Material.TextureType.Normal;
 				if(roughness is not null) use |= Material.TextureType.Roughness;
 				if(metallic is not null) use |= Material.TextureType.Metallic;
 				
-				CollectionsMarshal.AsSpan(drawList.Materials)[index].UseTextures = use;
+				//CollectionsMarshal.AsSpan(drawList.Materials)[index].UseTextures = use;
 			}
 		}
 		
@@ -169,7 +169,7 @@ namespace Cinenic.Presentation.Drawing {
 			//Debug.Assert(drawList.IsInstanced, "UseTextures() can only be called in an instanced draw list");
 			
 			index = index < 0 ? drawList.Materials.Count - 1 : index;
-			CollectionsMarshal.AsSpan(drawList.Materials)[index].UseTextures = use;
+			//CollectionsMarshal.AsSpan(drawList.Materials)[index].UseTextures = use;
 		}
 		
 		public void SetTransform(int index, Vector3? position = null, Vector3? rotation = null, Vector3? scale = null) {

@@ -51,6 +51,10 @@ namespace Cinenic.Renderer.OpenGL {
 			}
 		}
 
+		public void Write(uint offset, T[] data, uint? size = null) {
+			throw new NotImplementedException();
+		}
+
 		public void Dispose() {
 			GC.SuppressFinalize(this);
 			if(Handle != 0) _platform.API.DeleteBuffer((uint) Handle);

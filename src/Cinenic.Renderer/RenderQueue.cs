@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Numerics;
+using Cinenic.Renderer.Shader;
 using Silk.NET.Maths;
 
 namespace Cinenic.Renderer {
@@ -13,6 +14,7 @@ namespace Cinenic.Renderer {
 		public Vector4D<int> Viewport { get; set; } = Vector4D<int>.Zero;
 		public Vector4D<int> Scissor { get; set; } = Vector4D<int>.Zero;
 		
+		public RenderPipeline? Pipeline { get; internal set; }
 		public Framebuffer? RenderTarget;
 		
 		protected SortedDictionary<int, List<IRenderer>> Queue { get; set; } = [];

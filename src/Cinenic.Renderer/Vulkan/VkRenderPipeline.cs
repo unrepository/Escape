@@ -22,13 +22,13 @@ namespace Cinenic.Renderer.Vulkan {
 
 		private readonly VkPlatform _platform;
 
-		public unsafe VkRenderPipeline(VkPlatform platform, VkRenderQueue queue, ShaderProgram program)
-			: base(platform, queue, program) 
+		public unsafe VkRenderPipeline(VkPlatform platform, VkRenderQueue queue, IShaderPipeline shaderPipeline)
+			: base(platform, queue, shaderPipeline)
 		{
 			//Debug.Assert(((VkRenderQueue) queue).Base.Handle != 0, "RenderQueue.Handle is 0. Did you forget to call Initialize()?");
 			_platform = platform;
 
-			program.Build();
+			shaderPipeline.Program.Build();
 
 		#region Pipeline layout
 			_logger.Debug("Pipeline setup: Create layout");
@@ -130,15 +130,21 @@ namespace Cinenic.Renderer.Vulkan {
 				colorBlendInfo.BlendConstants[2] = 0;
 				colorBlendInfo.BlendConstants[3] = 0;
 
-				var setLayouts = ((VkShaderProgram) program).DescriptorSetLayouts.ToArray();
+				var pushConstantRange = new PushConstantRange {
+					Offset = 0,
+					Size = 16,
+					StageFlags = ShaderStageFlags.VertexBit
+				};
+				
+				var setLayouts = ((VkShaderProgram) shaderPipeline.Program).DescriptorSetLayouts.ToArray();
 
 				fixed(DescriptorSetLayout* setLayoutsPtr = setLayouts) {
 					var pipelineLayoutInfo = new PipelineLayoutCreateInfo {
 						SType = StructureType.PipelineLayoutCreateInfo,
 						SetLayoutCount = (uint) setLayouts.Length,
 						PSetLayouts = setLayoutsPtr,
-						PushConstantRangeCount = 0,
-						PPushConstantRanges = null
+						PushConstantRangeCount = 1,
+						PPushConstantRanges = &pushConstantRange
 					};
 
 					VkCheck(

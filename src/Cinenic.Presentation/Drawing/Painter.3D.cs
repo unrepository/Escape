@@ -27,8 +27,8 @@ namespace Cinenic.Presentation.Drawing {
 					drawList.Textures.Add([]);
 				}
 				
-				if(material.HasValue) drawList.Materials.Add(material.Value);
-				else drawList.Materials.Add(drawList.Meshes[i].Material);
+				// if(material.HasValue) drawList.Materials.Add(material.Value);
+				// else drawList.Materials.Add(drawList.Meshes[i].Material);
 
 				var matrix =
 					Matrix4x4.CreateScale(scale)

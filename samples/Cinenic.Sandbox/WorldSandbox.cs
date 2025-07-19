@@ -20,6 +20,7 @@ using Silk.NET.Vulkan;
 using Silk.NET.Windowing;
 using Camera3D = Cinenic.World.Components.Camera3D;
 using Shader = Cinenic.Renderer.Shader.Shader;
+using Texture = Cinenic.Renderer.Texture;
 using Window = Cinenic.Renderer.Window;
 
 	
@@ -65,12 +66,8 @@ public static class WorldSandbox {
 					20, 21, 22, 20, 22, 23
 				],
 				Material = new Material {
-					Albedo = Color.White.ToVector4(),
-					Metallic = 0.5f,
-					Roughness = 0.5f,
-					UseTextures = Material.TextureType.None
-				},
-				Textures = []
+					AlbedoColor = Color.White
+				}
 			}
 		]
 	};
@@ -94,6 +91,26 @@ public static class WorldSandbox {
 		platform.PrimaryDevice = primaryDevice;
 		_logger.Info("Using primary device 0 ({name})", primaryDevice.Name);
 		
+		_logger.Info("Create textures & models");
+		var bricksAlbedo = Texture.Create(platform, Resources.Get("Textures.Bricks059_1K_JPG.Bricks059_1K-JPG_Color.jpg"));
+		var bricksNormal = Texture.Create(platform, Resources.Get("Textures.Bricks059_1K_JPG.Bricks059_1K-JPG_NormalGL.jpg"));
+		var bricksDisplacement = Texture.Create(platform, Resources.Get("Textures.Bricks059_1K_JPG.Bricks059_1K-JPG_Displacement.jpg"));
+		var bricksRoughness = Texture.Create(platform, Resources.Get("Textures.Bricks059_1K_JPG.Bricks059_1K-JPG_Roughness.jpg"));
+
+		var model1 = _cubeModel.Clone();
+		var model2 = _cubeModel.Clone();
+		var model3 = _cubeModel.Clone();
+		var model4 = _cubeModel.Clone();
+
+		// model1.Meshes[0].Material.AlbedoTexture = bricksAlbedo;
+		// model2.Meshes[0].Material.AlbedoTexture = bricksNormal;
+		// model3.Meshes[0].Material.AlbedoTexture = bricksDisplacement;
+		// model4.Meshes[0].Material.AlbedoTexture = bricksRoughness;
+		model1.Meshes[0].Material.AlbedoColor = Color.Yellow;
+		model2.Meshes[0].Material.AlbedoColor = Color.Red;
+		model3.Meshes[0].Material.AlbedoColor = Color.Green;
+		model4.Meshes[0].Material.AlbedoColor = Color.Blue;
+		
 		_logger.Info("Create shader pipeline");
 		var shaderPipeline = new DefaultSceneShaderPipeline(platform);
 		
@@ -101,7 +118,7 @@ public static class WorldSandbox {
 		var queue = RenderQueueManager.Create(platform, "world");
 		
 		_logger.Info("Create render pipeline");
-		var pipeline = RenderPipelineManager.Create(platform, "main", queue, shaderPipeline.Program);
+		var pipeline = RenderPipelineManager.Create(platform, "main", queue, shaderPipeline);
 		
 		_logger.Info("Create window");
 		var window = Window.Create(platform, WindowOptions.DefaultVulkan);
@@ -114,16 +131,28 @@ public static class WorldSandbox {
 		_logger.Info("Create world");
 		using var world = World.Create();
 		
-		_logger.Info("Create renderable entity");
-		var cube = world
-			.Entity("renderable cube")
+		_logger.Info("Create renderable entities");
+		var cube1 = world
+			.Entity("cube 1")
 			.Set(new Transform3D(Vector3.Zero, Quaternion.Zero, Vector3.One))
-			.Set(new Renderable(delta => {
-				return _cubeModel;
-			}));
-		cube.GetMut<Transform3D>().RotationDeg = new Vector3(-45, 30, 70);
+			.Set(new Renderable(delta => model1));
 		
-		UpdateManager.Add(new TestRotationUpdater("test rotation", world, cube));
+		var cube2 = world
+			.Entity("cube 2")
+			.Set(new Transform3D(new Vector3(0, 2, 0), Quaternion.Zero, Vector3.One))
+			.Set(new Renderable(delta => model2));
+		
+		var cube3 = world
+			.Entity("cube 3")
+			.Set(new Transform3D(new Vector3(-2, 2, 0), Quaternion.Zero, Vector3.One))
+			.Set(new Renderable(delta => model3));
+		
+		var cube4 = world
+			.Entity("cube 4")
+			.Set(new Transform3D(new Vector3(-2, 0, 0), Quaternion.Zero, Vector3.One))
+			.Set(new Renderable(delta => model4));
+		
+		UpdateManager.Add(new TestRotationUpdater("test rotation", world, cube1));
 		
 		_logger.Info("Create camera entity");
 		var camera = world
@@ -172,7 +201,7 @@ public static class WorldSandbox {
 			_lastMousePosition = position;
 
 			_cameraYaw -= deltaX;
-			_cameraPitch += deltaY;
+			_cameraPitch -= deltaY;
 
 			_cameraPitch = Math.Clamp(_cameraPitch, -89.9f, 89.9f);
 			

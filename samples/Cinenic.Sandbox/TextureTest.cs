@@ -81,7 +81,7 @@ namespace Cinenic.Sandbox {
 			Painter.BeginDrawList();
 			Painter.Add3DCube(new Vector3(0, 2, 0), Vector3.Zero, Vector3.One, Color.Red);
 			Painter.SetMaterial(new Material {
-				Albedo = Color.DarkGreen.ToVector4()
+				AlbedoColor = Color.DarkGreen
 			});
 			Painter.SetTextures(_smileyTexture);
 			Painter.EndDrawList();

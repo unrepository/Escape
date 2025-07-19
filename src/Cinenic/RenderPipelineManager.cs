@@ -17,7 +17,7 @@ namespace Cinenic {
 			IPlatform platform,
 			string id,
 			RenderQueue queue,
-			ShaderProgram program,
+			IShaderPipeline shaderPipeline,
 			bool disabled = false
 		) {
 			RenderPipeline pipeline;
@@ -25,7 +25,7 @@ namespace Cinenic {
 			switch(platform) {
 				case VkPlatform vkPlatform:
 					Debug.Assert(queue is VkRenderQueue);
-					pipeline = new VkRenderPipeline(vkPlatform, (VkRenderQueue) queue, program);
+					pipeline = new VkRenderPipeline(vkPlatform, (VkRenderQueue) queue, shaderPipeline);
 					break;
 				default:
 					throw new NotImplementedException("PlatformImpl");

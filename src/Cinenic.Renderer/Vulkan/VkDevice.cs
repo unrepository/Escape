@@ -16,7 +16,8 @@ namespace Cinenic.Renderer.Vulkan {
 		public bool Headless { get; }
 
 		public PhysicalDeviceFeatures Features { get; }
-
+		public PhysicalDeviceProperties Properties { get; }
+		
 		public Device Logical { get; private set; }
 		public PhysicalDevice Physical { get; }
 		
@@ -62,9 +63,11 @@ namespace Cinenic.Renderer.Vulkan {
 			}
 
 			Features = _platform.API.GetPhysicalDeviceFeature(nativeDevice);
+			Properties = _platform.API.GetPhysicalDeviceProperties(nativeDevice);
+			
+			Index = Properties.DeviceID;
 
-			var properties = _platform.API.GetPhysicalDeviceProperties(nativeDevice);
-			Index = properties.DeviceID;
+			var properties = Properties;
 			Name = Marshal.PtrToStringAnsi((nint) properties.DeviceName) ?? "Unknown";
 
 		#region Queue families
@@ -203,7 +206,7 @@ namespace Cinenic.Renderer.Vulkan {
 			// graphics family
 			float priority = 1.0f;
 			
-			queueInfos.Add(new DeviceQueueCreateInfo() {
+			queueInfos.Add(new DeviceQueueCreateInfo {
 				SType = StructureType.DeviceQueueCreateInfo,
 				QueueFamilyIndex = (uint) GraphicsFamily,
 				QueueCount = 1,
@@ -211,7 +214,7 @@ namespace Cinenic.Renderer.Vulkan {
 			});
 			
 			// compute family
-			queueInfos.Add(new DeviceQueueCreateInfo() {
+			queueInfos.Add(new DeviceQueueCreateInfo {
 				SType = StructureType.DeviceQueueCreateInfo,
 				QueueFamilyIndex = (uint) ComputeFamily,
 				QueueCount = 1,
@@ -220,7 +223,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 			// surface family, if present
 			if(SurfaceFamily > 0) {
-				queueInfos.Add(new DeviceQueueCreateInfo() {
+				queueInfos.Add(new DeviceQueueCreateInfo {
 					SType = StructureType.DeviceQueueCreateInfo,
 					QueueFamilyIndex = (uint) SurfaceFamily,
 					QueueCount = 1,
@@ -230,8 +233,9 @@ namespace Cinenic.Renderer.Vulkan {
 			
 			// device creation
 			var deviceFeatures = new PhysicalDeviceFeatures();
+			deviceFeatures.SamplerAnisotropy = Features.SamplerAnisotropy;
 
-			var deviceInfo = new DeviceCreateInfo() {
+			var deviceInfo = new DeviceCreateInfo {
 				SType = StructureType.DeviceCreateInfo,
 				QueueCreateInfoCount = (uint) queueInfos.Count,
 				PEnabledFeatures = &deviceFeatures,

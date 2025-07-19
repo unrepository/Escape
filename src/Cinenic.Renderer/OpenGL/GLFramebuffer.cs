@@ -30,7 +30,7 @@ namespace Cinenic.Renderer.OpenGL {
 			Bind();
 
 			if(TextureAttachments.Count == 0) {
-				AttachTexture(new GLTexture(_platform, Size, Texture.Filter.Nearest, Texture.WrapMode.Clamp));
+				AttachTexture(new GLTexture(_platform, Size, Texture.TextureFilter.Nearest, Texture.TextureWrapMode.ClampToBorder, Texture.TextureFormat.RGBA8));
 			}
 			
 			// check completeness

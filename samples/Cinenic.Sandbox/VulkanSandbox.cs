@@ -7,10 +7,55 @@ using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Vulkan;
 using Silk.NET.Windowing;
+using Sampler = Silk.NET.Vulkan.Sampler;
 using Shader = Cinenic.Renderer.Shader.Shader;
 using Window = Cinenic.Renderer.Window;
 
 namespace Cinenic.Sandbox {
+
+	class TestShader1Pipeline : IShaderPipeline {
+
+		public IPlatform Platform { get; }
+		public ShaderProgram Program { get; }
+
+		public TestShader1Pipeline(VkPlatform platform) {
+			Platform = platform;
+			
+			Program = ShaderProgram.Create(
+				platform,
+				Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk.vert")),
+				Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
+			);
+		}
+		
+		public void VkBindTextureUnit(uint unit, ImageView imageView, Sampler sampler) { }
+		public void VkBindTextureDescriptors(VkRenderQueue queue) { }
+		
+		public void PushData() { }
+		public void Dispose() { }
+	}
+	
+	class TestShader2Pipeline : IShaderPipeline {
+
+		public IPlatform Platform { get; }
+		public ShaderProgram Program { get; }
+
+		public TestShader2Pipeline(VkPlatform platform) {
+			Platform = platform;
+			
+			Program = ShaderProgram.Create(
+				platform,
+				Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk2.vert")),
+				Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
+			);
+		}
+
+		public void VkBindTextureUnit(uint unit, ImageView imageView, Sampler sampler) { }
+		public void VkBindTextureDescriptors(VkRenderQueue queue) { }
+
+		public void PushData() { }
+		public void Dispose() { }
+	}
 	
 	public static class VulkanSandbox {
 		
@@ -53,17 +98,9 @@ namespace Cinenic.Sandbox {
 			queue.Initialize();
 			
 			_logger.Info("Create pipeline");
-			var pipeline1 = new VkRenderPipeline(platform, queue, ShaderProgram.Create(
-				platform,
-				Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk.vert")),
-				Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
-			));
+			var pipeline1 = new VkRenderPipeline(platform, queue, new TestShader1Pipeline(platform));
 			
-			var pipeline2 = new VkRenderPipeline(platform, queue, ShaderProgram.Create(
-				platform,
-				Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk2.vert")),
-				Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
-			));
+			var pipeline2 = new VkRenderPipeline(platform, queue, new TestShader2Pipeline(platform));
 			
 			_logger.Info("Create window");
 			var window = Window.Create(platform, WindowOptions.DefaultVulkan);

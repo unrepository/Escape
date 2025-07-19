@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Drawing;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using Cinenic.Renderer;
@@ -167,8 +169,16 @@ namespace Cinenic.Presentation.Extensions.ModelLoading {
 		) {
 			if(aiMaterial == null) return;
 
+			Vector4 albedo = Vector4.One;
 			_ai.GetMaterialColor(aiMaterial, Assimp.MatkeyColorDiffuse,
-			                    0, 0, ref material.Albedo);
+			                    0, 0, ref albedo);
+			
+			material.AlbedoColor = Color.FromArgb(
+				(int) (albedo.W * 255),
+				(int) (albedo.X * 255),
+				(int) (albedo.Y * 255),
+				(int) (albedo.Z * 255)
+			);
 
 			uint max = 1;
 
@@ -236,7 +246,7 @@ namespace Cinenic.Presentation.Extensions.ModelLoading {
 				}
 
 				var trueType = textureType switch {
-					AiTextureType.Diffuse => Material.TextureType.Diffuse,
+					AiTextureType.Diffuse => Material.TextureType.Albedo,
 					AiTextureType.DiffuseRoughness => Material.TextureType.Roughness,
 					AiTextureType.Normals => Material.TextureType.Normal,
 					AiTextureType.Metalness => Material.TextureType.Metallic,
@@ -248,7 +258,7 @@ namespace Cinenic.Presentation.Extensions.ModelLoading {
 					continue;
 				}
 				
-				mesh.Material.UseTextures |= trueType;
+				//mesh.Material.UseTextures |= trueType;
 				mesh.Textures = mesh.Textures.Append(texture).ToArray();
 			}
 

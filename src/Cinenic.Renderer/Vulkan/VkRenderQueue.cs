@@ -17,7 +17,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 		public const int MAX_FRAMES_IN_FLIGHT = 2;
 		
-		public Silk.NET.Vulkan.RenderPass Base { get; private set; }
+		public RenderPass Base { get; private set; }
 		
 		public List<AttachmentDescription> Attachments { get; init; } = [];
 		public List<SubpassDescription> Subpasses { get; init; } = [];
@@ -34,12 +34,15 @@ namespace Cinenic.Renderer.Vulkan {
 		internal readonly VkColorSpace VkColorSpace;
 		
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
+		
 		private readonly VkPlatform _platform;
 		
 		private Semaphore[] _imagesAvailable;
 		private Semaphore[] _rendersComplete;
 		private Fence[] _inFlightFrames;
+
+		private List<Action<VkRenderQueue>> _singleTimeActions = [];
+		private List<(Queue queue, Action<VkRenderQueue, CommandBuffer>)> _singleTimeCommandActions = [];
 		
 		// public VkRenderQueue(
 		// 	VkPlatform platform, Family family, Format format,
@@ -67,6 +70,8 @@ namespace Cinenic.Renderer.Vulkan {
 					VkColorFormat = VkColorFormat.R8G8B8A8Srgb;
 					VkColorSpace = VkColorSpace.SpaceSrgbNonlinearKhr;
 					break;
+				default:
+					throw new NotImplementedException();
 			}
 			
 			_logger.Debug("Creating synchronization objects");
@@ -266,6 +271,64 @@ namespace Cinenic.Renderer.Vulkan {
 				ulong.MaxValue
 			);
 			
+			// single-time command actions
+			foreach(var (queue, action) in _singleTimeCommandActions) {
+				Debug.Assert(CommandPool is not null);
+			
+				var bufferAllocateInfo = new CommandBufferAllocateInfo {
+					SType = StructureType.CommandBufferAllocateInfo,
+					CommandPool = CommandPool.Value,
+					Level = CommandBufferLevel.Primary,
+					CommandBufferCount = (uint) CommandBuffers.Length
+				};
+
+				VkCheck(
+					_platform.API.AllocateCommandBuffers(
+						_platform.PrimaryDevice.Logical,
+						bufferAllocateInfo,
+						out var singleTimeBuffer
+					),
+					"Could not allocate single-time command buffer"
+				);
+
+				var beginInfo = new CommandBufferBeginInfo {
+					SType = StructureType.CommandBufferBeginInfo,
+					Flags = CommandBufferUsageFlags.OneTimeSubmitBit
+				};
+
+				_platform.API.BeginCommandBuffer(singleTimeBuffer, beginInfo);
+				action.Invoke(this, singleTimeBuffer);
+				_platform.API.EndCommandBuffer(singleTimeBuffer);
+
+				var submitInfo = new SubmitInfo {
+					SType = StructureType.SubmitInfo,
+					CommandBufferCount = 1,
+					PCommandBuffers = &singleTimeBuffer
+				};
+
+				VkCheck(
+					_platform.API.QueueSubmit(
+						queue,
+						1,
+						submitInfo,
+						default
+					),
+					"Failed to submit single-time command buffer"
+				);
+
+				_platform.API.QueueWaitIdle(queue);
+				_platform.API.FreeCommandBuffers(_platform.PrimaryDevice.Logical, CommandPool.Value, 1, singleTimeBuffer);
+			}
+			
+			_singleTimeCommandActions.Clear();
+			
+			// single-time actions
+			foreach(var action in _singleTimeActions) {
+				action.Invoke(this);
+			}
+			
+			_singleTimeActions.Clear();
+			
 			// acquire frame
 			uint nextImage = 0;
 			var result = VkExtension
@@ -403,6 +466,14 @@ namespace Cinenic.Renderer.Vulkan {
 			}
 			
 			return true;
+		}
+
+		public void CreateSingleTimeAction(Action<VkRenderQueue> action) {
+			_singleTimeActions.Add(action);
+		}
+		
+		public void CreateSingleTimeCommandAction(Queue queue, Action<VkRenderQueue, CommandBuffer> action) {
+			_singleTimeCommandActions.Add((queue, action));
 		}
 
 		public override void Dispose() {

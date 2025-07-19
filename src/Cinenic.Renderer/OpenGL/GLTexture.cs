@@ -13,8 +13,8 @@ namespace Cinenic.Renderer.OpenGL {
 		
 		private readonly GLPlatform _platform;
 
-		public GLTexture(GLPlatform platform, Vector2D<uint> size, Filter filter, WrapMode wrapMode)
-			: base(platform, size, filter, wrapMode)
+		public GLTexture(GLPlatform platform, Vector2D<uint> size, TextureFilter filter, TextureWrapMode wrapMode, TextureFormat format)
+			: base(platform, size, filter, wrapMode, format)
 		{
 			_platform = platform;
 
@@ -36,14 +36,15 @@ namespace Cinenic.Renderer.OpenGL {
 			}
 
 			uint glFilter = filter switch {
-				Filter.Nearest => (uint) GLEnum.Nearest,
-				Filter.Linear => (uint) GLEnum.Linear
+				TextureFilter.Nearest => (uint) GLEnum.Nearest,
+				TextureFilter.Linear => (uint) GLEnum.Linear
 			};
 			
 			uint glWrapMode = wrapMode switch {
-				WrapMode.Clamp => (uint) GLEnum.ClampToEdge,
-				WrapMode.Repeat => (uint) GLEnum.Repeat,
-				WrapMode.RepeatMirrored => (uint) GLEnum.MirroredRepeat
+				TextureWrapMode.ClampToBorder => (uint) GLEnum.ClampToBorder,
+				TextureWrapMode.ClampToEdge => (uint) GLEnum.ClampToEdge,
+				TextureWrapMode.Repeat => (uint) GLEnum.Repeat,
+				TextureWrapMode.RepeatMirrored => (uint) GLEnum.MirroredRepeat
 			};
 
 			float[] borderColor = [ 0.0f, 0.0f, 0.0f, 0.0f ];
@@ -99,7 +100,11 @@ namespace Cinenic.Renderer.OpenGL {
 			_platform.API.ActiveTexture((TextureUnit) ((int) TextureUnit.Texture0 + unit));
 			_platform.API.BindTexture(TextureTarget.Texture2D, Id);
 		}
-		
+
+		public override void Bind(RenderQueue queue, uint unit) {
+			throw new NotImplementedException();
+		}
+
 		public override void Unbind() {
 			_platform.API.ActiveTexture((TextureUnit) ((int) TextureUnit.Texture0 + _unit));
 			_platform.API.BindTexture(TextureTarget.Texture2D, 0);

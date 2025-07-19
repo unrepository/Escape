@@ -9,12 +9,14 @@ namespace Cinenic.Renderer {
 
 		public RenderQueue Queue;
 		//public Framebuffer RenderTarget { get; set; }
-		public ShaderProgram Program { get; }
+		public IShaderPipeline ShaderPipeline { get; }
+		public ShaderProgram Program => ShaderPipeline.Program;
 
-		public RenderPipeline(IPlatform platform, RenderQueue queue, ShaderProgram program) {
+		public RenderPipeline(IPlatform platform, RenderQueue queue, IShaderPipeline shaderPipeline) {
 			Platform = platform;
 			Queue = queue;
-			Program = program;
+			ShaderPipeline = shaderPipeline;
+			queue.Pipeline = this;
 		}
 
 		public abstract bool Begin();

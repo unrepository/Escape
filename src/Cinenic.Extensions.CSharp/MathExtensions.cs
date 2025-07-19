@@ -17,5 +17,9 @@ namespace Cinenic.Extensions.CSharp {
 		public static float ToDegrees(this float radians) {
 			return radians * (180 / MathF.PI);
 		}
+
+		public static uint CeilIncrement(this uint num, uint increment) {
+			return (num + increment - 1) / increment * increment;
+		}
 	}
 }

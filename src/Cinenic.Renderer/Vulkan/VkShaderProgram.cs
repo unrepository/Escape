@@ -16,7 +16,7 @@ namespace Cinenic.Renderer.Vulkan {
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		private readonly VkPlatform _platform;
 
-		private DescriptorSet[] _descriptorSetsArray;
+		internal DescriptorSet[] _descriptorSetsArray;
 
 		public VkShaderProgram(VkPlatform platform, params Shader.Shader[] shaders) : base(platform, shaders) {
 			_platform = platform;
