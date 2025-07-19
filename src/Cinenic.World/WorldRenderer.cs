@@ -69,8 +69,8 @@ namespace Cinenic.World {
 					ObjectRenderer.AddObject(renderable.Render.Invoke(delta), matrix);
 				});
 			
-			ObjectRenderer.Render(queue, delta);
-			ObjectRenderer.Reset();
+			//ObjectRenderer.Render(queue, delta);
+			//ObjectRenderer.Reset();
 		}
 	}
 }

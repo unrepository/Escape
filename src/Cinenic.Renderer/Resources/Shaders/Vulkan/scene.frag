@@ -23,14 +23,14 @@ layout(location = 1) in Vertex vertex;
 layout(location = 10) flat in Material material;
 
 void main() {
-//	bool hasAlbedo = (material.useTextures & (1 << 0)) != 0;
-//	bool hasNormal = (material.useTextures & (1 << 1)) != 0;
-//	bool hasMetallic = (material.useTextures & (1 << 2)) != 0;
-//	bool hasRoughness = (material.useTextures & (1 << 3)) != 0;
+	bool hasAlbedo = (material.useTextures & (1 << 0)) != 0;
+	bool hasNormal = (material.useTextures & (1 << 1)) != 0;
+	bool hasMetallic = (material.useTextures & (1 << 2)) != 0;
+	bool hasRoughness = (material.useTextures & (1 << 3)) != 0;
 
 	fragColor = material.albedo;
 
-//	if(hasAlbedo) {
-//		fragColor *= texture(albedoTexture, vertex.uv).rgba;
-//	}
+	if(hasAlbedo) {
+		fragColor *= texture(albedoTexture, vertex.uv).rgba;
+	}
 }

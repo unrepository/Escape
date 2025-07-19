@@ -136,23 +136,10 @@ namespace Cinenic.Renderer.Vulkan {
 		
 		public void Push() {
 			Debug.Assert(_platform.PrimaryDevice is not null);
+			Debug.Assert(_bufferDataPtr is not null);
 			
 			if(Data is null) {
 				return;
-			}
-			
-			if(_bufferDataPtr is null) {
-				VkCheck(
-					_platform.API.MapMemory(
-						_platform.PrimaryDevice.Logical,
-						_bufferMemory,
-						0,
-						Size,
-						0,
-						ref _bufferDataPtr
-					),
-					"Failed to map buffer memory"
-				);
 			}
 
 			fixed(void* dataPtr = &_data) {
@@ -170,14 +157,6 @@ namespace Cinenic.Renderer.Vulkan {
 
 			void* dst = (byte*) _bufferDataPtr + offset;
 			System.Buffer.MemoryCopy(&data, dst, size.Value, size.Value);
-			
-			// UpdateDescriptorSet(
-			// 	_platform,
-			// 	_descriptorSet,
-			// 	Binding,
-			// 	_bufferSize,
-			// 	_buffer
-			// );
 		}
 		
 		public void Dispose() {

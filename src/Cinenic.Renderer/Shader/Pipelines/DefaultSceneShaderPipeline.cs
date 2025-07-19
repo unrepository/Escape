@@ -15,8 +15,8 @@ namespace Cinenic.Renderer.Shader.Pipelines {
 		public IShaderData<CameraData> CameraData;
 		public IShaderArrayData<Vertex> VertexData;
 		public IShaderArrayData<uint> IndexData;
-		public IShaderData<Material.Data> MaterialData;
-		public IShaderData<Matrix4x4> MatrixData;
+		public IShaderArrayData<Material.Data> MaterialData;
+		public IShaderArrayData<Matrix4x4> MatrixData;
 
 	#region Vulkan
 		private DescriptorSet _textureDescriptorSet;
@@ -61,10 +61,10 @@ namespace Cinenic.Renderer.Shader.Pipelines {
 
 			// SSBOs
 			CameraData = IShaderData.Create<CameraData>(platform, Program, 0, default);
-			VertexData = IShaderArrayData.Create<Vertex>(platform, Program, 1, null, 16);
-			IndexData = IShaderArrayData.Create<uint>(platform, Program, 2, null, 16);
-			MaterialData = IShaderData.Create<Material.Data>(platform, Program, 3, default);
-			MatrixData = IShaderData.Create<Matrix4x4>(platform, Program, 4, default);
+			VertexData = IShaderArrayData.Create<Vertex>(platform, Program, 1, null, 1024);
+			IndexData = IShaderArrayData.Create<uint>(platform, Program, 2, null, 1024);
+			MaterialData = IShaderArrayData.Create<Material.Data>(platform, Program, 3, null, 1024);
+			MatrixData = IShaderArrayData.Create<Matrix4x4>(platform, Program, 4, null, 1024);
 		}
 
 		public void PushData() {

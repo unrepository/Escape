@@ -12,19 +12,13 @@ namespace Cinenic.Renderer {
 		
 		public DefaultSceneShaderPipeline ShaderPipeline { get; }
 		
-		protected List<RenderableModel> Models { get; } = [];
-		protected List<Matrix4x4> Matrices { get; } = [];
-		
 		public ObjectRenderer(string id, DefaultSceneShaderPipeline shaderPipeline) {
 			Id = id;
 			ShaderPipeline = shaderPipeline;
 		}
 
-		public void AddObject(RenderableModel model, Matrix4x4 matrix) {
-			Models.Add(model);
-			Matrices.Add(matrix);
-		}
-
+		public abstract void AddObject(RenderableModel model, Matrix4x4 matrix);
+		
 		public abstract void Render(RenderQueue queue, TimeSpan delta);
 		public abstract void Reset();
 		

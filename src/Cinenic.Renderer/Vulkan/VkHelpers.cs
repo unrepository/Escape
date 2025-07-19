@@ -147,7 +147,8 @@ namespace Cinenic.Renderer.Vulkan {
 			VkShaderProgram? program,
 			uint[] bindings,
 			DescriptorType type,
-			ShaderStageFlags stageFlags
+			ShaderStageFlags stageFlags,
+			DescriptorBindingFlags bindingFlags = DescriptorBindingFlags.None
 		) {
 			var descriptorBindings = new Dictionary<uint, DescriptorSetLayoutBinding>();
 			var device = platform.PrimaryDevice.Logical;
@@ -155,19 +156,20 @@ namespace Cinenic.Renderer.Vulkan {
 			// create descriptor pool
 			var descriptorPoolSize = new DescriptorPoolSize {
 				Type = type,
-				DescriptorCount = 1
+				DescriptorCount = (uint) bindings.Length
 			};
 
 			var descriptorPoolInfo = new DescriptorPoolCreateInfo {
 				SType = StructureType.DescriptorPoolCreateInfo,
 				PoolSizeCount = 1,
 				PPoolSizes = &descriptorPoolSize,
-				MaxSets = 1
+				MaxSets = (uint) bindings.Length
 			};
 
 			platform.API.CreateDescriptorPool(device, descriptorPoolInfo, null, out var descriptorPool);
 
 			var descriptorLayoutBindings = new DescriptorSetLayoutBinding[bindings.Length];
+			var descriptorBindingFlags = new DescriptorBindingFlags[bindings.Length];
 			
 			for(uint i = 0; i < bindings.Length; i++) {
 				var descriptorLayoutBinding = new DescriptorSetLayoutBinding {
@@ -178,17 +180,29 @@ namespace Cinenic.Renderer.Vulkan {
 				};
 
 				descriptorLayoutBindings[i] = descriptorLayoutBinding;
+				descriptorBindingFlags[i] = bindingFlags;
+				
 				descriptorBindings[bindings[i]] = descriptorLayoutBinding;
 			}
 			
 			DescriptorSetLayout descriptorLayout;
 			DescriptorSet descriptorSet;
 			
-			fixed(DescriptorSetLayoutBinding* descriptorLayoutBindingsPtr = descriptorLayoutBindings) {
+			fixed(
+				void* descriptorLayoutBindingsPtr = descriptorLayoutBindings,
+				descriptorBindingFlagsPtr = descriptorBindingFlags
+			) {
+				var descriptorSetLayoutBindingFlagsInfo = new DescriptorSetLayoutBindingFlagsCreateInfo {
+					SType = StructureType.DescriptorSetLayoutBindingFlagsCreateInfo,
+					BindingCount = (uint) bindings.Length,
+					PBindingFlags = (DescriptorBindingFlags*) descriptorBindingFlagsPtr
+				};
+				
 				var descriptorLayoutInfo = new DescriptorSetLayoutCreateInfo {
 					SType = StructureType.DescriptorSetLayoutCreateInfo,
-					BindingCount = 1,
-					PBindings = descriptorLayoutBindingsPtr
+					BindingCount = (uint) bindings.Length,
+					PBindings = (DescriptorSetLayoutBinding*) descriptorLayoutBindingsPtr,
+					PNext = &descriptorSetLayoutBindingFlagsInfo
 				};
 
 				platform.API.CreateDescriptorSetLayout(device, descriptorLayoutInfo, null, out descriptorLayout);

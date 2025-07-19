@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Cinenic.Extensions.CSharp;
 using Cinenic.Renderer.Shader;
 using Cinenic.Renderer.Shader.Pipelines;
 using Silk.NET.Vulkan;
@@ -8,30 +9,74 @@ using Silk.NET.Vulkan;
 namespace Cinenic.Renderer.Vulkan {
 	
 	public class VkObjectRenderer : ObjectRenderer {
+
+		private List<RenderableModel> _models = [];
+		
+		private List<Vertex> _totalVertices = [];
+		private List<uint> _totalIndices = [];
+		private List<Material.Data> _totalMaterials = [];
+		private List<Matrix4x4> _totalMatrices = [];
 		
 		public VkObjectRenderer(string id, DefaultSceneShaderPipeline shaderPipeline) : base(id, shaderPipeline) { }
+
+		public override void AddObject(RenderableModel model, Matrix4x4 matrix) {
+			foreach(var mesh in model.Meshes) {
+				_totalVertices.AddRange(mesh.Vertices);
+				_totalIndices.AddRange(mesh.Indices);
+				_totalMaterials.Add(mesh.Material.CreateData());
+			}
+			
+			_totalMatrices.Add(matrix);
+			_models.Add(model);
+		}
 
 		public unsafe override void Render(RenderQueue queue, TimeSpan delta) {
 			Debug.Assert(queue is VkRenderQueue);
 			var vkQueue = (VkRenderQueue) queue;
 			var vkPlatform = (VkPlatform) queue.Platform;
 			
-			Debug.Assert(Models.Count == Matrices.Count, "Model-Matrix list size mismatch! This should never happen!");
+			//Debug.Assert(Models.Count == Matrices.Count, "Model-Matrix list size mismatch! This should never happen!");
+
+			// var allVertexData = new List<Vertex>();
+			// var allIndexData = new List<uint>();
+			// var allMaterialData = new List<Material.Data>();
+			// var allMatrixData = new List<Matrix4x4>();
+			//
+			// for(int i = 0; i < Models.Count; i++) {
+			// 	var model = Models[i];
+			// 	var matrix = Matrices[i];
+			//
+			// 	foreach(var mesh in model.Meshes) {
+			// 		allVertexData.AddRange(mesh.Vertices);
+			// 		allIndexData.AddRange(mesh.Indices);
+			// 		allMaterialData.Add(mesh.Material.CreateData());
+			// 		allMatrixData.Add(matrix);
+			// 	}
+			// }
+
+			ShaderPipeline.VertexData.Size = (uint) (_totalVertices.Count * sizeof(Vertex));
+			ShaderPipeline.IndexData.Size = (uint) (_totalIndices.Count * sizeof(uint));
+			ShaderPipeline.MaterialData.Size = (uint) (_totalMaterials.Count * sizeof(Material.Data));
+			ShaderPipeline.MatrixData.Size = (uint) (_totalMatrices.Count * sizeof(Matrix4x4));
+
+			ShaderPipeline.VertexData.Data = _totalVertices.ToArrayNoCopy();
+			ShaderPipeline.IndexData.Data = _totalIndices.ToArrayNoCopy();
+			ShaderPipeline.MaterialData.Data = _totalMaterials.ToArrayNoCopy();
+			ShaderPipeline.MatrixData.Data = _totalMatrices.ToArrayNoCopy();
+
+			ShaderPipeline.PushData();
 			
 			uint vertexOffset = 0;
 			uint indexOffset = 0;
 			uint materialOffset = 0;
 			uint matrixOffset = 0;
 			
-			for(int i = 0; i < Models.Count; i++) {
-				var model = Models[i];
-				var matrix = Matrices[i];
-				
+			foreach(var model in _models) {
 				foreach(var mesh in model.Meshes) {
-					var vertexDataSize = (uint) (mesh.Vertices.Length * sizeof(Vertex));
+					/*var vertexDataSize = (uint) (mesh.Vertices.Length * sizeof(Vertex));
 					var indexDataSize = (uint) (mesh.Indices.Length * sizeof(uint));
 					var materialDataSize = (uint) sizeof(Material.Data);
-					var matrixDataSize = (uint) sizeof(Material.Data);
+					var matrixDataSize = (uint) sizeof(Matrix4x4);
 					
 					ShaderPipeline.VertexData.Size = vertexOffset + vertexDataSize;
 					ShaderPipeline.VertexData.Write(vertexOffset, mesh.Vertices);
@@ -43,15 +88,15 @@ namespace Cinenic.Renderer.Vulkan {
 					ShaderPipeline.MaterialData.Write(materialOffset, mesh.Material.CreateData());
 					
 					ShaderPipeline.MatrixData.Size = matrixOffset + matrixDataSize;
-					ShaderPipeline.MatrixData.Write(matrixOffset, matrix);
+					ShaderPipeline.MatrixData.Write(matrixOffset, matrix);*/
 					
 					//ShaderPipeline.PushData();
 
 					var pc = new PushConstants {
-						VertexOffset = vertexOffset / (uint) sizeof(Vertex),
-						IndexOffset = indexOffset / (uint) sizeof(uint),
-						MaterialOffset = materialOffset / (uint) sizeof(Material.Data),
-						MatrixOffset = matrixOffset / (uint) sizeof(Matrix4x4)
+						VertexOffset = vertexOffset,
+						IndexOffset = indexOffset,
+						MaterialOffset = materialOffset,
+						MatrixOffset = matrixOffset
 					};
 					
 					vkPlatform.API.CmdPushConstants(
@@ -63,10 +108,10 @@ namespace Cinenic.Renderer.Vulkan {
 						&pc
 					);
 					
-					// mesh.Material.AlbedoTexture?.Bind(queue, (uint) Material.TextureType.Albedo);
-					// mesh.Material.NormalTexture?.Bind(queue, (uint) Material.TextureType.Normal);
-					// mesh.Material.MetallicTexture?.Bind(queue, (uint) Material.TextureType.Metallic);
-					// mesh.Material.RoughnessTexture?.Bind(queue, (uint) Material.TextureType.Roughness);
+					mesh.Material.AlbedoTexture?.Bind(queue, (uint) Material.TextureType.Albedo);
+					mesh.Material.NormalTexture?.Bind(queue, (uint) Material.TextureType.Normal);
+					mesh.Material.MetallicTexture?.Bind(queue, (uint) Material.TextureType.Metallic);
+					mesh.Material.RoughnessTexture?.Bind(queue, (uint) Material.TextureType.Roughness);
 					
 					// fixed(DescriptorSet* descriptorSetsPtr = ((VkShaderProgram) vkQueue.Pipeline.ShaderPipeline.Program)._descriptorSetsArray) {
 					// 	vkPlatform.API.CmdBindDescriptorSets(
@@ -102,19 +147,24 @@ namespace Cinenic.Renderer.Vulkan {
 						0
 					);*/
 
-					vertexOffset += vertexDataSize;
-					indexOffset += indexDataSize;
-					materialOffset += materialDataSize;
-					matrixOffset += matrixDataSize;
+					vertexOffset += (uint) mesh.Vertices.Length;
+					indexOffset += (uint) mesh.Indices.Length;
+					materialOffset += 1;
 				}
+				
+				matrixOffset += 1;
 			}
 			
 			//ShaderPipeline.VkBindTextureDescriptors(vkQueue);
+			Reset();
 		}
 
 		public override void Reset() {
-			Models.Clear();
-			Matrices.Clear();
+			_models.Clear();
+			_totalVertices.Clear();
+			_totalIndices.Clear();
+			_totalMaterials.Clear();
+			_totalMatrices.Clear();
 		}
 
 		[StructLayout(LayoutKind.Explicit)]

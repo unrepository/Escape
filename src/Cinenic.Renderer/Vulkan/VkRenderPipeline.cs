@@ -132,7 +132,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 				var pushConstantRange = new PushConstantRange {
 					Offset = 0,
-					Size = 16,
+					Size = 64,
 					StageFlags = ShaderStageFlags.VertexBit
 				};
 				
