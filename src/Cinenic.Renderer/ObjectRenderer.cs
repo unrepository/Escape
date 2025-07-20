@@ -17,7 +17,9 @@ namespace Cinenic.Renderer {
 			ShaderPipeline = shaderPipeline;
 		}
 
-		public abstract void AddObject(RenderableModel model, Matrix4x4 matrix);
+		public abstract bool AddObject(RenderableObject @object, Matrix4x4? matrix = null);
+		public abstract bool SetMatrix(RenderableObject @object, Matrix4x4 matrix);
+		public abstract bool RemoveObject(RenderableObject @object);
 		
 		public abstract void Render(RenderQueue queue, TimeSpan delta);
 		public abstract void Reset();

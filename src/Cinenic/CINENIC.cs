@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Cinenic.Extensions.CSharp;
 
 namespace Cinenic {
 	
@@ -44,6 +45,7 @@ namespace Cinenic {
 
 				if(sinceLastUpdate >= targetDelta) {
 					UpdateDelta = sinceLastUpdate;
+					ThreadScheduler.RunSchedules();
 					UpdateManager.Update(sinceLastUpdate);
 					LastUpdate = currentTime;
 				} else {
@@ -61,6 +63,7 @@ namespace Cinenic {
 				var sinceLastRender = currentTime - LastRender;
 
 				RenderDelta = sinceLastRender;
+				ThreadScheduler.RunSchedules();
 				RenderManager.Render(sinceLastRender);
 				LastRender = currentTime;
 

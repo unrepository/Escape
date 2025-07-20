@@ -12,5 +12,12 @@ namespace Cinenic.Extensions.CSharp {
 
 			return result;
 		}
+
+		public static void RemoveRange<T>(ref T[] arr, int index, int count) {
+			int newLength = arr.Length - count;
+			
+			Array.Copy(arr, index + count, arr, index, arr.Length - index - count);
+			Array.Resize(ref arr, newLength);
+		}
 	}
 }

@@ -101,7 +101,7 @@ public static class VulkanSSBOTest {
 		var triangle =
 			world
 				.Entity("triangle")
-				.Set(new Renderable(delta => { platform.API.CmdDraw(((VkRenderQueue) pipeline1.Queue).CommandBuffer, 3, 1, 0, 0); return null; }));
+				.Set(new DynamicRenderable(delta => { platform.API.CmdDraw(((VkRenderQueue) pipeline1.Queue).CommandBuffer, 3, 1, 0, 0); return null; }));
 		
 		// var wr = new WorldRenderer("world", world);
 		// RenderManager.Add(queue1, wr);

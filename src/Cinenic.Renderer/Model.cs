@@ -3,11 +3,11 @@ using Cinenic.Extensions.CSharp;
 
 namespace Cinenic.Renderer {
 	
-	public class RenderableModel : ITypeCloneable<RenderableModel> {
+	public class Model : ITypeCloneable<Model> {
 
-		public List<Mesh> Meshes { get; init; }
+		public required List<Mesh> Meshes { get; init; }
 
-		public RenderableModel Clone() {
+		public Model Clone() {
 			var clonedMeshes = new List<Mesh>(Meshes.Count);
 
 			foreach(var mesh in Meshes) {

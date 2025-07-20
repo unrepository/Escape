@@ -13,6 +13,7 @@ using Cinenic.Presentation.Extensions.ModelLoading;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using Model = Cinenic.Presentation.Drawing.Model;
 using Monitor = Silk.NET.Windowing.Monitor;
 using Texture = Cinenic.Renderer.Texture;
 using Window = Cinenic.Renderer.Window;

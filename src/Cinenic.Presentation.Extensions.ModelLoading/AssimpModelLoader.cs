@@ -17,6 +17,7 @@ using AiMaterial = Silk.NET.Assimp.Material;
 using AiTextureType = Silk.NET.Assimp.TextureType;
 using Material = Cinenic.Renderer.Material;
 using Mesh = Cinenic.Renderer.Mesh;
+using Model = Cinenic.Presentation.Drawing.Model;
 using PrimitiveType = Silk.NET.OpenGL.PrimitiveType;
 using Texture = Cinenic.Renderer.Texture;
 

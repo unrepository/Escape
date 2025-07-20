@@ -1,130 +1,134 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Cinenic.Extensions.CSharp;
 using Cinenic.Renderer.Shader;
 using Cinenic.Renderer.Shader.Pipelines;
+using NLog;
 using Silk.NET.Vulkan;
-
-using static Cinenic.Renderer.Vulkan.VkHelpers;
 
 namespace Cinenic.Renderer.Vulkan {
 	
+	// TODO we could perchance optimize this with IShaderData.Write to only write parts of data in Add/RemoveObject, SetMatrix
 	public class VkObjectRenderer : ObjectRenderer {
-		
-		private List<RenderableModel> _models = [];
-		
-		private List<Vertex> _totalVertices = [];
-		private List<uint> _totalIndices = [];
-		private List<Material.Data> _totalMaterials = [];
-		private List<Matrix4x4> _totalMatrices = [];
 
-		private DescriptorSet _textureDescriptorSet;
-		private Dictionary<int, VkTexture> _textureIndexMap = [];
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-		public VkObjectRenderer(string id, DefaultSceneShaderPipeline shaderPipeline) : base(id, shaderPipeline) {
-			var descriptor = CreateDescriptorSet(
-				(VkPlatform) shaderPipeline.Platform,
-				(VkShaderProgram) shaderPipeline.Program,
-				[0],
-				1024,
-				DescriptorType.CombinedImageSampler,
-				ShaderStageFlags.FragmentBit
-			);
+		private readonly ConcurrentQueue<ObjectData> _pendingAdd = new();
+		private readonly ConcurrentQueue<RenderableObject> _pendingRemove = new();
 
-			_textureDescriptorSet = descriptor.Set;
+		private readonly ConcurrentDictionary<RenderableObject, ObjectData> _objects = new();
+		private readonly ConcurrentDictionary<RenderableObject, Matrix4x4> _matrices = new();
+
+		public VkObjectRenderer(string id, DefaultSceneShaderPipeline shaderPipeline) : base(id, shaderPipeline) { }
+
+		public override bool AddObject(RenderableObject obj, Matrix4x4? matrix = null) {
+			if(_objects.ContainsKey(obj)) return false;
+
+			matrix ??= Matrix4x4.Identity;
+
+			var model = obj.Model;
+			var vertices = model.Meshes.SelectMany(m => m.Vertices).ToArray();
+			var indices = model.Meshes.SelectMany(m => m.Indices).ToArray();
+			var materials = model.Meshes.Select(m => m.Material.CreateData()).ToArray();
+
+			var data = new ObjectData(obj, model.Meshes, vertices, indices, materials);
+			_pendingAdd.Enqueue(data);
+			_matrices[obj] = matrix.Value;
+
+			_logger.Trace("Added object {Id}", obj.Id);
+			return true;
 		}
 
-		public override void AddObject(RenderableModel model, Matrix4x4 matrix) {
-			foreach(var mesh in model.Meshes) {
-				_totalVertices.AddRange(mesh.Vertices);
-				_totalIndices.AddRange(mesh.Indices);
-				_totalMaterials.Add(mesh.Material.CreateData());
-				
-				// if(mesh.Material.AlbedoTexture is VkTexture albedoTexture) _textureIndexMap.TryAdd(albedoTexture.Index, albedoTexture);
-				// if(mesh.Material.NormalTexture is VkTexture normalTexture) _textureIndexMap.TryAdd(normalTexture.Index, normalTexture);
-				// if(mesh.Material.MetallicTexture is VkTexture metallicTexture) _textureIndexMap.TryAdd(metallicTexture.Index, metallicTexture);
-				// if(mesh.Material.RoughnessTexture is VkTexture roughnessTexture) _textureIndexMap.TryAdd(roughnessTexture.Index, roughnessTexture);
-			}
+		public override bool SetMatrix(RenderableObject obj, Matrix4x4 matrix) {
+			return _matrices.TryUpdate(obj, matrix, _matrices.GetValueOrDefault(obj));
+		}
+
+		public override bool RemoveObject(RenderableObject obj) {
+			if (!_objects.ContainsKey(obj)) return false;
+
+			_pendingRemove.Enqueue(obj);
+			_matrices.TryRemove(obj, out _);
 			
-			_totalMatrices.Add(matrix);
-			_models.Add(model);
+			_logger.Trace("Removed object {Id}", obj.Id);
+			return true;
 		}
 
 		public unsafe override void Render(RenderQueue queue, TimeSpan delta) {
 			Debug.Assert(queue is VkRenderQueue);
 			var vkQueue = (VkRenderQueue) queue;
 			var vkPlatform = (VkPlatform) queue.Platform;
-			
-			//Debug.Assert(Models.Count == Matrices.Count, "Model-Matrix list size mismatch! This should never happen!");
 
-			// var allVertexData = new List<Vertex>();
-			// var allIndexData = new List<uint>();
-			// var allMaterialData = new List<Material.Data>();
-			// var allMatrixData = new List<Matrix4x4>();
-			//
-			// for(int i = 0; i < Models.Count; i++) {
-			// 	var model = Models[i];
-			// 	var matrix = Matrices[i];
-			//
-			// 	foreach(var mesh in model.Meshes) {
-			// 		allVertexData.AddRange(mesh.Vertices);
-			// 		allIndexData.AddRange(mesh.Indices);
-			// 		allMaterialData.Add(mesh.Material.CreateData());
-			// 		allMatrixData.Add(matrix);
-			// 	}
-			// }
+			// process queues
+			while(_pendingAdd.TryDequeue(out var add)) {
+				_objects[add.Object] = add;
+			}
+			while(_pendingRemove.TryDequeue(out var remove)) {
+				_objects.TryRemove(remove, out _);
+			}
 
-			ShaderPipeline.VertexData.Size = (uint) (_totalVertices.Count * sizeof(Vertex));
-			ShaderPipeline.IndexData.Size = (uint) (_totalIndices.Count * sizeof(uint));
-			ShaderPipeline.MaterialData.Size = (uint) (_totalMaterials.Count * sizeof(Material.Data));
-			ShaderPipeline.MatrixData.Size = (uint) (_totalMatrices.Count * sizeof(Matrix4x4));
+			// construct buffer data
+			var totalVertices = new List<Vertex>();
+			var totalIndices = new List<uint>();
+			var totalMaterials = new List<Material.Data>();
+			var totalMatrices = new List<Matrix4x4>();
+			var drawInstances = new List<DrawInstance>();
 
-			ShaderPipeline.VertexData.Data = _totalVertices.ToArrayNoCopy();
-			ShaderPipeline.IndexData.Data = _totalIndices.ToArrayNoCopy();
-			ShaderPipeline.MaterialData.Data = _totalMaterials.ToArrayNoCopy();
-			ShaderPipeline.MatrixData.Data = _totalMatrices.ToArrayNoCopy();
-
-			ShaderPipeline.PushData();
-			
 			uint vertexOffset = 0;
 			uint indexOffset = 0;
 			uint materialOffset = 0;
 			uint matrixOffset = 0;
-			
-			foreach(var model in _models) {
-				foreach(var mesh in model.Meshes) {
-					/*var vertexDataSize = (uint) (mesh.Vertices.Length * sizeof(Vertex));
-					var indexDataSize = (uint) (mesh.Indices.Length * sizeof(uint));
-					var materialDataSize = (uint) sizeof(Material.Data);
-					var matrixDataSize = (uint) sizeof(Matrix4x4);
-					
-					ShaderPipeline.VertexData.Size = vertexOffset + vertexDataSize;
-					ShaderPipeline.VertexData.Write(vertexOffset, mesh.Vertices);
-					
-					ShaderPipeline.IndexData.Size = indexOffset + indexDataSize;
-					ShaderPipeline.IndexData.Write(indexOffset, mesh.Indices);
-					
-					ShaderPipeline.MaterialData.Size = materialOffset + materialDataSize;
-					ShaderPipeline.MaterialData.Write(materialOffset, mesh.Material.CreateData());
-					
-					ShaderPipeline.MatrixData.Size = matrixOffset + matrixDataSize;
-					ShaderPipeline.MatrixData.Write(matrixOffset, matrix);*/
-					
-					//ShaderPipeline.PushData();
 
+			foreach (var obj in _objects.Values) {
+				var matrix = _matrices.GetValueOrDefault(obj.Object, Matrix4x4.Identity);
+
+				totalVertices.AddRange(obj.Vertices);
+				totalIndices.AddRange(obj.Indices);
+				totalMaterials.AddRange(obj.Materials);
+				totalMatrices.Add(matrix);
+
+				drawInstances.Add(new(
+					obj.Meshes,
+					vertexOffset,
+					indexOffset,
+					materialOffset,
+					matrixOffset
+				));
+
+				vertexOffset += (uint)obj.Vertices.Length;
+				indexOffset += (uint)obj.Indices.Length;
+				materialOffset += (uint)obj.Materials.Length;
+				matrixOffset += 1;
+			}
+
+			// upload data to GPU
+			ShaderPipeline.VertexData.Size = (uint)(totalVertices.Count * sizeof(Vertex));
+			ShaderPipeline.IndexData.Size = (uint)(totalIndices.Count * sizeof(uint));
+			ShaderPipeline.MaterialData.Size = (uint)(totalMaterials.Count * sizeof(Material.Data));
+			ShaderPipeline.MatrixData.Size = (uint)(totalMatrices.Count * sizeof(Matrix4x4));
+
+			ShaderPipeline.VertexData.Data = totalVertices.ToArrayNoCopy();
+			ShaderPipeline.IndexData.Data = totalIndices.ToArrayNoCopy();
+			ShaderPipeline.MaterialData.Data = totalMaterials.ToArrayNoCopy();
+			ShaderPipeline.MatrixData.Data = totalMatrices.ToArrayNoCopy();
+
+			ShaderPipeline.PushData();
+
+			foreach (var instance in drawInstances) {
+				foreach (var mesh in instance.Meshes) {
 					var pc = new PushConstants {
-						VertexOffset = vertexOffset,
-						IndexOffset = indexOffset,
-						MaterialOffset = materialOffset,
-						MatrixOffset = matrixOffset
+						VertexOffset = instance.VertexOffset,
+						IndexOffset = instance.IndexOffset,
+						MaterialOffset = instance.MaterialOffset,
+						MatrixOffset = instance.MatrixOffset
 					};
 
-					if(mesh.Material.AlbedoTexture is VkTexture albedoTexture) pc.AlbedoTextureIndex = albedoTexture.Index;
-					if(mesh.Material.NormalTexture is VkTexture normalTexture) pc.AlbedoTextureIndex = normalTexture.Index;
-					if(mesh.Material.MetallicTexture is VkTexture metallicTexture) pc.AlbedoTextureIndex = metallicTexture.Index;
-					if(mesh.Material.RoughnessTexture is VkTexture roughnessTexture) pc.AlbedoTextureIndex = roughnessTexture.Index;
-					
+					if(mesh.Material.AlbedoTexture is VkTexture albedo) pc.AlbedoTextureIndex = albedo.Index;
+					if(mesh.Material.NormalTexture is VkTexture normal) pc.NormalTextureIndex = normal.Index;
+					if(mesh.Material.MetallicTexture is VkTexture metallic) pc.MetallicTextureIndex = metallic.Index;
+					if(mesh.Material.RoughnessTexture is VkTexture roughness) pc.RoughnessTextureIndex = roughness.Index;
+
 					vkPlatform.API.CmdPushConstants(
 						vkQueue.CommandBuffer,
 						((VkRenderPipeline) queue.Pipeline!).PipelineLayout,
@@ -133,65 +137,61 @@ namespace Cinenic.Renderer.Vulkan {
 						(uint) sizeof(PushConstants),
 						&pc
 					);
-					
+
 					// this doesn't bind the textures per-se, but rather adds them to the textures descriptor array (if they aren't already)...
 					mesh.Material.AlbedoTexture?.Bind(queue, 0);
 					mesh.Material.NormalTexture?.Bind(queue, 0);
 					mesh.Material.MetallicTexture?.Bind(queue, 0);
 					mesh.Material.RoughnessTexture?.Bind(queue, 0);
-					
-					// fixed(DescriptorSet* descriptorSetsPtr = ((VkShaderProgram) vkQueue.Pipeline.ShaderPipeline.Program)._descriptorSetsArray) {
-					// 	vkPlatform.API.CmdBindDescriptorSets(
-					// 		vkQueue.CommandBuffer,
-					// 		queue.Type switch {
-					// 			RenderQueue.Family.Graphics => PipelineBindPoint.Graphics,
-					// 			RenderQueue.Family.Compute => PipelineBindPoint.Compute,
-					// 			_ => throw new NotImplementedException()
-					// 		},
-					// 		((VkRenderPipeline) queue.Pipeline).PipelineLayout,
-					// 		0,
-					// 		(uint) ((VkShaderProgram) vkQueue.Pipeline.ShaderPipeline.Program)._descriptorSetsArray.Length,
-					// 		descriptorSetsPtr,
-					// 		0,
-					// 		null
-					// 	);
-					// }
-					
+
 					vkPlatform.API.CmdDraw(
 						vkQueue.CommandBuffer,
-						(uint) mesh.Indices.Length,
+						(uint)mesh.Indices.Length,
 						1,
 						0,
 						0
 					);
-					
-					/*vkPlatform.API.CmdDrawIndexed(
-						vkQueue.CommandBuffer,
-						(uint) mesh.Indices.Length,
-						1,
-						/*indexOffset / sizeof(uint)#1# 0,
-						/*(int) (vertexOffset / sizeof(Vertex))#1# 0,
-						0
-					);*/
 
-					vertexOffset += (uint) mesh.Vertices.Length;
-					indexOffset += (uint) mesh.Indices.Length;
-					materialOffset += 1;
+					instance.VertexOffset += (uint)mesh.Vertices.Length;
+					instance.IndexOffset += (uint)mesh.Indices.Length;
+					instance.MaterialOffset += 1;
 				}
-				
-				matrixOffset += 1;
+
+				instance.MatrixOffset += 1;
 			}
-			
-			//ShaderPipeline.VkBindTextureDescriptors(vkQueue);
-			Reset();
 		}
 
 		public override void Reset() {
-			_models.Clear();
-			_totalVertices.Clear();
-			_totalIndices.Clear();
-			_totalMaterials.Clear();
-			_totalMatrices.Clear();
+			_objects.Clear();
+			_matrices.Clear();
+			
+			while(_pendingAdd.TryDequeue(out _)) { }
+			while(_pendingRemove.TryDequeue(out _)) { }
+		}
+
+		private record ObjectData(
+			RenderableObject Object,
+			List<Mesh> Meshes,
+			Vertex[] Vertices,
+			uint[] Indices,
+			Material.Data[] Materials
+		);
+
+		private class DrawInstance {
+			
+			public List<Mesh> Meshes;
+			public uint VertexOffset;
+			public uint IndexOffset;
+			public uint MaterialOffset;
+			public uint MatrixOffset;
+		
+			public DrawInstance(List<Mesh> meshes, uint vo, uint io, uint mo, uint ma) {
+				Meshes = meshes;
+				VertexOffset = vo;
+				IndexOffset = io;
+				MaterialOffset = mo;
+				MatrixOffset = ma;
+			}
 		}
 
 		[StructLayout(LayoutKind.Explicit)]
@@ -201,7 +201,7 @@ namespace Cinenic.Renderer.Vulkan {
 			[FieldOffset(4)] public uint IndexOffset;
 			[FieldOffset(8)] public uint MaterialOffset;
 			[FieldOffset(12)] public uint MatrixOffset;
-			
+
 			[FieldOffset(16)] public int AlbedoTextureIndex;
 			[FieldOffset(20)] public int NormalTextureIndex;
 			[FieldOffset(24)] public int MetallicTextureIndex;

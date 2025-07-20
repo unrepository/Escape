@@ -28,7 +28,7 @@ public static class WorldSandbox {
 	
 	private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-	private static readonly RenderableModel _cubeModel = new RenderableModel {
+	private static readonly Model _cubeModel = new Model {
 		Meshes = [
 			new Mesh {
 				Vertices = [
@@ -131,28 +131,36 @@ public static class WorldSandbox {
 		_logger.Info("Create world");
 		using var world = World.Create();
 		
+		_logger.Info("Add object & world renderer");
+		var or = ObjectRenderer.Create(platform, shaderPipeline);
+		RenderManager.Add(queue, or);
+		RenderManager.Add(queue, new WorldRenderer("main", or, world));
+		UpdateManager.Add(new WorldUpdater("main", world));
+		
 		_logger.Info("Create renderable entities");
 		var cube1 = world
 			.Entity("cube 1")
 			.Set(new Transform3D(Vector3.Zero, Quaternion.Zero, Vector3.One))
-			.Set(new Renderable(delta => model1));
+			.Set(new RenderableObject(model1));
 		
 		var cube2 = world
 			.Entity("cube 2")
 			.Set(new Transform3D(new Vector3(0, 2, 0), Quaternion.Zero, Vector3.One))
-			.Set(new Renderable(delta => model2));
+			.Set(new RenderableObject(model2));
 		
 		var cube3 = world
 			.Entity("cube 3")
 			.Set(new Transform3D(new Vector3(-2, 2, 0), Quaternion.Zero, Vector3.One))
-			.Set(new Renderable(delta => model3));
+			.Set(new RenderableObject(model3));
 		
 		var cube4 = world
 			.Entity("cube 4")
 			.Set(new Transform3D(new Vector3(-2, 0, 0), Quaternion.Zero, Vector3.One))
-			.Set(new Renderable(delta => model4));
+			.Set(new RenderableObject(model4));
 		
 		UpdateManager.Add(new TestRotationUpdater("test rotation", world, cube1));
+		UpdateManager.Add(new TestKiller("test killer", world, cube4));
+		UpdateManager.Add(new TestSwitcher("test model switcher", world, cube2, model1));
 		
 		_logger.Info("Create camera entity");
 		var camera = world
@@ -165,13 +173,7 @@ public static class WorldSandbox {
 			));
 		camera.GetMut<Transform3D>().LookAt(Vector3.Zero);
 
-		world.Set(default(flecs.EcsRest));
-
-		_logger.Info("Add object & world renderer");
-		var or = ObjectRenderer.Create(platform, shaderPipeline);
-		RenderManager.Add(queue, or);
-		RenderManager.Add(queue, new WorldRenderer("main", or, world));
-		UpdateManager.Add(new WorldUpdater("main", world));
+		//world.Set(default(flecs.EcsRest));
 		
 		_logger.Info("Setup window input");
 		Debug.Assert(window.Input is not null);
@@ -232,6 +234,52 @@ public static class WorldSandbox {
 				MathF.Cos(t) * MathF.PI * 0.5f,
 				0 /*MathF.Sin(t * 0.5f)*/
 			);
+		}
+	}
+	
+	private class TestKiller : WorldUpdater {
+
+		private TimeSpan _time = TimeSpan.Zero;
+		private Entity _entity;
+		private bool _done;
+
+		public TestKiller(string id, World world, Entity entity) : base(id, world) {
+			_entity = entity;
+		}
+
+		public override void Update(TimeSpan delta) {
+			if(_done) return;
+			
+			_time += delta;
+
+			if(_time.TotalSeconds > 2.0) {
+				_entity.Destruct();
+				_done = true;
+			}
+		}
+	}
+	
+	private class TestSwitcher : WorldUpdater {
+
+		private TimeSpan _time = TimeSpan.Zero;
+		private Entity _entity;
+		private Model _newModel;
+		private bool _done;
+
+		public TestSwitcher(string id, World world, Entity entity, Model newModel) : base(id, world) {
+			_entity = entity;
+			_newModel = newModel;
+		}
+
+		public override void Update(TimeSpan delta) {
+			if(_done) return;
+			
+			_time += delta;
+
+			if(_time.TotalSeconds > 3.0) {
+				_entity.Set(new RenderableObject(_newModel));
+				_done = true;
+			}
 		}
 	}
 }
