@@ -28,4 +28,8 @@
       <Folder Include="Resources\Textures\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Silk.NET.Input.Glfw" Version="2.22.0" />
+    </ItemGroup>
+
 </Project>
