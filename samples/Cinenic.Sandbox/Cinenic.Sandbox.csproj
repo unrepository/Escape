@@ -9,8 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Cinenic.Presentation.Extensions.ModelLoading\Cinenic.Presentation.Extensions.ModelLoading.csproj" />
-      <ProjectReference Include="..\..\src\Cinenic.Presentation\Cinenic.Presentation.csproj" />
       <ProjectReference Include="..\..\src\Cinenic.Compute\Cinenic.Compute.csproj" />
       <ProjectReference Include="..\..\src\Cinenic.World\Cinenic.World.csproj" />
       <ProjectReference Include="..\..\src\Cinenic\Cinenic.csproj" />
