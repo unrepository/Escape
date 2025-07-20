@@ -23,6 +23,7 @@ namespace Cinenic.Renderer.Vulkan {
 		public Vk API { get; }
 		public Instance Vk { get; private set; }
 
+		// TODO make non-nullable
 		public VkDevice? PrimaryDevice {
 			get;
 			set {

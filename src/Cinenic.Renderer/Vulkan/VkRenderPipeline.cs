@@ -129,6 +129,16 @@ namespace Cinenic.Renderer.Vulkan {
 				colorBlendInfo.BlendConstants[1] = 0;
 				colorBlendInfo.BlendConstants[2] = 0;
 				colorBlendInfo.BlendConstants[3] = 0;
+				
+				bool hasDepthStencil = queue.Subpasses.Any(
+					description => description.PDepthStencilAttachment is not null);
+
+				var depthStencilState = new PipelineDepthStencilStateCreateInfo {
+					SType = StructureType.PipelineDepthStencilStateCreateInfo,
+					DepthTestEnable = hasDepthStencil,
+					DepthWriteEnable = hasDepthStencil,
+					DepthCompareOp = hasDepthStencil ? CompareOp.Less : CompareOp.Never
+				};
 
 				var pushConstantRange = new PushConstantRange {
 					Offset = 0,
@@ -172,7 +182,7 @@ namespace Cinenic.Renderer.Vulkan {
 								Layout = PipelineLayout,
 								RenderPass = ((VkRenderQueue) Queue).Base,
 								Subpass = 0,
-								BasePipelineHandle = default,
+								BasePipelineHandle = default
 							}
 						};
 
@@ -188,6 +198,7 @@ namespace Cinenic.Renderer.Vulkan {
 							pipelineInfo.PRasterizationState = &rasterizationInfo;
 							pipelineInfo.PMultisampleState = &multisampleInfo;
 							pipelineInfo.PColorBlendState = &colorBlendInfo;
+							pipelineInfo.PDepthStencilState = &depthStencilState;
 
 							VkCheck(
 								_platform.API.CreateGraphicsPipelines(
@@ -262,8 +273,8 @@ namespace Cinenic.Renderer.Vulkan {
 			var viewport = new Viewport {
 				X = Queue.Viewport.X,
 				Y = Queue.Viewport.Y,
-				Width = Queue.Viewport.Z > 0 ? Queue.Viewport.Z : vkRenderTarget.SwapchainExtent.Width,
-				Height = Queue.Viewport.W > 0 ? Queue.Viewport.W : vkRenderTarget.SwapchainExtent.Height,
+				Width = Queue.Viewport.Z > 0 ? Queue.Viewport.Z : vkRenderTarget.Size.X,
+				Height = Queue.Viewport.W > 0 ? Queue.Viewport.W : vkRenderTarget.Size.Y,
 				MinDepth = 0,
 				MaxDepth = 1
 			};

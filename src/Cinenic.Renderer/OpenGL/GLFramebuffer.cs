@@ -18,7 +18,7 @@ namespace Cinenic.Renderer.OpenGL {
 		
 		public override void Bind() {
 			if(Handle == 0) Create();
-			_platform.API.BindFramebuffer(FramebufferTarget.Framebuffer, Handle);
+			_platform.API.BindFramebuffer(FramebufferTarget.Framebuffer, (uint) Handle);
 			_platform.API.Viewport(0, 0, Size.X, Size.Y);
 		}
 		
@@ -60,6 +60,10 @@ namespace Cinenic.Renderer.OpenGL {
 			TextureAttachments.Add(texture);
 		}
 
+		public override void CreateAttachment(AttachmentType type) {
+			throw new NotImplementedException();
+		}
+
 		public override void Resize(Vector2D<int> size) {
 			throw new NotImplementedException();
 		}
@@ -87,7 +91,7 @@ namespace Cinenic.Renderer.OpenGL {
 			GC.SuppressFinalize(this);
 			Debug.Assert(Handle != 0);
 			
-			_platform.API.DeleteFramebuffer(Handle);
+			_platform.API.DeleteFramebuffer((uint) Handle);
 			
 			foreach(var texture in TextureAttachments) {
 				texture.Dispose();

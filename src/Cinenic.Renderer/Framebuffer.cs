@@ -9,12 +9,13 @@ namespace Cinenic.Renderer {
 		public IPlatform Platform { get; }
 		public RenderQueue Queue { get; }
 		
-		public uint Handle { get; protected set; }
-		public Vector2D<uint> Size { get; protected init; }
+		public ulong Handle { get; protected set; }
+		public Vector2D<uint> Size { get; }
 
 		public delegate void ResizeEventHandler(Vector2D<int> newSize);
 		public event ResizeEventHandler Resized;
 		
+		[Obsolete]
 		protected List<Texture> TextureAttachments { get; } = [];
 
 		protected Framebuffer(IPlatform platform, RenderQueue queue, Vector2D<uint> size) {
@@ -23,6 +24,7 @@ namespace Cinenic.Renderer {
 			Size = size;
 		}
 
+		[Obsolete]
 		public IReadOnlyList<Texture> GetTextureAttachments()
 			=> TextureAttachments;
 		
@@ -31,8 +33,12 @@ namespace Cinenic.Renderer {
 		[Obsolete]
 		public abstract void Unbind();
 
+		public abstract void CreateAttachment(AttachmentType type);
 		public abstract void Create();
+		
+		[Obsolete("Use CreateAttachment()")]
 		public abstract void AttachTexture(Texture texture);
+		
 		public abstract void Resize(Vector2D<int> size);
 
 		public abstract byte[] Read(int attachment = 0, Rectangle<uint>? area = null);
@@ -53,6 +59,12 @@ namespace Cinenic.Renderer {
 				VkPlatform vkPlatform => new VkFramebuffer(vkPlatform, queue, size),
 				_ => throw new NotImplementedException("PlatformImpl")
 			};
+		}
+
+		public enum AttachmentType {
+			
+			Color,
+			Depth
 		}
 	}
 }

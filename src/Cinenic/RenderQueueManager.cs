@@ -10,7 +10,7 @@ namespace Cinenic {
 		
 		public static Dictionary<string, RenderQueue> Queues { get; } = [];
 
-		public static RenderQueue Create(
+		public unsafe static RenderQueue Create(
 			IPlatform platform,
 			string id,
 			Framebuffer? renderTarget = null,
@@ -22,22 +22,23 @@ namespace Cinenic {
 			switch(platform) {
 				case VkPlatform vkPlatform:
 					var vkQueue = new VkRenderQueue(vkPlatform, family, format);
-					vkQueue.CreateAttachment();
+					
+					// attachments
+					vkQueue.CreateAttachment(Framebuffer.AttachmentType.Color);
+					vkQueue.CreateAttachment(Framebuffer.AttachmentType.Depth, Format.D32Sfloat); // TODO some method to figure out the format depending on the device
+					
 					vkQueue.CreateSubpass(
-						0,
-						ImageLayout.ColorAttachmentOptimal,
-						new SubpassDescription {
-							ColorAttachmentCount = 1
-						},
+						[ Framebuffer.AttachmentType.Color, Framebuffer.AttachmentType.Depth ],
 						new SubpassDependency {
 							SrcSubpass = Vk.SubpassExternal,
 							DstSubpass = 0,
-							SrcStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
+							SrcStageMask = PipelineStageFlags.ColorAttachmentOutputBit | PipelineStageFlags.EarlyFragmentTestsBit,
 							SrcAccessMask = 0,
-							DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
-							DstAccessMask = AccessFlags.ColorAttachmentWriteBit
+							DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit | PipelineStageFlags.EarlyFragmentTestsBit,
+							DstAccessMask = AccessFlags.ColorAttachmentWriteBit | AccessFlags.DepthStencilAttachmentWriteBit
 						}
 					);
+					
 					vkQueue.RenderTarget = renderTarget;
 					vkQueue.Initialize();
 

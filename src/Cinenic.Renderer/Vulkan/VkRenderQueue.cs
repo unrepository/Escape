@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Cinenic.Extensions.CSharp;
 using NLog;
 using Silk.NET.Core;
 using Silk.NET.Maths;
@@ -36,6 +37,8 @@ namespace Cinenic.Renderer.Vulkan {
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		
 		private readonly VkPlatform _platform;
+		
+		private bool _hasDepthStencil = false;
 		
 		private Semaphore[] _imagesAvailable;
 		private Semaphore[] _rendersComplete;
@@ -206,51 +209,84 @@ namespace Cinenic.Renderer.Vulkan {
 				
 				Base = pass;
 			}
+
+			if(Subpasses.Any(description => description.PDepthStencilAttachment is not null)) {
+				_hasDepthStencil = true;
+			}
 			
-			_logger.Debug("Initialized render pass");
+			_logger.Debug($"Initialized render pass; depthStencilBuffer={_hasDepthStencil}");
 		}
 
-		public void CreateAttachment(VkColorFormat? format = null) {
-			var attachment = new AttachmentDescription {
-				Format = format ?? VkColorFormat,
-				Samples = SampleCountFlags.Count1Bit,
-				LoadOp = AttachmentLoadOp.Clear,
-				StoreOp = AttachmentStoreOp.Store,
-				StencilLoadOp = AttachmentLoadOp.DontCare,
-				StencilStoreOp = AttachmentStoreOp.DontCare,
-				InitialLayout = ImageLayout.Undefined,
-				FinalLayout = ImageLayout.PresentSrcKhr
+		public void CreateAttachment(Framebuffer.AttachmentType type, VkColorFormat? format = null) {
+			var description = type switch {
+				Framebuffer.AttachmentType.Color => new AttachmentDescription {
+					Format = format ?? VkColorFormat,
+					Samples = SampleCountFlags.Count1Bit,
+					LoadOp = AttachmentLoadOp.Clear,
+					StoreOp = AttachmentStoreOp.Store,
+					StencilLoadOp = AttachmentLoadOp.DontCare,
+					StencilStoreOp = AttachmentStoreOp.DontCare,
+					InitialLayout = ImageLayout.Undefined,
+					FinalLayout = ImageLayout.PresentSrcKhr
+				},
+				Framebuffer.AttachmentType.Depth => new AttachmentDescription {
+					Format = format ?? VkColorFormat,
+					Samples = SampleCountFlags.Count1Bit,
+					LoadOp = AttachmentLoadOp.Clear,
+					StoreOp = AttachmentStoreOp.DontCare,
+					StencilLoadOp = AttachmentLoadOp.DontCare,
+					StencilStoreOp = AttachmentStoreOp.DontCare,
+					InitialLayout = ImageLayout.Undefined,
+					FinalLayout = ImageLayout.DepthStencilAttachmentOptimal
+				},
+				_ => throw new NotImplementedException()
 			};
 			
-			Attachments.Add(attachment);
+			Attachments.Add(description);
 			_logger.Debug("Created attachment for {RenderPass}", this);
 		}
 
 		public unsafe void CreateSubpass(
-			uint attachmentIndex, ImageLayout layout,
-			SubpassDescription description, SubpassDependency? dependency = null)
-		{
-			description.PipelineBindPoint = Type switch {
-				Family.Graphics => PipelineBindPoint.Graphics,
-				Family.Compute => PipelineBindPoint.Compute,
-				_ => throw new NotImplementedException()
-			};
-			
-			var attachmentReference = new AttachmentReference {
-				Attachment = attachmentIndex,
-				Layout = layout
+			Framebuffer.AttachmentType[] types,
+			SubpassDependency? dependency = null
+		) {
+			var description = new SubpassDescription {
+				PipelineBindPoint = Type switch {
+					Family.Graphics => PipelineBindPoint.Graphics,
+					Family.Compute => PipelineBindPoint.Compute,
+					_ => throw new NotImplementedException()
+				}
 			};
 
-			var handle = GCHandle.Alloc(attachmentReference, GCHandleType.Pinned);
-			
-			description.PColorAttachments = (AttachmentReference*) handle.AddrOfPinnedObject();
-			description.PInputAttachments = (AttachmentReference*) handle.AddrOfPinnedObject();
+			foreach(var (i, type) in types.Enumerate()) {
+				var reference = new AttachmentReference {
+					Attachment = (uint) i
+				};
+
+				AttachmentReference* Alloc() {
+					return (AttachmentReference*) GCHandle.Alloc(reference, GCHandleType.Pinned).AddrOfPinnedObject();
+				}
+
+				switch(type) {
+					case Framebuffer.AttachmentType.Color:
+						reference.Layout = ImageLayout.ColorAttachmentOptimal;
+						description.ColorAttachmentCount++;
+						description.PColorAttachments = Alloc();
+						break;
+					case Framebuffer.AttachmentType.Depth:
+						reference.Layout = ImageLayout.DepthStencilAttachmentOptimal;
+						description.PDepthStencilAttachment = Alloc();
+						break;
+					default:
+						throw new NotImplementedException();
+				}
+			}
 			
 			Subpasses.Add(description);
 			if(dependency.HasValue) SubpassDependencies.Add(dependency.Value);
 			
-			_logger.Debug("Created subpass for {RenderPass}, attachmentIndex={AttachmentIndex}, layout={Layout}, bindPoint={BindPoint}",
-				this, attachmentIndex, layout, description.PipelineBindPoint);
+			_logger.Debug("Created subpass for {RenderPass}, types={AttachmentTypes}, bindPoint={BindPoint}",
+				this, types, description.PipelineBindPoint);
 		}
 
 		public unsafe override bool Begin() {
@@ -261,6 +297,7 @@ namespace Cinenic.Renderer.Vulkan {
 			Debug.Assert(CommandBuffers.Length > 0);
 
 			var vkRenderTarget = (VkFramebuffer) RenderTarget;
+			var windowFramebuffer = vkRenderTarget as VkWindow.WindowFramebuffer;
 
 			// synchronization wait
 			_platform.API.WaitForFences(
@@ -331,24 +368,30 @@ namespace Cinenic.Renderer.Vulkan {
 			
 			// acquire frame
 			uint nextImage = 0;
-			var result = VkExtension
-				.Get<KhrSwapchain>(_platform, _platform.PrimaryDevice)
-				.AcquireNextImage(
-					_platform.PrimaryDevice.Logical,
-					vkRenderTarget.Swapchain,
-					ulong.MaxValue,
-					_imagesAvailable[CurrentFrame],
-					default,
-					ref nextImage
-				);
-			CurrentImage = (int) nextImage;
 
-			if(result == Result.ErrorOutOfDateKhr) {
-				return false;
-			}
+			if(windowFramebuffer is not null) {
+				var result = VkExtension
+					.Get<KhrSwapchain>(_platform, _platform.PrimaryDevice)
+					.AcquireNextImage(
+						 _platform.PrimaryDevice.Logical,
+						 windowFramebuffer.Swapchain,
+						 ulong.MaxValue,
+						 _imagesAvailable[CurrentFrame],
+						 default,
+						 ref nextImage
+					);
+				
+				CurrentImage = (int) nextImage;
+
+				if(result == Result.ErrorOutOfDateKhr) {
+					return false;
+				}
 			
-			if(result != Result.Success && result != Result.SuboptimalKhr) {
-				throw new PlatformException($"Failed to acquire swapchain image: {result}");
+				if(result != Result.Success && result != Result.SuboptimalKhr) {
+					throw new PlatformException($"Failed to acquire swapchain image: {result}");
+				}
+			} else {
+				CurrentImage = 0;
 			}
 			
 			// reset synchronization
@@ -368,26 +411,38 @@ namespace Cinenic.Renderer.Vulkan {
 				_platform.API.BeginCommandBuffer(CommandBuffer, &cmdBeginInfo),
 				"Could not begin the command buffer"
 			);
+
+			var clearValues = stackalloc ClearValue[2] {
+				new ClearValue {
+					Color = { Float32_0 = 0, Float32_1 = 0, Float32_2 = 0, Float32_3 = 0 }
+				},
+				new ClearValue {
+					DepthStencil = { Depth = 1.0f, Stencil = 0 }
+				}
+			};
 			
 			var passBeginInfo = new RenderPassBeginInfo {
 				SType = StructureType.RenderPassBeginInfo,
 				RenderPass = Base,
-				Framebuffer = vkRenderTarget.SwapchainFramebuffers[CurrentImage],
 				RenderArea = {
 					Offset = {
 						X = Viewport.X,
 						Y = Viewport.Y
 					},
 					Extent = {
-						Width = (uint) Viewport.Z > 0 ? (uint) Viewport.Z : vkRenderTarget.SwapchainExtent.Width,
-						Height = (uint) Viewport.W > 0 ? (uint) Viewport.W : vkRenderTarget.SwapchainExtent.Height
+						Width = (uint) Viewport.Z > 0 ? (uint) Viewport.Z : vkRenderTarget.Size.X,
+						Height = (uint) Viewport.W > 0 ? (uint) Viewport.W : vkRenderTarget.Size.Y
 					}
 				},
-				ClearValueCount = 1
+				ClearValueCount = (uint) (_hasDepthStencil ? 2 : 1),
+				PClearValues = clearValues
 			};
-			
-			var clearColor = new ClearValue { Color = new ClearColorValue { Float32_0 = 0, Float32_1 = 0, Float32_2 = 0, Float32_3 = 0 } };
-			passBeginInfo.PClearValues = &clearColor;
+
+			if(windowFramebuffer is not null) {
+				passBeginInfo.Framebuffer = windowFramebuffer.SwapchainFramebuffers[CurrentImage];
+			} else {
+				passBeginInfo.Framebuffer = vkRenderTarget.Base;
+			}
 			
 			_platform.API.CmdBeginRenderPass(CommandBuffer, &passBeginInfo, SubpassContents.Inline);
 			return true;
@@ -401,6 +456,7 @@ namespace Cinenic.Renderer.Vulkan {
 			Debug.Assert(CommandBuffers.Length > 0);
 
 			var vkRenderTarget = (VkFramebuffer) RenderTarget;
+			var windowFramebuffer = vkRenderTarget as VkWindow.WindowFramebuffer;
 			
 			// end render pass & command buffer
 			_platform.API.CmdEndRenderPass(CommandBuffer);
@@ -435,34 +491,36 @@ namespace Cinenic.Renderer.Vulkan {
 				),
 				"Could not submit the graphics queue"
 			);
-
-			var image = CurrentImage;
 			
-			// presentation
-			var targetSwapchain = vkRenderTarget.Swapchain;
-				
-			var presentInfo = new PresentInfoKHR {
-				SType = StructureType.PresentInfoKhr,
-				WaitSemaphoreCount = 1,
-				PWaitSemaphores = &renderComplete,
-				SwapchainCount = 1,
-				PSwapchains = &targetSwapchain,
-				PImageIndices = (uint*) &image,
-				PResults = null
-			};
-
-			var result = VkExtension
-				.Get<KhrSwapchain>(_platform, _platform.PrimaryDevice)
-				.QueuePresent(_platform.PrimaryDevice.SurfaceQueue.Value, presentInfo);
-
 			CurrentFrame = (CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 			
-			if(result == Result.ErrorOutOfDateKhr || result == Result.SuboptimalKhr) {
-				return false;
-			}
+			// presentation
+			if(windowFramebuffer is not null) {
+				var image = CurrentImage;
+				var targetSwapchain = windowFramebuffer.Swapchain;
+				
+				var presentInfo = new PresentInfoKHR {
+					SType = StructureType.PresentInfoKhr,
+					WaitSemaphoreCount = 1,
+					PWaitSemaphores = &renderComplete,
+					SwapchainCount = 1,
+					PSwapchains = &targetSwapchain,
+					PImageIndices = (uint*) &image,
+					PResults = null
+				};
+
+				var result =
+					VkExtension
+						.Get<KhrSwapchain>(_platform, _platform.PrimaryDevice)
+						.QueuePresent(_platform.PrimaryDevice.SurfaceQueue.Value, presentInfo);
+
+				if(result == Result.ErrorOutOfDateKhr || result == Result.SuboptimalKhr) {
+					return false;
+				}
 			
-			if(result != Result.Success) {
-				throw new PlatformException($"Failed to present queue: {result}");
+				if(result != Result.Success) {
+					throw new PlatformException($"Failed to present queue: {result}");
+				}
 			}
 			
 			return true;

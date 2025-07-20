@@ -7,6 +7,7 @@ using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Vulkan;
 using Silk.NET.Windowing;
+using Framebuffer = Cinenic.Renderer.Framebuffer;
 using Sampler = Silk.NET.Vulkan.Sampler;
 using Shader = Cinenic.Renderer.Shader.Shader;
 using Window = Cinenic.Renderer.Window;
@@ -63,7 +64,7 @@ namespace Cinenic.Sandbox {
 		
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-		public static void Start(string[] args) {
+		public unsafe static void Start(string[] args) {
 			var platform = new VkPlatform(new VkPlatform.Options {
 				Headless = false
 			});
@@ -81,13 +82,17 @@ namespace Cinenic.Sandbox {
 			var queue = new VkRenderQueue(platform, RenderQueue.Family.Graphics, RenderQueue.Format.R8G8B8A8Srgb);
 			//queue.Viewport = new Vector4D<int>(0, 0, 640, 480);
 			//queue.Scissor = new Vector4D<int>(0, 0, 640, 480);
-			queue.CreateAttachment();
+			queue.CreateAttachment(Framebuffer.AttachmentType.Color);
+			
+			var colorAttachments = stackalloc AttachmentReference[1] {
+				new AttachmentReference {
+					Attachment = 0,
+					Layout = ImageLayout.ColorAttachmentOptimal
+				}
+			};
+					
 			queue.CreateSubpass(
-				0,
-				ImageLayout.ColorAttachmentOptimal,
-				new SubpassDescription {
-					ColorAttachmentCount = 1
-				},
+				[ Framebuffer.AttachmentType.Color ],
 				new SubpassDependency {
 					SrcSubpass = Vk.SubpassExternal,
 					DstSubpass = 0,
@@ -97,6 +102,7 @@ namespace Cinenic.Sandbox {
 					DstAccessMask = AccessFlags.ColorAttachmentWriteBit
 				}
 			);
+			
 			queue.Initialize();
 			
 			_logger.Info("Create pipeline");

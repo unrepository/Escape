@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Cinenic.Extensions.CSharp;
 using Silk.NET.Core;
 using Silk.NET.Input;
 using Silk.NET.Maths;
@@ -64,6 +65,7 @@ namespace Cinenic.Renderer.Vulkan {
 			}
 			
 			Framebuffer = new WindowFramebuffer(_platform, vkQueue, this, new Vector2D<uint>(Width, Height));
+			Framebuffer.Create();
 		}
 
 		public override double RenderFrame(Action<double>? frameProvider = null) {
@@ -86,9 +88,19 @@ namespace Cinenic.Renderer.Vulkan {
 		internal class WindowFramebuffer : VkFramebuffer {
 			
 			public VkWindow Window { get; }
+			
+			public SwapchainKHR Swapchain { get; protected set; }
+
+			public Format SwapchainFormat { get; protected set; }
+			public Extent2D SwapchainExtent { get; protected set; }
+			public Image[] SwapchainImages { get; protected set; }
+			public Silk.NET.Vulkan.Framebuffer[] SwapchainFramebuffers { get; protected set; }
 
 			private readonly VkPlatform _platform;
 			private readonly VkDevice _device;
+
+			private List<(Image Image, ImageView View, DeviceMemory Memory)> _colorAttachments = [];
+			private List<(Image Image, ImageView View, DeviceMemory Memory)> _depthAttachments = [];
 			
 			public WindowFramebuffer(VkPlatform platform, VkRenderQueue queue, VkWindow window, Vector2D<uint> size)
 				: base(platform, queue, size)
@@ -97,29 +109,62 @@ namespace Cinenic.Renderer.Vulkan {
 				Window = window;
 				_device = platform.PrimaryDevice!;
 				
-				_CreateSwapchain();
-				_CreateImageViews();
-				_CreateFramebuffers();
-				
 				window.Base.FramebufferResize += OnResized;
 			}
-			
+
+			public unsafe override void Create() {
+				_CreateSwapchain();
+				
+				// create attachments
+				foreach(var image in SwapchainImages) {
+					_colorAttachments.Add(CreateAttachment(AttachmentType.Color, image));
+					_depthAttachments.Add(CreateAttachment(AttachmentType.Depth, null));
+				}
+				
+				// create framebuffers
+				SwapchainFramebuffers = new Silk.NET.Vulkan.Framebuffer[_colorAttachments.Count];
+
+				for(int i = 0; i < SwapchainFramebuffers.Length; i++) {
+					var attachments = new ImageView[] {
+						_colorAttachments[i].View,
+						_depthAttachments[i].View
+					};
+
+					fixed(ImageView* attachmentsPtr = attachments) {
+						var framebufferInfo = new FramebufferCreateInfo {
+							SType = StructureType.FramebufferCreateInfo,
+							RenderPass = ((VkRenderQueue) Queue).Base,
+							AttachmentCount = (uint) ((VkRenderQueue) Queue).Attachments.Count,
+							PAttachments = attachmentsPtr,
+							Width = Size.X,
+							Height = Size.Y,
+							Layers = 1
+						};
+
+						VkCheck(
+							_platform.API.CreateFramebuffer(
+								_device.Logical,
+								framebufferInfo,
+								null,
+								out var swapchainFramebuffer
+							),
+							"Could not create swapchain framebuffer"
+						);
+
+						SwapchainFramebuffers[i] = swapchainFramebuffer;
+					}
+				}
+			}
+
 			public override void Dispose() {
 				GC.SuppressFinalize(this);
+				base.Dispose();
 
 				unsafe {
 					if(Swapchain.Handle != 0) {
 						VkExtension
 							.Get<KhrSwapchain>(_platform, _device)
 							.DestroySwapchain(_device.Logical, Swapchain, null);
-					}
-
-					foreach(var image in SwapchainImages) {
-						_platform.API.DestroyImage(_device.Logical, image, null);
-					}
-
-					foreach(var imageView in SwapchainImageViews) {
-						_platform.API.DestroyImageView(_device.Logical, imageView, null);
 					}
 
 					foreach(var framebuffer in SwapchainFramebuffers) {
@@ -162,11 +207,13 @@ namespace Cinenic.Renderer.Vulkan {
 						Width = uint.Clamp(
 							Window.Width,
 							surfaceCapabilities.MinImageExtent.Width,
-							surfaceCapabilities.MaxImageExtent.Width),
+							surfaceCapabilities.MaxImageExtent.Width
+						),
 						Height = uint.Clamp(
 							Window.Height,
 							surfaceCapabilities.MinImageExtent.Height,
-							surfaceCapabilities.MaxImageExtent.Height)
+							surfaceCapabilities.MaxImageExtent.Height
+						)
 					};
 				}
 			#endregion
@@ -236,82 +283,6 @@ namespace Cinenic.Renderer.Vulkan {
 					);
 				}
 			#endregion
-			}
-
-			private unsafe void _CreateImageViews() {
-				SwapchainImageViews = new ImageView[SwapchainImages.Length];
-
-				for(int i = 0; i < SwapchainImages.Length; i++) {
-					var imageViewCreateInfo = new ImageViewCreateInfo {
-						SType = StructureType.ImageViewCreateInfo,
-						Image = SwapchainImages[i],
-						ViewType = ImageViewType.Type2D,
-						Format = SwapchainFormat,
-						Components = new ComponentMapping {
-							R = ComponentSwizzle.Identity,
-							G = ComponentSwizzle.Identity,
-							B = ComponentSwizzle.Identity,
-							A = ComponentSwizzle.Identity
-						},
-						SubresourceRange = new ImageSubresourceRange {
-							AspectMask = ImageAspectFlags.ColorBit,
-							BaseMipLevel = 0,
-							LevelCount = 1,
-							BaseArrayLayer = 0,
-							LayerCount = 1
-						}
-					};
-
-					VkCheck(
-						_platform.API.CreateImageView(_device.Logical, imageViewCreateInfo, null, out var imageView),
-						"Could not create image view"
-					);
-
-					SwapchainImageViews[i] = imageView;
-				}
-			}
-
-			private unsafe void _CreateFramebuffers() {
-				SwapchainFramebuffers = new Silk.NET.Vulkan.Framebuffer[SwapchainImageViews.Length];
-				
-				for(int i = 0; i < SwapchainImageViews.Length; i++) {
-					var imageView = SwapchainImageViews[i];
-					var attachments = new ImageView[] { imageView };
-
-					fixed(ImageView* attachmentsPtr = &attachments[0]) {
-						var framebufferInfo = new FramebufferCreateInfo {
-							SType = StructureType.FramebufferCreateInfo,
-							RenderPass = ((VkRenderQueue) Queue).Base,
-							AttachmentCount = (uint) ((VkRenderQueue) Queue).Attachments.Count,
-							PAttachments = attachmentsPtr,
-							Width = SwapchainExtent.Width,
-							Height = SwapchainExtent.Height,
-							Layers = 1
-						};
-
-						VkCheck(
-							_platform.API.CreateFramebuffer(
-								_device.Logical,
-								framebufferInfo,
-								null,
-								out var swapchainFramebuffer
-							),
-							"Could not create swapchain framebuffer"
-						);
-
-						SwapchainFramebuffers[i] = swapchainFramebuffer;
-					}
-				}
-
-				// Framebuffer = new VkFramebuffer(_platform, Vector2D<uint>.Zero) {
-				// 	Base = SwapchainFramebuffers[0],
-				// 	Swapchain = Swapchain.Value,
-				// 	SwapchainImages = SwapchainImages,
-				// 	SwapchainImageViews = SwapchainImageViews,
-				// 	SwapchainExtent = SwapchainExtent,
-				// 	SwapchainFormat = SwapchainFormat,
-				// 	SwapchainFramebuffers = SwapchainFramebuffers
-				// };
 			}
 		}
 	}
