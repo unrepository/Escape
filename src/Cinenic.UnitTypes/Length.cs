@@ -1,6 +1,9 @@
-namespace Eclair.UnitTypes {
+using System.Numerics;
+
+namespace Cinenic.UnitTypes {
 	
-	public class Length {
+	// TODO generic
+	public struct Length {
 
 		public double AU {
 			get => Meters / 149_597_870_700.0;

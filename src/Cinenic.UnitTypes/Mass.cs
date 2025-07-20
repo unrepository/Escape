@@ -1,6 +1,7 @@
-namespace Eclair.UnitTypes {
+namespace Cinenic.UnitTypes {
 	
-	public class Mass {
+	// TODO generic
+	public struct Mass {
 
 		public double Tonnes {
 			get => Kilograms / 1000.0;

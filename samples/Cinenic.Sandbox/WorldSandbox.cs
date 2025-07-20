@@ -8,6 +8,7 @@ using Cinenic.Renderer.Camera;
 using Cinenic.Renderer.Shader;
 using Cinenic.Renderer.Shader.Pipelines;
 using Cinenic.Renderer.Vulkan;
+using Cinenic.UnitTypes;
 using Cinenic.World;
 using Cinenic.World.Components;
 using Flecs.NET.Bindings;
@@ -205,7 +206,7 @@ public static class WorldSandbox {
 			_cameraYaw -= deltaX;
 			_cameraPitch -= deltaY;
 
-			_cameraPitch = Math.Clamp(_cameraPitch, -89.9f, 89.9f);
+			_cameraPitch = Math.Clamp(_cameraPitch, -89.9f.ToRadians(), 89.9f.ToRadians());
 			
 			camera.GetMut<Transform3D>().Rotation = Quaternion.CreateFromYawPitchRoll(_cameraYaw, _cameraPitch, 0);
 			//Console.WriteLine(camera.Get<Transform3D>().Rotation);
@@ -229,11 +230,13 @@ public static class WorldSandbox {
 
 			float t = (float) _time.TotalSeconds * 1f;
 			
-			_entity.GetMut<Transform3D>().RotationRad = new Vector3(
-				0 /*MathF.Sin(t)*/,
+			/*_entity.GetMut<Transform3D>().RotationRadians = new Vector3(
+				0 /*MathF.Sin(t)#1#,
 				MathF.Cos(t) * MathF.PI * 0.5f,
-				0 /*MathF.Sin(t * 0.5f)*/
-			);
+				0 /*MathF.Sin(t * 0.5f)#1#
+			);*/
+
+			_entity.GetMut<Transform3D>().Yaw = Rotation<float>.FromRadians(MathF.Cos(t) * MathF.PI * 0.5f);
 		}
 	}
 	

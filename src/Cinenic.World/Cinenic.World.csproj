@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Cinenic.Renderer\Cinenic.Renderer.csproj" />
+      <ProjectReference Include="..\Cinenic.UnitTypes\Cinenic.UnitTypes.csproj" />
     </ItemGroup>
 
 </Project>
