@@ -3,6 +3,7 @@ using System.Numerics;
 using Cinenic;
 using Cinenic.Renderer;
 using Cinenic.Renderer.Camera;
+using Cinenic.Renderer.Resources;
 using Cinenic.Renderer.Shader.Pipelines;
 using Cinenic.Renderer.Vulkan;
 using Cinenic.Resources;

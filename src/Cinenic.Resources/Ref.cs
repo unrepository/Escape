@@ -1,5 +1,3 @@
-using Cinenic.Renderer;
-
 namespace Cinenic.Resources {
 	
 	public class Ref<T> : IDisposable where T : class, IRefCounted {
@@ -9,6 +7,9 @@ namespace Cinenic.Resources {
 		
 		public delegate void FreedEventHandler(Ref<T> sender);
 		public event FreedEventHandler? Freed;
+
+		public delegate void ReloadedEventHandler(Ref<T> sender);
+		public event ReloadedEventHandler? Reloaded;
 		
 		public T Get() => ReferencedObject;
 

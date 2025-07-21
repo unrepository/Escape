@@ -12,7 +12,7 @@ namespace Cinenic.Resources {
 		private static readonly Dictionary<string, object> _loadedResources = [];
 		
 		public static Ref<TResource>? Load<TResource>(IPlatform platform, string path, bool required = true)
-			where TResource : class, IResource
+			where TResource : class, IResource, new()
 		{
 			if(_loadedResources.TryGetValue(path, out var loadedResource)) {
 				Debug.Assert(loadedResource is TResource);
@@ -32,15 +32,16 @@ namespace Cinenic.Resources {
 			}
 
 			ImportSettings? importSettings = null;
+			var settingsType = new TResource().SettingsType;
 
 			if(File.Exists(path + ImportSettings.FileExtension)) {
 				using var importStream = new FileStream(path + ImportSettings.FileExtension, FileMode.Open);
-				importSettings = (ImportSettings?) JsonSerializer.Deserialize(importStream, TResource.SettingsType, ImportSettings.DefaultSerializerOptions);
+				importSettings = (ImportSettings?) JsonSerializer.Deserialize(importStream, settingsType, ImportSettings.DefaultSerializerOptions);
 			}
 
 			if(importSettings is null) {
 				_logger.Debug("Creating a new default ImportSettings instance as an existing one could not be found");
-				importSettings = (ImportSettings) TResource.SettingsType.GetConstructor([]).Invoke(null);
+				importSettings = (ImportSettings) settingsType.GetConstructor([]).Invoke(null);
 			}
 
 			var format = ResourceRegistry.GetFormat(importSettings.Type);

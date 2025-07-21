@@ -30,8 +30,8 @@ namespace Cinenic.Renderer.Shader.Pipelines {
 			
 			Shader[] shaders = platform switch {
 				VkPlatform => [
-					new VkShader(vkPlatform!, Shader.Family.Vertex, Resources.LoadText("Shaders.Vulkan.scene.vert")),
-					new VkShader(vkPlatform!, Shader.Family.Fragment, Resources.LoadText("Shaders.Vulkan.scene.frag")),
+					new VkShader(vkPlatform!, Shader.Family.Vertex, Extensions.CSharp.Resources.LoadText("Shaders.Vulkan.scene.vert")),
+					new VkShader(vkPlatform!, Shader.Family.Fragment, Extensions.CSharp.Resources.LoadText("Shaders.Vulkan.scene.frag")),
 				],
 				_ => throw new NotImplementedException("PlatformImpl")
 			};

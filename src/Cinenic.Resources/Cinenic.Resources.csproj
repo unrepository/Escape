@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Cinenic.Renderer\Cinenic.Renderer.csproj" />
+      <ProjectReference Include="..\Cinenic.Renderer.Platform\Cinenic.Renderer.Platform.csproj" />
     </ItemGroup>
 
 </Project>

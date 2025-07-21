@@ -8,12 +8,12 @@ namespace Cinenic.Resources {
 
 		private static Dictionary<string, (ConstructorInfo Constructor, MethodInfo LoadMethod/*, Type ImportSettingsType*/)> _formats = [];
 
-		static ResourceRegistry() {
-			RegisterFormat<TextureResource, TextureResource.Import>();
-		}
+		// static ResourceRegistry() {
+		// 	RegisterFormat<TextureResource, TextureResource.Import>();
+		// }
 		
 		public static void RegisterFormat<TResource, TImportSettings>()
-			where TResource : IResource<TImportSettings>, new()
+			where TResource : Resource<TImportSettings>, new()
 			where TImportSettings : ImportSettings, new()
 		{
 			var type = typeof(TResource);
