@@ -14,9 +14,9 @@ using static Cinenic.Renderer.Vulkan.VkHelpers;
 namespace Cinenic.Renderer.Vulkan {
 	
 	public unsafe class VkPlatform : IPlatform {
-		
+
+		public Thread PlatformThread { get; set; }
 		public bool IsInitialized { get; set; } = false;
-		public ShaderProgram? DefaultProgram { get; set; }
 		
 		public Options CurrentOptions { get; }
 
@@ -110,6 +110,8 @@ namespace Cinenic.Renderer.Vulkan {
 		}
 
 		public void Initialize() {
+			PlatformThread = Thread.CurrentThread;
+			
 			var appInfo = new ApplicationInfo {
 				SType = StructureType.ApplicationInfo,
 				PApplicationName = (byte*) Marshal.StringToHGlobalAnsi("CINENIC"),

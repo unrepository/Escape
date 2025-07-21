@@ -37,12 +37,12 @@ public static class ResourcesTest {
 		var model5 = CubeModel.Clone();
 		var model6 = CubeModel.Clone();
 
-		model1.Meshes[0].Material.AlbedoTexture = texture1.Get();
-		model2.Meshes[0].Material.AlbedoTexture = texture1_1.Get();
-		model3.Meshes[0].Material.AlbedoTexture = texture1_2.Get();
-		model4.Meshes[0].Material.AlbedoTexture = texture2.Get();
-		model5.Meshes[0].Material.AlbedoTexture = texture3.Get();
-		model6.Meshes[0].Material.AlbedoTexture = texture4.Get();
+		model1.Meshes[0].Material.AlbedoTexture = texture1;
+		model2.Meshes[0].Material.AlbedoTexture = texture1_1;
+		model3.Meshes[0].Material.AlbedoTexture = texture1_2;
+		model4.Meshes[0].Material.AlbedoTexture = texture2;
+		model5.Meshes[0].Material.AlbedoTexture = texture3;
+		model6.Meshes[0].Material.AlbedoTexture = texture4;
 
 		CreateWindow(platform, "Resources Test", ref renderQueue, out var window);
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);

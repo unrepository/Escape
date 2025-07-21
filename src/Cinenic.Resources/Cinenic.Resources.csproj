@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Cinenic.Extensions.CSharp\Cinenic.Extensions.CSharp.csproj" />
       <ProjectReference Include="..\Cinenic.Renderer.Platform\Cinenic.Renderer.Platform.csproj" />
     </ItemGroup>
 

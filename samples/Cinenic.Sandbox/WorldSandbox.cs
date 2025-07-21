@@ -103,14 +103,14 @@ public static class WorldSandbox {
 		var model3 = _cubeModel.Clone();
 		var model4 = _cubeModel.Clone();
 
-		model1.Meshes[0].Material.AlbedoTexture = bricksAlbedo;
-		model2.Meshes[0].Material.AlbedoTexture = bricksNormal;
-		model3.Meshes[0].Material.AlbedoTexture = bricksDisplacement;
-		model4.Meshes[0].Material.AlbedoTexture = bricksRoughness;
-		// model1.Meshes[0].Material.AlbedoColor = Color.Yellow;
-		// model2.Meshes[0].Material.AlbedoColor = Color.Red;
-		// model3.Meshes[0].Material.AlbedoColor = Color.Green;
-		// model4.Meshes[0].Material.AlbedoColor = Color.Blue;
+		// model1.Meshes[0].Material.AlbedoTexture = bricksAlbedo;
+		// model2.Meshes[0].Material.AlbedoTexture = bricksNormal;
+		// model3.Meshes[0].Material.AlbedoTexture = bricksDisplacement;
+		// model4.Meshes[0].Material.AlbedoTexture = bricksRoughness;
+		model1.Meshes[0].Material.AlbedoColor = Color.Yellow;
+		model2.Meshes[0].Material.AlbedoColor = Color.Red;
+		model3.Meshes[0].Material.AlbedoColor = Color.Green;
+		model4.Meshes[0].Material.AlbedoColor = Color.Blue;
 		
 		_logger.Info("Create shader pipeline");
 		var shaderPipeline = new DefaultSceneShaderPipeline(platform);

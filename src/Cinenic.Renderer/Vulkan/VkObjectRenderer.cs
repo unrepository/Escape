@@ -124,10 +124,10 @@ namespace Cinenic.Renderer.Vulkan {
 						MatrixOffset = instance.MatrixOffset
 					};
 
-					if(mesh.Material.AlbedoTexture is VkTexture albedo) pc.AlbedoTextureIndex = albedo.Index;
-					if(mesh.Material.NormalTexture is VkTexture normal) pc.NormalTextureIndex = normal.Index;
-					if(mesh.Material.MetallicTexture is VkTexture metallic) pc.MetallicTextureIndex = metallic.Index;
-					if(mesh.Material.RoughnessTexture is VkTexture roughness) pc.RoughnessTextureIndex = roughness.Index;
+					if(mesh.Material.AlbedoTexture?.Get().Texture is VkTexture albedo) pc.AlbedoTextureIndex = albedo.Index;
+					if(mesh.Material.NormalTexture?.Get().Texture is VkTexture normal) pc.NormalTextureIndex = normal.Index;
+					if(mesh.Material.MetallicTexture?.Get().Texture is VkTexture metallic) pc.MetallicTextureIndex = metallic.Index;
+					if(mesh.Material.RoughnessTexture?.Get().Texture is VkTexture roughness) pc.RoughnessTextureIndex = roughness.Index;
 
 					vkPlatform.API.CmdPushConstants(
 						vkQueue.CommandBuffer,
@@ -139,10 +139,10 @@ namespace Cinenic.Renderer.Vulkan {
 					);
 
 					// this doesn't bind the textures per-se, but rather adds them to the textures descriptor array (if they aren't already)...
-					mesh.Material.AlbedoTexture?.Bind(queue, 0);
-					mesh.Material.NormalTexture?.Bind(queue, 0);
-					mesh.Material.MetallicTexture?.Bind(queue, 0);
-					mesh.Material.RoughnessTexture?.Bind(queue, 0);
+					mesh.Material.AlbedoTexture?.Get().Texture?.Bind(queue, 0);
+					mesh.Material.NormalTexture?.Get().Texture?.Bind(queue, 0);
+					mesh.Material.MetallicTexture?.Get().Texture?.Bind(queue, 0);
+					mesh.Material.RoughnessTexture?.Get().Texture?.Bind(queue, 0);
 
 					vkPlatform.API.CmdDraw(
 						vkQueue.CommandBuffer,

@@ -1,6 +1,8 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
+using Cinenic.Extensions.CSharp;
 using Cinenic.Renderer;
 using NLog;
 
@@ -9,23 +11,31 @@ namespace Cinenic.Resources {
 	public static class ResourceManager {
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+		
 		private static readonly Dictionary<string, object> _loadedResources = [];
+		private static readonly Dictionary<Assembly, FileSystemWatcher> _resourceWatchers = [];
+		private static readonly ConcurrentDictionary<string, bool> _reloadLocks = [];
 		
 		public static Ref<TResource>? Load<TResource>(IPlatform platform, string path, bool required = true)
 			where TResource : class, IResource, new()
 		{
-			if(_loadedResources.TryGetValue(path, out var loadedResource)) {
+			Debug.Assert(!Path.IsPathFullyQualified(path), "Resource path must be relative to the current assembly");
+			
+			string callingDirectory = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location)!;
+			string absolutePath = callingDirectory + Path.DirectorySeparatorChar + path;
+			
+			if(_loadedResources.TryGetValue(absolutePath, out var loadedResource)) {
 				Debug.Assert(loadedResource is TResource);
 				
-				_logger.Debug("Returning already-loaded resource for {FilePath}", path);
+				_logger.Debug("Returning already-loaded resource for {FilePath}", absolutePath);
 				return new((TResource) loadedResource);
 			}
 			
-			if(!File.Exists(path)) {
-				_logger.Warn("Resource file not found: {FilePath}", path);
+			if(!File.Exists(absolutePath)) {
+				_logger.Warn("Resource file not found: {FilePath}", absolutePath);
 
 				if(required) {
-					throw new FileNotFoundException("Required resource file not found", path);
+					throw new FileNotFoundException("Required resource file not found", absolutePath);
 				}
 
 				return null;
@@ -34,8 +44,8 @@ namespace Cinenic.Resources {
 			ImportSettings? importSettings = null;
 			var settingsType = new TResource().SettingsType;
 
-			if(File.Exists(path + ImportSettings.FileExtension)) {
-				using var importStream = new FileStream(path + ImportSettings.FileExtension, FileMode.Open);
+			if(File.Exists(absolutePath + ImportSettings.FileExtension)) {
+				using var importStream = new FileStream(absolutePath + ImportSettings.FileExtension, FileMode.Open);
 				importSettings = (ImportSettings?) JsonSerializer.Deserialize(importStream, settingsType, ImportSettings.DefaultSerializerOptions);
 			}
 
@@ -56,25 +66,57 @@ namespace Cinenic.Resources {
 				return null;
 			}
 
-			using var fileStream = new FileStream(path, FileMode.Open);
+			using var fileStream = new FileStream(absolutePath, FileMode.Open);
 
 			var instance = format.Value.Constructor.Invoke(null);
 			format.Value.LoadMethod.Invoke(
 				instance,
-				[ platform, path, fileStream, importSettings ]
+				[ platform, absolutePath, fileStream, importSettings ]
 			);
 			
 			Debug.Assert(instance is not null);
 			Debug.Assert(instance is TResource);
 			var resourceInstance = (TResource) instance;
 
-			_loadedResources[path] = resourceInstance;
+			if(!_resourceWatchers.TryGetValue(Assembly.GetCallingAssembly(), out var watcher)) {
+				watcher = new FileSystemWatcher(callingDirectory) {
+					EnableRaisingEvents = true,
+					NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.CreationTime,
+					IncludeSubdirectories = true
+				};
+
+				_resourceWatchers[Assembly.GetCallingAssembly()] = watcher;
+			}
+
+			void WatcherChanged(object s, FileSystemEventArgs e) {
+				if(e.FullPath == absolutePath && !_reloadLocks.GetValueOrDefault(absolutePath, false)) {
+					_reloadLocks[absolutePath] = true;
+					
+					platform.PlatformThread.ScheduleAction(() => {
+						resourceInstance.Reload();
+						_reloadLocks[absolutePath] = false;
+					});
+				}
+			}
+
+			watcher.Changed += WatcherChanged;
+			watcher.Created += WatcherChanged;
+			watcher.Renamed += WatcherChanged;
+			
+			_loadedResources[absolutePath] = resourceInstance;
+			
 			resourceInstance.Freed += _ => {
-				_loadedResources.Remove(path);
-				_logger.Trace("Removed resource {Path} from loaded resources as it's no longer valid", path);
+				if(_resourceWatchers.TryGetValue(Assembly.GetCallingAssembly(), out var watcher)) {
+					watcher.Changed -= WatcherChanged;
+					watcher.Created -= WatcherChanged;
+					watcher.Renamed -= WatcherChanged;
+				}
+				
+				_loadedResources.Remove(absolutePath);
+				_logger.Trace("Removed resource {Path} from loaded resources as it's no longer valid", absolutePath);
 			};
 			
-			_logger.Debug("Successfully loaded resource of type {Type} at {Path}", typeof(TResource).Name, path);
+			_logger.Debug("Successfully loaded resource of type {Type} at {Path}", typeof(TResource).Name, absolutePath);
 			return new(resourceInstance);
 		}
 

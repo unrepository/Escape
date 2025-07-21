@@ -23,6 +23,10 @@ namespace Cinenic.Resources {
 		
 		public Guid Id { get; protected set; }
 		public TImportSettings Settings { get; protected set; }
+
+		~Resource() {
+			Dispose(false);
+		}
 		
 		public void Load(IPlatform platform, string? filePath, byte[] data, ImportSettings? settings) {
 			using var stream = new MemoryStream(data);
@@ -74,9 +78,13 @@ namespace Cinenic.Resources {
 			_logger.Trace("Finished reloading resource {Path}", FilePath);
 		}
 
-		public virtual void Dispose() {
-			Freed?.Invoke(this);
+		public void Dispose() {
+			Dispose(true);
 			GC.SuppressFinalize(this);
+		}
+		
+		public virtual void Dispose(bool reloading) {
+			if(!reloading) Freed?.Invoke(this);
 		}
 	}
 

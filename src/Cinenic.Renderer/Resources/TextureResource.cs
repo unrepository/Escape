@@ -25,10 +25,9 @@ namespace Cinenic.Renderer.Resources {
 			);
 		}
 
-		public override void Dispose() {
+		public override void Dispose(bool reloading) {
 			Texture?.Dispose();
-			base.Dispose();
-			GC.SuppressFinalize(this);
+			base.Dispose(reloading);
 		}
 
 		public static implicit operator Texture(TextureResource resource) => resource.Texture;
