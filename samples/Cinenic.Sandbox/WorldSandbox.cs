@@ -5,9 +5,11 @@ using Cinenic;
 using Cinenic.Extensions.CSharp;
 using Cinenic.Renderer;
 using Cinenic.Renderer.Camera;
+using Cinenic.Renderer.Resources;
 using Cinenic.Renderer.Shader;
 using Cinenic.Renderer.Shader.Pipelines;
 using Cinenic.Renderer.Vulkan;
+using Cinenic.Resources;
 using Cinenic.UnitTypes;
 using Cinenic.World;
 using Cinenic.World.Components;
@@ -93,24 +95,20 @@ public static class WorldSandbox {
 		_logger.Info("Using primary device 0 ({name})", primaryDevice.Name);
 		
 		_logger.Info("Create textures & models");
-		var bricksAlbedo = Texture.Create(platform, Resources.Get("textures.Bricks059_1K_JPG.Bricks059_1K-JPG_Color.jpg"));
-		var bricksNormal = Texture.Create(platform, Resources.Get("textures.Bricks059_1K_JPG.Bricks059_1K-JPG_NormalGL.jpg"));
-		var bricksDisplacement = Texture.Create(platform, Resources.Get("textures.Bricks059_1K_JPG.Bricks059_1K-JPG_Displacement.jpg"));
-		var bricksRoughness = Texture.Create(platform, Resources.Get("textures.Bricks059_1K_JPG.Bricks059_1K-JPG_Roughness.jpg"));
+		var bricksAlbedo = ResourceManager.Load<TextureResource>(platform, "textures/Bricks059_1K-JPG/Bricks059_1K-JPG_Color.jpg");
+		var bricksNormal = ResourceManager.Load<TextureResource>(platform, "textures/Bricks059_1K-JPG/Bricks059_1K-JPG_NormalGL.jpg");
+		var bricksDisplacement = ResourceManager.Load<TextureResource>(platform, "textures/Bricks059_1K-JPG/Bricks059_1K-JPG_Displacement.jpg");
+		var bricksRoughness = ResourceManager.Load<TextureResource>(platform, "textures/Bricks059_1K-JPG/Bricks059_1K-JPG_Roughness.jpg");
 
 		var model1 = _cubeModel.Clone();
 		var model2 = _cubeModel.Clone();
 		var model3 = _cubeModel.Clone();
 		var model4 = _cubeModel.Clone();
 
-		// model1.Meshes[0].Material.AlbedoTexture = bricksAlbedo;
-		// model2.Meshes[0].Material.AlbedoTexture = bricksNormal;
-		// model3.Meshes[0].Material.AlbedoTexture = bricksDisplacement;
-		// model4.Meshes[0].Material.AlbedoTexture = bricksRoughness;
-		model1.Meshes[0].Material.AlbedoColor = Color.Yellow;
-		model2.Meshes[0].Material.AlbedoColor = Color.Red;
-		model3.Meshes[0].Material.AlbedoColor = Color.Green;
-		model4.Meshes[0].Material.AlbedoColor = Color.Blue;
+		model1.Meshes[0].Material.AlbedoTexture = bricksAlbedo;
+		model2.Meshes[0].Material.AlbedoTexture = bricksNormal;
+		model3.Meshes[0].Material.AlbedoTexture = bricksDisplacement;
+		model4.Meshes[0].Material.AlbedoTexture = bricksRoughness;
 		
 		_logger.Info("Create shader pipeline");
 		var shaderPipeline = new DefaultSceneShaderPipeline(platform);
