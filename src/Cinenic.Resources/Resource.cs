@@ -18,6 +18,7 @@ namespace Cinenic.Resources {
 		public event ReloadedEventHandler? Reloaded;
 
 		public abstract Type SettingsType { get; }
+		public abstract string[] FileExtensions { get; }
 
 		public IPlatform Platform { get; protected set; }
 		public string? FilePath { get; protected set; }
@@ -118,6 +119,7 @@ namespace Cinenic.Resources {
 	public interface IResource : IRefCounted, IReloadable {
 		
 		public Type SettingsType { get; }
+		public string[] FileExtensions { get; }
 		
 		public IPlatform Platform { get; }
 		public string FilePath { get; }

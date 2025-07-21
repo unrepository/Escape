@@ -25,6 +25,12 @@ namespace Cinenic.Resources {
 					((IDisposable) resourceObject).Dispose();
 				}
 			};
+
+			AppDomain.CurrentDomain.UnhandledException += (_, _) => {
+				foreach(var resourceObject in _loadedResources.Values) {
+					((IDisposable) resourceObject).Dispose();
+				}
+			};
 		}
 		
 		public static Ref<TResource>? Load<TResource>(
@@ -76,9 +82,23 @@ namespace Cinenic.Resources {
 
 				return null;
 			}
+			
+			var tempInstance = new TResource();
+			var settingsType = tempInstance.SettingsType;
+			var fileExtensions = tempInstance.FileExtensions;
+
+			if(!fileExtensions.Any(e => fullPath.EndsWith(e, StringComparison.OrdinalIgnoreCase))) {
+				_logger.Warn("Invalid extension for resource type {Type}", typeof(TResource).Name);
+				_logger.Warn("Valid extensions are: {Extensions}", string.Join(", ", fileExtensions));
+
+				if(required) {
+					throw new ArgumentException($"Invalid extension for resource type {typeof(TResource).Name}", path);
+				}
+
+				return null;
+			}
 
 			ImportMetadata? importSettings = null;
-			var settingsType = new TResource().SettingsType;
 
 			if(File.Exists(fullPath + ImportMetadata.FileExtension)) {
 				using var importStream = new FileStream(fullPath + ImportMetadata.FileExtension, FileMode.Open);

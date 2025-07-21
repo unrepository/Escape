@@ -10,6 +10,7 @@ namespace Cinenic.Renderer.Resources {
 		}
 		
 		public override Type SettingsType => typeof(Import);
+		public override string[] FileExtensions => [ ".frag", ".vert", ".tesc", ".tese", ".geom", ".comp", ".glsl", ".shader" ];
 
 		public Shader.Shader? Shader { get; private set; }
 

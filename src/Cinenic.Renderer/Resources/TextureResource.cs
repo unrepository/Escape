@@ -11,7 +11,8 @@ namespace Cinenic.Renderer.Resources {
 		}
 
 		public override Type SettingsType => typeof(Import);
-		
+		public override string[] FileExtensions => [ ".png", ".jpg", ".bmp", ".jpeg", ".tiff", ".tga", ".webp", ".pbm", ".qoi" ];
+
 		public Texture? Texture { get; private set; }
 
 		public void Create(Texture texture) {
