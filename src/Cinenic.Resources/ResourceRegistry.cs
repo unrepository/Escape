@@ -14,13 +14,13 @@ namespace Cinenic.Resources {
 		
 		public static void RegisterFormat<TResource, TImportSettings>()
 			where TResource : Resource<TImportSettings>, new()
-			where TImportSettings : ImportSettings, new()
+			where TImportSettings : ImportMetadata, new()
 		{
 			var type = typeof(TResource);
 			var defaultCtor = type.GetConstructor([]);
 			var loadMethod = type.GetMethod(
 				"Load",
-				[ typeof(IPlatform), typeof(string), typeof(Stream), typeof(Assembly), typeof(ImportSettings) ]
+				[ typeof(IPlatform), typeof(string), typeof(Stream), typeof(Assembly), typeof(ImportMetadata) ]
 			);
 			
 			Debug.Assert(defaultCtor is not null);

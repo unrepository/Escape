@@ -6,7 +6,7 @@ using NLog;
 namespace Cinenic.Resources {
 	
 	public abstract class Resource<TImportSettings> : IResource
-		where TImportSettings : ImportSettings, new()
+		where TImportSettings : ImportMetadata, new()
 	{
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		
@@ -31,12 +31,12 @@ namespace Cinenic.Resources {
 		// 	Dispose(false);
 		// }
 		
-		public void Load(IPlatform platform, string filePath, byte[] data, Assembly resourceAssembly, ImportSettings? settings) {
+		public void Load(IPlatform platform, string filePath, byte[] data, Assembly resourceAssembly, ImportMetadata? settings) {
 			using var stream = new MemoryStream(data);
 			Load(platform, filePath, stream, resourceAssembly, settings as TImportSettings);
 		}
 		
-		public void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, ImportSettings? settings) {
+		public void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, ImportMetadata? settings) {
 			Load(platform, filePath, stream, resourceAssembly, settings as TImportSettings);
 		}
 
@@ -57,14 +57,14 @@ namespace Cinenic.Resources {
 			
 			var importSettingsData = JsonSerializer.SerializeToUtf8Bytes(
 				Settings,
-				ImportSettings.DefaultSerializerOptions
+				ImportMetadata.DefaultSerializerOptions
 			);
 			
-			File.WriteAllBytes(FilePath + ImportSettings.FileExtension, importSettingsData);
+			File.WriteAllBytes(FilePath + ImportMetadata.FileExtension, importSettingsData);
 			
 			_logger.Debug(
 				"Saved {Type} import settings to {Path}",
-				GetType().Name, FilePath + ImportSettings.FileExtension
+				GetType().Name, FilePath + ImportMetadata.FileExtension
 			);
 			
 			return true;
@@ -85,9 +85,9 @@ namespace Cinenic.Resources {
 			
 			TImportSettings? importSettings = null;
 
-			if(File.Exists(FilePath + ImportSettings.FileExtension)) {
-				using var importStream = new FileStream(FilePath + ImportSettings.FileExtension, FileMode.Open);
-				importSettings = JsonSerializer.Deserialize<TImportSettings>(importStream, ImportSettings.DefaultSerializerOptions);
+			if(File.Exists(FilePath + ImportMetadata.FileExtension)) {
+				using var importStream = new FileStream(FilePath + ImportMetadata.FileExtension, FileMode.Open);
+				importSettings = JsonSerializer.Deserialize<TImportSettings>(importStream, ImportMetadata.DefaultSerializerOptions);
 			}
 
 			importSettings ??= new();
@@ -126,6 +126,6 @@ namespace Cinenic.Resources {
 		public Guid Id { get; }
 		public List<IResource> Dependencies { get; }
 
-		void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, ImportSettings? settings);
+		void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, ImportMetadata? settings);
 	}
 }

@@ -39,7 +39,7 @@ namespace Cinenic.Renderer.Resources {
 
 		public static implicit operator Shader.Shader(ShaderResource resource) => resource.Shader;
 
-		public class Import : ImportSettings {
+		public class Import : ImportMetadata {
 
 			public override string FormatId => "shader";
 

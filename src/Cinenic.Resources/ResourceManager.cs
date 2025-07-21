@@ -77,17 +77,17 @@ namespace Cinenic.Resources {
 				return null;
 			}
 
-			ImportSettings? importSettings = null;
+			ImportMetadata? importSettings = null;
 			var settingsType = new TResource().SettingsType;
 
-			if(File.Exists(fullPath + ImportSettings.FileExtension)) {
-				using var importStream = new FileStream(fullPath + ImportSettings.FileExtension, FileMode.Open);
-				importSettings = (ImportSettings?) JsonSerializer.Deserialize(importStream, settingsType, ImportSettings.DefaultSerializerOptions);
+			if(File.Exists(fullPath + ImportMetadata.FileExtension)) {
+				using var importStream = new FileStream(fullPath + ImportMetadata.FileExtension, FileMode.Open);
+				importSettings = (ImportMetadata?) JsonSerializer.Deserialize(importStream, settingsType, ImportMetadata.DefaultSerializerOptions);
 			}
 
 			if(importSettings is null) {
 				_logger.Debug("Creating a new default ImportSettings instance as an existing one could not be found");
-				importSettings = (ImportSettings) settingsType.GetConstructor([]).Invoke(null);
+				importSettings = (ImportMetadata) settingsType.GetConstructor([]).Invoke(null);
 			}
 
 			var format = ResourceRegistry.GetFormat(importSettings.FormatId);

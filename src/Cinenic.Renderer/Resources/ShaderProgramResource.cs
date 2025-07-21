@@ -31,7 +31,7 @@ namespace Cinenic.Renderer.Resources {
 		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings) {
 			base.Load(platform, filePath, stream, resourceAssembly, settings);
 
-			var file = JsonSerializer.Deserialize<File>(stream, ImportSettings.DefaultSerializerOptions);
+			var file = JsonSerializer.Deserialize<File>(stream, ImportMetadata.DefaultSerializerOptions);
 			Debug.Assert(file is not null);
 			
 			// load required shaders
@@ -82,7 +82,7 @@ namespace Cinenic.Renderer.Resources {
 
 		public static implicit operator ShaderProgram(ShaderProgramResource resource) => resource.Program;
 		
-		public class Import : ImportSettings {
+		public class Import : ImportMetadata {
 
 			public override string FormatId => "shader_program";
 		}

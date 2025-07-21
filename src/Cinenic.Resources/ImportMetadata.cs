@@ -4,9 +4,9 @@ using System.Text.Json.Serialization;
 
 namespace Cinenic.Resources {
 	
-	public abstract class ImportSettings {
+	public abstract class ImportMetadata {
 
-		public const string FileExtension = ".import";
+		public const string FileExtension = ".meta.json";
 
 		public static readonly JsonSerializerOptions DefaultSerializerOptions = new() {
 			IndentCharacter = '\t',

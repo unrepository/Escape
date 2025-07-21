@@ -41,7 +41,7 @@ namespace Cinenic.Renderer.Resources {
 
 		public static implicit operator Texture(TextureResource resource) => resource.Texture;
 		
-		public class Import : ImportSettings {
+		public class Import : ImportMetadata {
 
 			public override string FormatId => "texture";
 
