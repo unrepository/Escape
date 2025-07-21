@@ -5,12 +5,12 @@ using Cinenic.UnitTypes;
 namespace Cinenic.World.Components {
 
 	// TODO should we change euler rotations to RotationF from UnitTypes?
-	public struct Transform3D(Vector3 position, Quaternion rotation, Vector3 scale) {
+	public struct Transform3D {
 
-		public Vector3 Position = position;
-		public Quaternion Rotation = rotation;
-		public Vector3 Scale = scale;
-
+		public Vector3 Position;
+		public Quaternion Rotation;
+		public Vector3 Scale;
+		
 		public Rotation<float> Yaw {
 			get => Rotation<float>.FromRadians(Rotation.GetYaw());
 			set => Rotation.SetYaw(value.Radians);
@@ -48,8 +48,20 @@ namespace Cinenic.World.Components {
 			}
 		}
 
+		public Transform3D() {
+			Position = Vector3.Zero;
+			Rotation = Quaternion.Zero;
+			Scale = Vector3.One;
+		}
+
+		public Transform3D(Vector3 position, Quaternion rotation, Vector3 scale) {
+			Position = position;
+			Rotation = rotation;
+			Scale = scale;
+		}
+
 		public void LookAt(Vector3 target) {
-			var forward = Vector3.Normalize(target - position);
+			var forward = Vector3.Normalize(target - Position);
 			
 			if(forward == Vector3.Zero) {
 				Rotation = Quaternion.Identity;

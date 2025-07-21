@@ -26,8 +26,8 @@ namespace Cinenic.Sandbox {
 			
 			Program = ShaderProgram.Create(
 				platform,
-				Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk.vert")),
-				Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
+				Shader.Create(platform, Shader.Family.Vertex, Extensions.CSharp.Resources.LoadText("Shaders.vk.vert")),
+				Shader.Create(platform, Shader.Family.Fragment, Extensions.CSharp.Resources.LoadText("Shaders.vk.frag"))
 			);
 		}
 		
@@ -49,8 +49,8 @@ namespace Cinenic.Sandbox {
 			
 			Program = ShaderProgram.Create(
 				platform,
-				Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk2.vert")),
-				Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
+				Shader.Create(platform, Shader.Family.Vertex, Extensions.CSharp.Resources.LoadText("Shaders.vk2.vert")),
+				Shader.Create(platform, Shader.Family.Fragment, Extensions.CSharp.Resources.LoadText("Shaders.vk.frag"))
 			);
 		}
 

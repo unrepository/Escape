@@ -41,7 +41,7 @@ namespace Cinenic.Renderer {
 			IPlatform platform, Vector2D<uint> size,
 			TextureFilter filter = TextureFilter.Linear,
 			TextureWrapMode wrapMode = TextureWrapMode.Repeat,
-			TextureFormat format = TextureFormat.RGB8
+			TextureFormat format = TextureFormat.RGBA8
 		) {
 			return platform switch {
 				GLPlatform glPlatform => new GLTexture(glPlatform, size, filter, wrapMode, format),

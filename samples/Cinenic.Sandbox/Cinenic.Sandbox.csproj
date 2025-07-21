@@ -6,7 +6,12 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RootNamespace></RootNamespace>
     </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Silk.NET.Input.Glfw" Version="2.22.0" />
+    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Cinenic.Compute\Cinenic.Compute.csproj" />
@@ -27,9 +32,11 @@
     <ItemGroup>
       <Folder Include="Resources\Textures\" />
     </ItemGroup>
-
+    
     <ItemGroup>
-      <PackageReference Include="Silk.NET.Input.Glfw" Version="2.22.0" />
+        <None Update="Assets\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>
