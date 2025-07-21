@@ -11,14 +11,14 @@ namespace Cinenic.Resources {
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		private static readonly Dictionary<string, object> _loadedResources = [];
 		
-		public static TResource? Load<TResource>(IPlatform platform, string path, bool required = true)
+		public static Ref<TResource>? Load<TResource>(IPlatform platform, string path, bool required = true)
 			where TResource : class, IResource
 		{
 			if(_loadedResources.TryGetValue(path, out var loadedResource)) {
 				Debug.Assert(loadedResource is TResource);
 				
 				_logger.Debug("Returning already-loaded resource for {FilePath}", path);
-				return (TResource) loadedResource;
+				return new((TResource) loadedResource);
 			}
 			
 			if(!File.Exists(path)) {
@@ -65,10 +65,16 @@ namespace Cinenic.Resources {
 			
 			Debug.Assert(instance is not null);
 			Debug.Assert(instance is TResource);
+			var resourceInstance = (TResource) instance;
 
-			_loadedResources[path] = instance;
+			_loadedResources[path] = resourceInstance;
+			resourceInstance.Freed += _ => {
+				_loadedResources.Remove(path);
+				_logger.Trace("Removed resource {Path} from loaded resources as it's no longer valid", path);
+			};
+			
 			_logger.Debug("Successfully loaded resource of type {Type} at {Path}", typeof(TResource).Name, path);
-			return (TResource) instance;
+			return new(resourceInstance);
 		}
 
 		/*public static void AddFormatAssembly(Assembly assembly) {

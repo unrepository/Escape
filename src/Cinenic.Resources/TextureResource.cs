@@ -3,11 +3,14 @@ using Cinenic.Renderer;
 namespace Cinenic.Resources {
 	
 	public class TextureResource : IResource<TextureResource.Import> {
-
+		
 		public static Type SettingsType => typeof(Import);
 
-		public string FilePath { get; private set; }
+		public uint ReferenceCount { get; set; }
+		public bool IsValidObject { get; set; }
+		public event IRefCounted.FreedEventHandler? Freed;
 
+		public string FilePath { get; private set; }
 		public Guid Id { get; private set; }
 		public Import Settings { get; private set; }
 		ImportSettings IResource.Settings => Settings;
@@ -36,9 +39,11 @@ namespace Cinenic.Resources {
 
 		public void Dispose() {
 			Texture?.Dispose();
+			Freed?.Invoke(this);
 		}
 
 		public static implicit operator Texture(TextureResource resource) => resource.Texture;
+		//public static implicit operator TextureResource(Ref<TextureResource> resource) => resource.Get();
 		
 		public class Import : ImportSettings {
 

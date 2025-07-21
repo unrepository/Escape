@@ -14,7 +14,7 @@ namespace Cinenic.Resources {
 		}
 	}
 
-	public interface IResource : IDisposable {
+	public interface IResource : IRefCounted {
 		
 		public string FilePath { get; }
 		
