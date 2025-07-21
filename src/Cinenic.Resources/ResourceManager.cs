@@ -17,6 +17,15 @@ namespace Cinenic.Resources {
 		private static readonly Dictionary<string, object> _loadedResources = [];
 		private static readonly Dictionary<string, FileSystemWatcher> _resourceWatchers = [];
 		private static readonly ConcurrentDictionary<string, bool> _reloadLocks = [];
+
+		static ResourceManager() {
+			// dispose all remaining resources when process exits, primarily to save them
+			AppDomain.CurrentDomain.ProcessExit += (_, _) => {
+				foreach(var resourceObject in _loadedResources.Values) {
+					((IDisposable) resourceObject).Dispose();
+				}
+			};
+		}
 		
 		public static Ref<TResource>? Load<TResource>(
 			IPlatform platform,
@@ -41,14 +50,14 @@ namespace Cinenic.Resources {
 				@namespace = "unknown";
 			}
 			
-			string baseDirectory = Path.GetDirectoryName(assembly.Location)!;
+			var baseDirectory = Path.GetDirectoryName(assembly.Location)!;
 			
 			//if(!explicitSubpath) {
 				baseDirectory += Path.DirectorySeparatorChar + ASSETS_DIRECTORY_NAME;
 				baseDirectory += Path.DirectorySeparatorChar + @namespace;
 			//}
 			
-			string fullPath = explicitPath ? path : baseDirectory + Path.DirectorySeparatorChar + path;
+			var fullPath = explicitPath ? path : baseDirectory + Path.DirectorySeparatorChar + path;
 			fullPath = Path.GetFullPath(fullPath); // resolve the real path
 			
 			if(_loadedResources.TryGetValue(fullPath, out var loadedResource)) {

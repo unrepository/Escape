@@ -106,7 +106,10 @@ namespace Cinenic.Resources {
 		}
 		
 		public virtual void Dispose(bool reloading) {
-			if(!reloading) Freed?.Invoke(this);
+			if(!reloading) {
+				Save();
+				Freed?.Invoke(this);
+			}
 		}
 		
 		public static implicit operator Resource<TImportSettings>(Ref<Resource<TImportSettings>> resource) => resource.Get();
