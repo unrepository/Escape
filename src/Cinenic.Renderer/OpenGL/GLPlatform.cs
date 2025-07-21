@@ -10,6 +10,8 @@ namespace Cinenic.Renderer.OpenGL {
 	
 	public class GLPlatform : IPlatform {
 
+		public Platform Identifier => Platform.OpenGL;
+
 		public Thread PlatformThread { get; set; }
 		public bool IsInitialized { get; set; }
 		

@@ -2,6 +2,6 @@ namespace Cinenic.Resources {
 	
 	public interface IReloadable {
 
-		public void Reload();
+		public bool Reload();
 	}
 }

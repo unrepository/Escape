@@ -15,6 +15,8 @@ namespace Cinenic.Renderer.Vulkan {
 	
 	public unsafe class VkPlatform : IPlatform {
 
+		public Platform Identifier => Platform.Vulkan;
+
 		public Thread PlatformThread { get; set; }
 		public bool IsInitialized { get; set; } = false;
 		

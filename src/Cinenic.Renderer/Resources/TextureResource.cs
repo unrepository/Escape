@@ -1,3 +1,4 @@
+using System.Reflection;
 using Cinenic.Renderer;
 using Cinenic.Resources;
 
@@ -13,8 +14,16 @@ namespace Cinenic.Renderer.Resources {
 		
 		public Texture? Texture { get; private set; }
 
-		public override void Load(IPlatform platform, string filePath, Stream stream, Import? settings) {
-			base.Load(platform, filePath, stream, settings);
+		public void Create(Texture texture) {
+			Platform = texture.Platform;
+			Settings = new Import();
+			Id = Settings.Id;
+			
+			Texture = texture;
+		}
+		
+		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings) {
+			base.Load(platform, filePath, stream, resourceAssembly, settings);
 			
 			Texture = Texture.Create(
 				platform,
@@ -31,11 +40,10 @@ namespace Cinenic.Renderer.Resources {
 		}
 
 		public static implicit operator Texture(TextureResource resource) => resource.Texture;
-		public static implicit operator TextureResource(Ref<TextureResource> resource) => resource.Get();
 		
 		public class Import : ImportSettings {
 
-			public override string Type => "texture";
+			public override string FormatId => "texture";
 
 			public Texture.TextureFilter Filter { get; set; } = Texture.TextureFilter.Nearest;
 			public Texture.TextureWrapMode WrapMode { get; set; } = Texture.TextureWrapMode.Repeat;

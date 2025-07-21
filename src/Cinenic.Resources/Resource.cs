@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using Cinenic.Renderer;
 using NLog;
@@ -20,47 +21,67 @@ namespace Cinenic.Resources {
 
 		public IPlatform Platform { get; protected set; }
 		public string? FilePath { get; protected set; }
-		
+		public Assembly ResourceAssembly { get; protected set; }
+
 		public Guid Id { get; protected set; }
 		public TImportSettings Settings { get; protected set; }
-
+		public List<IResource> Dependencies { get; protected set; } = [];
+		
 		~Resource() {
 			Dispose(false);
 		}
 		
-		public void Load(IPlatform platform, string? filePath, byte[] data, ImportSettings? settings) {
+		public void Load(IPlatform platform, string filePath, byte[] data, Assembly resourceAssembly, ImportSettings? settings) {
 			using var stream = new MemoryStream(data);
-			Load(platform, filePath, stream, settings as TImportSettings);
+			Load(platform, filePath, stream, resourceAssembly, settings as TImportSettings);
 		}
 		
-		public void Load(IPlatform platform, string? filePath, Stream stream, ImportSettings? settings) {
-			Load(platform, filePath, stream, settings as TImportSettings);
+		public void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, ImportSettings? settings) {
+			Load(platform, filePath, stream, resourceAssembly, settings as TImportSettings);
 		}
 
-		public virtual void Load(IPlatform platform, string? filePath, Stream stream, TImportSettings? settings) {
+		public virtual void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, TImportSettings? settings) {
 			settings ??= new();
-
+			
 			Platform = platform;
 			FilePath = filePath;
+			ResourceAssembly = resourceAssembly;
+			
 			Id = settings.Id;
 			Settings = settings;
+			Dependencies = [];
 		}
 
-		public virtual void Save() {
-			throw new NotImplementedException();
+		public virtual bool Save() {
+			if(FilePath is null) return false;
+			
+			var importSettingsData = JsonSerializer.SerializeToUtf8Bytes(
+				Settings,
+				ImportSettings.DefaultSerializerOptions
+			);
+			
+			File.WriteAllBytes(FilePath + ImportSettings.FileExtension, importSettingsData);
+			
+			_logger.Debug(
+				"Saved {Type} import settings to {Path}",
+				GetType().Name, FilePath + ImportSettings.FileExtension
+			);
+			
+			return true;
 		}
 		
-		public virtual void Reload() {
-			if(FilePath is null) return;
+		public virtual bool Reload() {
+			if(FilePath is null) return false;
 			
 			_logger.Trace("{Path} reload initiated", FilePath);
 			
 			if(!File.Exists(FilePath)) {
 				_logger.Warn("{Path} no longer exists, cannot reload", FilePath);
-				return;
+				return false;
 			}
 			
-			Dispose();
+			GC.SuppressFinalize(this);
+			Dispose(true);
 			
 			TImportSettings? importSettings = null;
 
@@ -71,21 +92,24 @@ namespace Cinenic.Resources {
 
 			importSettings ??= new();
 			using var fileStream = new FileStream(FilePath, FileMode.Open);
-			Load(Platform, FilePath, fileStream, importSettings);
+			Load(Platform, FilePath, fileStream, ResourceAssembly, importSettings);
 			
 			Reloaded?.Invoke(this);
 			
-			_logger.Trace("Finished reloading resource {Path}", FilePath);
+			_logger.Debug("Finished reloading resource {Path}", FilePath);
+			return true;
 		}
 
 		public void Dispose() {
-			Dispose(true);
 			GC.SuppressFinalize(this);
+			Dispose(false);
 		}
 		
 		public virtual void Dispose(bool reloading) {
 			if(!reloading) Freed?.Invoke(this);
 		}
+		
+		public static implicit operator Resource<TImportSettings>(Ref<Resource<TImportSettings>> resource) => resource.Get();
 	}
 
 	public interface IResource : IRefCounted, IReloadable {
@@ -94,9 +118,11 @@ namespace Cinenic.Resources {
 		
 		public IPlatform Platform { get; }
 		public string FilePath { get; }
+		public Assembly ResourceAssembly { get; }
 		
 		public Guid Id { get; }
+		public List<IResource> Dependencies { get; }
 
-		void Load(IPlatform platform, string filePath, Stream stream, ImportSettings? settings);
+		void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, ImportSettings? settings);
 	}
 }

@@ -32,11 +32,13 @@
     <ItemGroup>
       <Folder Include="Resources\Textures\" />
     </ItemGroup>
-    
-    <ItemGroup>
-        <None Update="Assets\**\*">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
+	
+	<!-- asset (sym)linking !-->
+	<Import Project="..\..\src\Cinenic.Resources\LinkAssets.targets" />
 
+	<ItemGroup>
+		<AssetLinkProject Include="Cinenic.Sandbox.csproj" />
+		<AssetLinkProject Include="..\..\src\Cinenic.Renderer\Cinenic.Renderer.csproj" />
+	</ItemGroup>
+	
 </Project>

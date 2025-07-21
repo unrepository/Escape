@@ -20,13 +20,13 @@ namespace Cinenic.Resources {
 			var defaultCtor = type.GetConstructor([]);
 			var loadMethod = type.GetMethod(
 				"Load",
-				[ typeof(IPlatform), typeof(string), typeof(Stream), typeof(ImportSettings) ]
+				[ typeof(IPlatform), typeof(string), typeof(Stream), typeof(Assembly), typeof(ImportSettings) ]
 			);
 			
 			Debug.Assert(defaultCtor is not null);
 			Debug.Assert(loadMethod is not null);
 			
-			_formats[new TImportSettings().Type] = (defaultCtor, loadMethod!/*, typeof(TImportSettings)*/);
+			_formats[new TImportSettings().FormatId] = (defaultCtor, loadMethod!/*, typeof(TImportSettings)*/);
 		}
 
 		public static (ConstructorInfo Constructor, MethodInfo LoadMethod)? GetFormat(string type) {

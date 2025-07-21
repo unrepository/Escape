@@ -2,6 +2,7 @@ using System.Numerics;
 using Cinenic;
 using Cinenic.Extensions.CSharp;
 using Cinenic.Renderer;
+using Cinenic.Renderer.Resources;
 using Cinenic.Renderer.Shader;
 using Cinenic.Renderer.Shader.Pipelines;
 using Cinenic.Renderer.Vulkan;
@@ -19,18 +20,18 @@ using Window = Cinenic.Renderer.Window;
 class SSBOTestShaderPipeline : IShaderPipeline {
 
 	public IPlatform Platform { get; }
-	public ShaderProgram Program { get; }
+	public Cinenic.Resources.Ref<ShaderProgramResource> Program { get; }
 
 	public DescriptorSet VkTexturesDescriptor { get; }
 
 	public SSBOTestShaderPipeline(VkPlatform platform) {
 		Platform = platform;
 		
-		Program = ShaderProgram.Create(
-			platform,
-			Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk3.vert")),
-			Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
-		);
+		// Program = ShaderProgram.Create(
+		// 	platform,
+		// 	Shader.Create(platform, Shader.Family.Vertex, Resources.LoadText("Shaders.vk3.vert")),
+		// 	Shader.Create(platform, Shader.Family.Fragment, Resources.LoadText("Shaders.vk.frag"))
+		// );
 	}
 	
 	public void VkBindTextureUnit(uint unit, ImageView imageView, Silk.NET.Vulkan.Sampler sampler) { }
@@ -77,8 +78,8 @@ public static class VulkanSSBOTest {
 			new(0, 0, 1, 0)
 		};
 
-		var positionData = IShaderArrayData.Create(platform, mainShaderPipeline.Program, 0, positions);
-		var colorData = IShaderArrayData.Create(platform, mainShaderPipeline.Program, 1, colors);
+		var positionData = IShaderArrayData.Create(platform, mainShaderPipeline.Program.Get(), 0, positions);
+		var colorData = IShaderArrayData.Create(platform, mainShaderPipeline.Program.Get(), 1, colors);
 		
 		_logger.Info("Initial shader data push");
 		positionData.Push();

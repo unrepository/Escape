@@ -1,7 +1,9 @@
 using Cinenic.Extensions.CSharp;
 using Cinenic.Renderer;
+using Cinenic.Renderer.Resources;
 using Cinenic.Renderer.Shader;
 using Cinenic.Renderer.Vulkan;
+using Cinenic.Resources;
 using NLog;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -17,18 +19,18 @@ namespace Cinenic.Sandbox {
 	class TestShader1Pipeline : IShaderPipeline {
 
 		public IPlatform Platform { get; }
-		public ShaderProgram Program { get; }
+		public Ref<ShaderProgramResource> Program { get; }
 
 		public DescriptorSet VkTexturesDescriptor { get; }
 
 		public TestShader1Pipeline(VkPlatform platform) {
 			Platform = platform;
 			
-			Program = ShaderProgram.Create(
-				platform,
-				Shader.Create(platform, Shader.Family.Vertex, Extensions.CSharp.Resources.LoadText("Shaders.vk.vert")),
-				Shader.Create(platform, Shader.Family.Fragment, Extensions.CSharp.Resources.LoadText("Shaders.vk.frag"))
-			);
+			// Program = ShaderProgram.Create(
+			// 	platform,
+			// 	Shader.Create(platform, Shader.Family.Vertex, Extensions.CSharp.Resources.LoadText("Shaders.vk.vert")),
+			// 	Shader.Create(platform, Shader.Family.Fragment, Extensions.CSharp.Resources.LoadText("Shaders.vk.frag"))
+			// );
 		}
 		
 		public void VkBindTextureUnit(uint unit, ImageView imageView, Sampler sampler) { }
@@ -40,18 +42,18 @@ namespace Cinenic.Sandbox {
 	class TestShader2Pipeline : IShaderPipeline {
 
 		public IPlatform Platform { get; }
-		public ShaderProgram Program { get; }
+		public Ref<ShaderProgramResource> Program { get; }
 
 		public DescriptorSet VkTexturesDescriptor { get; }
 
 		public TestShader2Pipeline(VkPlatform platform) {
 			Platform = platform;
 			
-			Program = ShaderProgram.Create(
-				platform,
-				Shader.Create(platform, Shader.Family.Vertex, Extensions.CSharp.Resources.LoadText("Shaders.vk2.vert")),
-				Shader.Create(platform, Shader.Family.Fragment, Extensions.CSharp.Resources.LoadText("Shaders.vk.frag"))
-			);
+			// Program = ShaderProgram.Create(
+			// 	platform,
+			// 	Shader.Create(platform, Shader.Family.Vertex, Extensions.CSharp.Resources.LoadText("Shaders.vk2.vert")),
+			// 	Shader.Create(platform, Shader.Family.Fragment, Extensions.CSharp.Resources.LoadText("Shaders.vk.frag"))
+			// );
 		}
 
 		public void VkBindTextureUnit(uint unit, ImageView imageView, Sampler sampler) { }

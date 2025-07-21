@@ -93,10 +93,10 @@ public static class WorldSandbox {
 		_logger.Info("Using primary device 0 ({name})", primaryDevice.Name);
 		
 		_logger.Info("Create textures & models");
-		var bricksAlbedo = Texture.Create(platform, Resources.Get("Textures.Bricks059_1K_JPG.Bricks059_1K-JPG_Color.jpg"));
-		var bricksNormal = Texture.Create(platform, Resources.Get("Textures.Bricks059_1K_JPG.Bricks059_1K-JPG_NormalGL.jpg"));
-		var bricksDisplacement = Texture.Create(platform, Resources.Get("Textures.Bricks059_1K_JPG.Bricks059_1K-JPG_Displacement.jpg"));
-		var bricksRoughness = Texture.Create(platform, Resources.Get("Textures.Bricks059_1K_JPG.Bricks059_1K-JPG_Roughness.jpg"));
+		var bricksAlbedo = Texture.Create(platform, Resources.Get("textures.Bricks059_1K_JPG.Bricks059_1K-JPG_Color.jpg"));
+		var bricksNormal = Texture.Create(platform, Resources.Get("textures.Bricks059_1K_JPG.Bricks059_1K-JPG_NormalGL.jpg"));
+		var bricksDisplacement = Texture.Create(platform, Resources.Get("textures.Bricks059_1K_JPG.Bricks059_1K-JPG_Displacement.jpg"));
+		var bricksRoughness = Texture.Create(platform, Resources.Get("textures.Bricks059_1K_JPG.Bricks059_1K-JPG_Roughness.jpg"));
 
 		var model1 = _cubeModel.Clone();
 		var model2 = _cubeModel.Clone();

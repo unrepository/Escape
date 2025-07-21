@@ -139,7 +139,7 @@ namespace Cinenic.Renderer.Vulkan {
 			Debug.Assert(queue.Pipeline is not null);
 			
 			var vkQueue = (VkRenderQueue) queue;
-			var vkProgram = (VkShaderProgram) queue.Pipeline.Program;
+			var vkProgram = (VkShaderProgram) queue.Pipeline.Program.Get();
 			var device = _platform.PrimaryDevice.Logical;
 			
 			// we only want this part to execute once

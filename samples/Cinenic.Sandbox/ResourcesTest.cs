@@ -22,12 +22,12 @@ public static class ResourcesTest {
 		SetupVulkan(out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
 
 		// load resources
-		var texture1 = ResourceManager.Load<TextureResource>(platform, "Assets/Textures/1.png")!;
-		var texture1_1 = ResourceManager.Load<TextureResource>(platform, "Assets/Textures/1.png")!;
-		var texture1_2 = ResourceManager.Load<TextureResource>(platform, "Assets/Textures/1.png")!;
-		var texture2 = ResourceManager.Load<TextureResource>(platform, "Assets/Textures/2.png")!;
-		var texture3 = ResourceManager.Load<TextureResource>(platform, "Assets/Textures/3.png")!;
-		var texture4 = ResourceManager.Load<TextureResource>(platform, "Assets/Textures/4.png")!;
+		var texture1 = ResourceManager.Load<TextureResource>(platform, "textures/1.png")!;
+		var texture1_1 = ResourceManager.Load<TextureResource>(platform, "textures/1.png")!;
+		var texture1_2 = ResourceManager.Load<TextureResource>(platform, "textures/1.png")!;
+		var texture2 = ResourceManager.Load<TextureResource>(platform, "textures/2.png")!;
+		var texture3 = ResourceManager.Load<TextureResource>(platform, "textures/3.png")!;
+		var texture4 = ResourceManager.Load<TextureResource>(platform, "textures/4.png")!;
 
 		// create models
 		var model1 = CubeModel.Clone();

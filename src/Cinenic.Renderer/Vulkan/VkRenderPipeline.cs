@@ -28,7 +28,7 @@ namespace Cinenic.Renderer.Vulkan {
 			//Debug.Assert(((VkRenderQueue) queue).Base.Handle != 0, "RenderQueue.Handle is 0. Did you forget to call Initialize()?");
 			_platform = platform;
 
-			shaderPipeline.Program.Build();
+			((VkShaderProgram) shaderPipeline.Program.Get()).Build();
 
 		#region Pipeline layout
 			_logger.Debug("Pipeline setup: Create layout");
@@ -146,7 +146,7 @@ namespace Cinenic.Renderer.Vulkan {
 					StageFlags = ShaderStageFlags.All
 				};
 				
-				var setLayouts = ((VkShaderProgram) shaderPipeline.Program).DescriptorSetLayouts.ToArray();
+				var setLayouts = ((VkShaderProgram) shaderPipeline.Program.Get()).DescriptorSetLayouts.ToArray();
 
 				fixed(DescriptorSetLayout* setLayoutsPtr = setLayouts) {
 					var pipelineLayoutInfo = new PipelineLayoutCreateInfo {
@@ -178,7 +178,7 @@ namespace Cinenic.Renderer.Vulkan {
 						var pipelineInfo = Queue.Type switch {
 							RenderQueue.Family.Graphics => new GraphicsPipelineCreateInfo {
 								SType = StructureType.GraphicsPipelineCreateInfo,
-								StageCount = (uint) ((VkShaderProgram) Program).Stages.Count,
+								StageCount = (uint) ((VkShaderProgram) Program.Get()).Stages.Count,
 								Layout = PipelineLayout,
 								RenderPass = ((VkRenderQueue) Queue).Base,
 								Subpass = 0,
@@ -186,7 +186,7 @@ namespace Cinenic.Renderer.Vulkan {
 							}
 						};
 
-						var programStages = ((VkShaderProgram) Program).Stages.ToArray();
+						var programStages = ((VkShaderProgram) Program.Get()).Stages.ToArray();
 
 						fixed(PipelineShaderStageCreateInfo* ptr = programStages) {
 							pipelineInfo.PStages = ptr;
@@ -268,7 +268,7 @@ namespace Cinenic.Renderer.Vulkan {
 				Pipeline
 			);
 			
-			Program.Bind(this);
+			Program.Get().Program.Bind(this);
 			
 			var viewport = new Viewport {
 				X = Queue.Viewport.X,
