@@ -2,6 +2,8 @@ using System.Drawing;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Cinenic.Extensions.CSharp;
+using Cinenic.Renderer.Resources;
+using Cinenic.Resources;
 using ILGPU.Runtime.CPU;
 
 namespace Cinenic.Renderer {
@@ -12,10 +14,10 @@ namespace Cinenic.Renderer {
 		public float Roughness = 0.5f;
 		public float Metallic = 0.0f;
 
-		public Texture? AlbedoTexture;
-		public Texture? NormalTexture;
-		public Texture? MetallicTexture;
-		public Texture? RoughnessTexture;
+		public Ref<TextureResource>? AlbedoTexture;
+		public Ref<TextureResource>? NormalTexture;
+		public Ref<TextureResource>? MetallicTexture;
+		public Ref<TextureResource>? RoughnessTexture;
 		
 		public static implicit operator Material(Color color)
 			=> new Material { AlbedoColor = color };
@@ -31,10 +33,10 @@ namespace Cinenic.Renderer {
 				Metallic = Metallic
 			};
 
-			if(AlbedoTexture is not null) data.UseTextures |= TextureType.Albedo;
-			if(NormalTexture is not null) data.UseTextures |= TextureType.Normal;
-			if(MetallicTexture is not null) data.UseTextures |= TextureType.Metallic;
-			if(RoughnessTexture is not null) data.UseTextures |= TextureType.Roughness;
+			if(AlbedoTexture is not null && AlbedoTexture.IsValid) data.UseTextures |= TextureType.Albedo;
+			if(NormalTexture is not null && NormalTexture.IsValid) data.UseTextures |= TextureType.Normal;
+			if(MetallicTexture is not null && MetallicTexture.IsValid) data.UseTextures |= TextureType.Metallic;
+			if(RoughnessTexture is not null && RoughnessTexture.IsValid) data.UseTextures |= TextureType.Roughness;
 			
 			return data;
 		}

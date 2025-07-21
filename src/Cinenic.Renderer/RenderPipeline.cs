@@ -1,5 +1,7 @@
 using System.Numerics;
+using Cinenic.Renderer.Resources;
 using Cinenic.Renderer.Shader;
+using Cinenic.Resources;
 
 namespace Cinenic.Renderer {
 	
@@ -10,7 +12,7 @@ namespace Cinenic.Renderer {
 		public RenderQueue Queue;
 		//public Framebuffer RenderTarget { get; set; }
 		public IShaderPipeline ShaderPipeline { get; }
-		public ShaderProgram Program => ShaderPipeline.Program;
+		public Ref<ShaderProgramResource> Program => ShaderPipeline.Program;
 
 		public RenderPipeline(IPlatform platform, RenderQueue queue, IShaderPipeline shaderPipeline) {
 			Platform = platform;

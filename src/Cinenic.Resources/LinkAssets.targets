@@ -1,0 +1,35 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<AssetsSubDir>Assets</AssetsSubDir>
+	</PropertyGroup>
+
+	<Target Name="SymlinkAssetsFromProjects" AfterTargets="Build">
+		<MakeDir Directories="$(OutDir)assets" />
+
+		<ItemGroup>
+			<AssetsToLink Include="@(AssetLinkProject)">
+				<AssemblyName>%(Filename)</AssemblyName>
+				<SourceDir>%(RootDir)%(Directory)$(AssetsSubDir)</SourceDir>
+				<LinkDir>$(OutDir)assets/%(Filename)</LinkDir>
+			</AssetsToLink>
+		</ItemGroup>
+
+		<Delete Files="@(AssetsToLink->'%(LinkDir)')" />
+		<RemoveDir Directories="@(AssetsToLink->'%(LinkDir)')" />
+
+		<Exec
+				Condition="'$(OS)' == 'Windows_NT'"
+				Command="cmd /c mklink /D &quot;%(AssetsToLink.LinkDir)&quot; &quot;%(AssetsToLink.SourceDir)&quot;"
+				StandardOutputImportance="High"
+				StandardErrorImportance="High"
+		/>
+
+		<Exec
+				Condition="'$(OS)' != 'Windows_NT'"
+				Command="ln -s &quot;%(AssetsToLink.SourceDir)&quot; &quot;%(AssetsToLink.LinkDir)&quot;"
+				StandardOutputImportance="High"
+				StandardErrorImportance="High"
+		/>
+
+	</Target>
+</Project>

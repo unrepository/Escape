@@ -1,3 +1,1 @@
-using Cinenic.Sandbox;
-
-WorldSandbox.Start(args);
+ResourcesTest.Start(args);

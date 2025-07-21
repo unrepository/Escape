@@ -9,9 +9,12 @@ using Silk.NET.Windowing;
 namespace Cinenic.Renderer.OpenGL {
 	
 	public class GLPlatform : IPlatform {
-		
+
+		public Platform Identifier => Platform.OpenGL;
+
+		public Thread PlatformThread { get; set; }
 		public bool IsInitialized { get; set; }
-		public ShaderProgram? DefaultProgram { get; set; } // TODO
+		
 		public Options CurrentOptions { get; }
 
 		public GL API { get; protected set; }
@@ -34,6 +37,7 @@ namespace Cinenic.Renderer.OpenGL {
 			Debug.Assert(!IsInitialized);
 			Debug.Assert(_sharedApi is not null && _sharedContext is not null, "A Window must be created first"); // TODO
 
+			PlatformThread = Thread.CurrentThread;
 			API = _sharedApi;
 
 			if(CurrentOptions.Debug) {

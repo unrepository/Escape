@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Cinenic.Extensions.CSharp;
+using Cinenic.Resources;
 
 namespace Cinenic {
 	

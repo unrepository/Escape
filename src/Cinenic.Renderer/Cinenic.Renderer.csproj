@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="ILGPU" Version="1.5.2" />
     <PackageReference Include="ILGPU.Algorithms" Version="1.5.2" />
-    <PackageReference Include="NLog" Version="5.5.0" />
+    <PackageReference Include="NLog" Version="6.0.2" />
     <PackageReference Include="Silk.NET.Input.Common" Version="2.22.0" />
     <PackageReference Include="Silk.NET.OpenGL" Version="2.22.0" />
     <PackageReference Include="Silk.NET.OpenGL.Extensions.ARB" Version="2.22.0" />
@@ -25,10 +25,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cinenic.Extensions.CSharp\Cinenic.Extensions.CSharp.csproj" />
+    <ProjectReference Include="..\Cinenic.Renderer.Platform\Cinenic.Renderer.Platform.csproj" />
+    <ProjectReference Include="..\Cinenic.Resources\Cinenic.Resources.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\**\*"/>
+    <EmbeddedResource Include="Resources\Shaders\**\*"/>
   </ItemGroup>
 
 </Project>
