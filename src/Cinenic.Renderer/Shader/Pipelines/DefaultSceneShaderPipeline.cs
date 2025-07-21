@@ -29,18 +29,8 @@ namespace Cinenic.Renderer.Shader.Pipelines {
 			Platform = platform;
 			
 			var vkPlatform = platform as VkPlatform;
-			
-			// Shader[] shaders = platform switch {
-			// 	VkPlatform => [
-			// 		new VkShader(vkPlatform!, Shader.Family.Vertex, Extensions.CSharp.Resources.LoadText("Shaders.Vulkan.scene.vert")),
-			// 		new VkShader(vkPlatform!, Shader.Family.Fragment, Extensions.CSharp.Resources.LoadText("Shaders.Vulkan.scene.frag")),
-			// 	],
-			// 	_ => throw new NotImplementedException("PlatformImpl")
-			// };
 
 			Program = ResourceManager.Load<ShaderProgramResource>(platform, "/shader_programs/scene.program")!;
-			
-			//Program = ShaderProgram.Create(platform, shaders);
 			
 		#region Vulkan
 			// material texture units for Vulkan
@@ -57,22 +47,6 @@ namespace Cinenic.Renderer.Shader.Pipelines {
 				);
 
 				VkTexturesDescriptor = textureDescriptor.Set;
-
-				// var textureDescriptor = VkHelpers.CreateDescriptorSet(
-				// 	vkPlatform,
-				// 	vkProgram,
-				// 	[
-				// 		(uint) Material.TextureType.Albedo,
-				// 		(uint) Material.TextureType.Normal,
-				// 		(uint) Material.TextureType.Metallic,
-				// 		(uint) Material.TextureType.Roughness
-				// 	],
-				// 	1,
-				// 	DescriptorType.CombinedImageSampler,
-				// 	ShaderStageFlags.FragmentBit
-				// );
-				//
-				// _textureDescriptorSet = textureDescriptor.Set;
 			}
 		#endregion
 
@@ -93,32 +67,6 @@ namespace Cinenic.Renderer.Shader.Pipelines {
 			MaterialData.Push();
 			MatrixData.Push();
 		}
-
-	#region Vulkan
-		[Obsolete]
-		public unsafe void VkBindTextureUnit(uint unit, ImageView imageView, Sampler sampler) {
-			var platform = (VkPlatform) Platform;
-			var device = platform.PrimaryDevice.Logical;
-					
-			var descriptorImageInfo = new DescriptorImageInfo {
-				ImageLayout = ImageLayout.ShaderReadOnlyOptimal,
-				ImageView = imageView,
-				Sampler = sampler
-			};
-
-			var writeDescriptorSet = new WriteDescriptorSet {
-				SType = StructureType.WriteDescriptorSet,
-				DstSet = _textureDescriptorSet,
-				DstBinding = unit,
-				DstArrayElement = 0, // TODO what is this
-				DescriptorType = DescriptorType.CombinedImageSampler,
-				DescriptorCount = 1,
-				PImageInfo = &descriptorImageInfo
-			};
-			
-			platform.API.UpdateDescriptorSets(device, 1, writeDescriptorSet, 0, null);
-		}
-	#endregion
 
 		public void Dispose() {
 			GC.SuppressFinalize(this);

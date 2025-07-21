@@ -10,17 +10,18 @@ namespace Cinenic.Resources {
 
 		public delegate void ReloadedEventHandler(Ref<T> sender);
 		public event ReloadedEventHandler? Reloaded;
-		
-		public T Get() => ReferencedObject;
 
 		public Ref(T referencedObject) {
 			ReferencedObject = referencedObject;
 			referencedObject.NewReference();
 		}
 		
-		~Ref() {
-			Dispose();
-		}
+		// ~Ref() {
+		// 	Dispose();
+		// }
+		
+		public T Get() => ReferencedObject;
+		public Ref<T> New() => new Ref<T>(ReferencedObject);
 		
 		public void Dispose() {
 			ReferencedObject.FreeReference();

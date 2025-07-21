@@ -27,9 +27,9 @@ namespace Cinenic.Resources {
 		public TImportSettings Settings { get; protected set; }
 		public List<IResource> Dependencies { get; protected set; } = [];
 		
-		~Resource() {
-			Dispose(false);
-		}
+		// ~Resource() {
+		// 	Dispose(false);
+		// }
 		
 		public void Load(IPlatform platform, string filePath, byte[] data, Assembly resourceAssembly, ImportSettings? settings) {
 			using var stream = new MemoryStream(data);
@@ -80,7 +80,7 @@ namespace Cinenic.Resources {
 				return false;
 			}
 			
-			GC.SuppressFinalize(this);
+			//GC.SuppressFinalize(this);
 			Dispose(true);
 			
 			TImportSettings? importSettings = null;
