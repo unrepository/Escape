@@ -55,17 +55,11 @@ namespace Cinenic.Resources {
 
 		public virtual bool Save() {
 			if(FilePath is null) return false;
-			
-			var importSettingsData = JsonSerializer.SerializeToUtf8Bytes(
-				Settings,
-				ImportMetadata.DefaultSerializerOptions
-			);
-			
-			File.WriteAllBytes(Settings.MetaPath, importSettingsData);
+			Settings.Save(typeof(TImportSettings));
 			
 			_logger.Debug(
 				"Saved {Type} import settings to {Path}",
-				GetType().Name, Settings.MetaPath
+				GetType().Name, Settings.Path
 			);
 			
 			return true;
@@ -108,7 +102,10 @@ namespace Cinenic.Resources {
 		
 		public virtual void Dispose(bool reloading) {
 			if(!reloading) {
+				// implicitly save only when debugging, as it will be normally done through the resource editor
+			#if DEBUG
 				Save();
+			#endif
 				Freed?.Invoke(this);
 			}
 		}

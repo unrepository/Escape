@@ -4,10 +4,6 @@ using Cinenic.Resources;
 namespace Cinenic.Renderer.Resources {
 	
 	public class ShaderResource : Resource<ShaderResource.Import> {
-
-		static ShaderResource() {
-			ResourceRegistry.RegisterFormat<ShaderResource, Import>();
-		}
 		
 		public override Type SettingsType => typeof(Import);
 		public override string[] FileExtensions => [ ".frag", ".vert", ".tesc", ".tese", ".geom", ".comp", ".glsl", ".shader" ];

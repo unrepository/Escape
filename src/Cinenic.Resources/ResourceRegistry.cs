@@ -6,11 +6,7 @@ namespace Cinenic.Resources {
 	
 	public static class ResourceRegistry {
 
-		private static Dictionary<string, (ConstructorInfo Constructor, MethodInfo LoadMethod/*, Type ImportSettingsType*/)> _formats = [];
-
-		// static ResourceRegistry() {
-		// 	RegisterFormat<TextureResource, TextureResource.Import>();
-		// }
+		private static Dictionary<string, (ConstructorInfo Constructor, MethodInfo LoadMethod, Type MetaType)> _formats = [];
 		
 		public static void RegisterFormat<TResource, TImportSettings>()
 			where TResource : Resource<TImportSettings>, new()
@@ -26,10 +22,10 @@ namespace Cinenic.Resources {
 			Debug.Assert(defaultCtor is not null);
 			Debug.Assert(loadMethod is not null);
 			
-			_formats[new TImportSettings().FormatId] = (defaultCtor, loadMethod!/*, typeof(TImportSettings)*/);
+			_formats[new TImportSettings().FormatId] = (defaultCtor, loadMethod!, typeof(TImportSettings));
 		}
 
-		public static (ConstructorInfo Constructor, MethodInfo LoadMethod)? GetFormat(string type) {
+		public static (ConstructorInfo Constructor, MethodInfo LoadMethod, Type MetaType)? GetFormat(string type) {
 			if(_formats.TryGetValue(type, out var format)) {
 				return format;
 			}

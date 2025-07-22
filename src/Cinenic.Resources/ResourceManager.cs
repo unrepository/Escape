@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Reflection;
 using System.Text.Json;
 using Cinenic.Extensions.CSharp;
@@ -14,8 +15,10 @@ namespace Cinenic.Resources {
 		
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		
+		private static readonly Dictionary<Assembly, ResourceDatabase> _databases = [];
+		
 		private static readonly Dictionary<string, object> _loadedResources = [];
-		private static readonly Dictionary<string, FileSystemWatcher> _resourceWatchers = [];
+		private static readonly Dictionary<Assembly, FileSystemWatcher> _resourceWatchers = [];
 		private static readonly ConcurrentDictionary<string, bool> _reloadLocks = [];
 
 		static ResourceManager() {
@@ -24,16 +27,73 @@ namespace Cinenic.Resources {
 				foreach(var resourceObject in _loadedResources.Values) {
 					((IDisposable) resourceObject).Dispose();
 				}
+
+				// save databases only in debug builds, as they will primarily be done through the resource editor
+			#if DEBUG
+				foreach(var (assembly, database) in _databases) {
+					database.Save();
+					_logger.Trace("Saved resource database for {Assembly}", assembly.GetName().Name ?? assembly.GetName().FullName);
+				}
+			#endif
 			};
 
-			AppDomain.CurrentDomain.UnhandledException += (_, _) => {
+			/*AppDomain.CurrentDomain.UnhandledException += (_, _) => {
 				foreach(var resourceObject in _loadedResources.Values) {
 					((IDisposable) resourceObject).Dispose();
 				}
-			};
+			};*/
+		}
+
+		public static Ref<TResource>? Load<TResource>(
+			IPlatform platform,
+			string resource,
+			bool required = true,
+			bool explicitPath = false,
+			Assembly? assembly = null
+		)
+			where TResource : class, IResource, new()
+		{
+			assembly ??= Assembly.GetCallingAssembly();
+			
+			if(Guid.TryParse(resource, out var guid)) {
+				return LoadById<TResource>(platform, guid, required, assembly);
+			}
+			
+			return LoadByPath<TResource>(platform, resource, required, explicitPath, assembly);
 		}
 		
-		public static Ref<TResource>? Load<TResource>(
+		public static Ref<TResource>? LoadById<TResource>(
+			IPlatform platform,
+			Guid id,
+			bool required = true,
+			Assembly? assembly = null
+		)
+			where TResource : class, IResource, new()
+		{
+			assembly ??= Assembly.GetCallingAssembly();
+			
+			var @namespace = _GetNamespace(assembly);
+			var database = LoadDatabase(assembly);
+
+			if(database is null || !database.Entries.TryGetValue(id, out var entry)) {
+				_logger.Warn("Could not load resource with id {Id} from database", id);
+
+				if(required) {
+					throw new KeyNotFoundException($"Could not load resource with id {id} from database");
+				}
+
+				return null;
+			}
+
+			return LoadByPath<TResource>(
+				platform,
+				entry.MetadataPath.ReplaceLast(ImportMetadata.FILE_EXTENSION, "", StringComparison.OrdinalIgnoreCase),
+				required,
+				assembly: assembly
+			);
+		}
+		
+		public static Ref<TResource>? LoadByPath<TResource>(
 			IPlatform platform,
 			string path,
 			bool required = true,
@@ -48,20 +108,14 @@ namespace Cinenic.Resources {
 			// }
 
 			assembly ??= Assembly.GetCallingAssembly();
-			var @namespace = assembly.GetName().Name;
+			var @namespace = _GetNamespace(assembly);
 
-			if(@namespace is null) {
-				_logger.Warn("Calling assembly has no name? Resource loading might break!");
-				_logger.Warn("Setting namespace to \"unknown\"");
-				@namespace = "unknown";
+			if(@namespace == "unknown") {
+				_logger.Warn("Assembly has no name? Resource loading might break!");
+				_logger.Warn("Namespace set to \"unknown\"");
 			}
-			
-			var baseDirectory = Path.GetDirectoryName(assembly.Location)!;
-			
-			//if(!explicitSubpath) {
-				baseDirectory += Path.DirectorySeparatorChar + ASSETS_DIRECTORY_NAME;
-				baseDirectory += Path.DirectorySeparatorChar + @namespace;
-			//}
+
+			var baseDirectory = _GetBaseDirectory(assembly);
 			
 			var fullPath = explicitPath ? path : baseDirectory + Path.DirectorySeparatorChar + path;
 			fullPath = Path.GetFullPath(fullPath); // resolve the real path
@@ -92,8 +146,7 @@ namespace Cinenic.Resources {
 			ImportMetadata? importMeta = null;
 
 			if(File.Exists(metaPath)) {
-				using var importStream = new FileStream(metaPath, FileMode.Open);
-				importMeta = (ImportMetadata?) JsonSerializer.Deserialize(importStream, settingsType, ImportMetadata.DefaultSerializerOptions);
+				importMeta = ImportMetadata.Load(metaPath, settingsType);
 			}
 			
 			if(importMeta is null) {
@@ -101,7 +154,7 @@ namespace Cinenic.Resources {
 				importMeta = (ImportMetadata) settingsType.GetConstructor([]).Invoke(null);
 			}
 
-			importMeta.MetaPath = metaPath;
+			importMeta.Path = metaPath;
 			
 			string? realPath = fullPath;
 			Stream stream;
@@ -190,14 +243,14 @@ namespace Cinenic.Resources {
 			}
 			
 			if(realPath is not null) {
-				if(!_resourceWatchers.TryGetValue(@namespace, out var watcher)) {
+				if(!_resourceWatchers.TryGetValue(assembly, out var watcher)) {
 					watcher = new FileSystemWatcher(baseDirectory) {
 						EnableRaisingEvents = true,
 						NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.CreationTime,
 						IncludeSubdirectories = true
 					};
 
-					_resourceWatchers[@namespace] = watcher;
+					_resourceWatchers[assembly] = watcher;
 				}
 
 				watcher.Changed += WatcherChanged;
@@ -211,7 +264,7 @@ namespace Cinenic.Resources {
 			resourceInstance.Freed += _ => {
 			#if DEBUG
 				if(realPath is not null) {
-					if(_resourceWatchers.TryGetValue(@namespace, out var watcher)) {
+					if(_resourceWatchers.TryGetValue(assembly, out var watcher)) {
 						watcher.Changed -= WatcherChanged;
 						watcher.Created -= WatcherChanged;
 						watcher.Renamed -= WatcherChanged;
@@ -225,6 +278,102 @@ namespace Cinenic.Resources {
 			
 			_logger.Debug("Successfully loaded resource of type {Type} at {Path}", typeof(TResource).Name, realPath);
 			return new(resourceInstance);
+		}
+
+		public static ResourceDatabase? LoadDatabase(Assembly assembly) {
+			if(_databases.TryGetValue(assembly, out var database)) return database;
+
+			var baseDirectory = _GetBaseDirectory(assembly);
+			var dbFilePath = baseDirectory + Path.DirectorySeparatorChar + ResourceDatabase.FILE_NAME;
+			
+			// load exiting database in debug only, as new resources don't get added automatically
+		#if DEBUG
+			if(File.Exists(dbFilePath)) {
+				// if we have the db file, read from it
+				database = ResourceDatabase.Load(dbFilePath);
+
+				if(database is null) {
+					_logger.Warn(
+						"Could not read the database file for {Assembly} at {Path}",
+						assembly.GetName().Name ?? assembly.GetName().FullName, dbFilePath
+					);
+
+					return null;
+				}
+			} else
+		#endif
+			{
+				// otherwise, scan the assets directory for files and create a new database
+				database = new ResourceDatabase();
+
+				foreach(
+					var metaFilePath in Directory.EnumerateFiles(
+						baseDirectory,
+						"*" + ImportMetadata.FILE_EXTENSION,
+						SearchOption.AllDirectories
+					)
+				) {
+					// read metadata file
+					
+					// very hacky, but first we need to read the metadata into dynamic to read the true format
+					using var stream = new FileStream(metaFilePath, FileMode.Open);
+					dynamic? dynamicMeta = JsonSerializer.Deserialize<ExpandoObject>(stream, ImportMetadata.DefaultSerializerOptions);
+					
+					if(dynamicMeta is null) {
+						_logger.Warn(
+							"Could not read metadata file {Path} for creating the {Assembly} database",
+							metaFilePath, assembly.GetName().Name ?? assembly.GetName().FullName
+						);
+						
+						continue;
+					}
+					
+					var format = ResourceRegistry.GetFormat((string) dynamicMeta.format_id.ToString());
+
+					if(format is null) {
+						_logger.Warn("Could not find import format for resource type {Type}", dynamicMeta.format_id);
+						continue;
+					}
+					
+					// now we can read the actual type
+					var importMeta = ImportMetadata.Load(metaFilePath, format.Value.MetaType);
+					Debug.Assert(importMeta is not null, "This should never happen actually");
+
+					database.Entries[importMeta.Id] = new ResourceDatabase.Entry {
+						MetadataPath = metaFilePath.Replace(baseDirectory, "")
+					};
+				}
+			}
+
+			database.Path = dbFilePath;
+			_databases[assembly] = database;
+			return database;
+		}
+
+		public static string ResolvePath(string? baseDirectory, string path, out bool explicitPath) {
+			if(Guid.TryParse(path, out _)) {
+				explicitPath = false;
+				return path;
+			}
+
+			if(!path.StartsWith('/')) {
+				Debug.Assert(baseDirectory is not null, "path is relative but baseDirectory is null!");
+				explicitPath = true;
+				return baseDirectory + Path.DirectorySeparatorChar + path;
+			}
+
+			explicitPath = false;
+			return path;
+		}
+
+		private static string _GetNamespace(Assembly assembly) => assembly.GetName().Name ?? "unknown";
+
+		private static string _GetBaseDirectory(Assembly assembly) {
+			var baseDirectory = Path.GetDirectoryName(assembly.Location)!;
+			baseDirectory += Path.DirectorySeparatorChar + ASSETS_DIRECTORY_NAME;
+			baseDirectory += Path.DirectorySeparatorChar + _GetNamespace(assembly);
+
+			return baseDirectory;
 		}
 	}
 }

@@ -1,0 +1,13 @@
+{
+	"entries": {
+		"dbec5184-1a1b-4d39-9a55-3f97d55b4a83": {
+			"metadata_path": "/shader_programs/scene.program.meta.json"
+		},
+		"acc218ba-15ab-4071-9b8f-93d33c44fa5e": {
+			"metadata_path": "/shaders/vk/scene.frag.meta.json"
+		},
+		"5dac8408-b4be-4f3a-b7f4-bfd9cba9c5ab": {
+			"metadata_path": "/shaders/vk/scene.vert.meta.json"
+		}
+	}
+}

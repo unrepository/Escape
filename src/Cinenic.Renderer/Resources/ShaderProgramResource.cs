@@ -8,10 +8,6 @@ using NLog;
 namespace Cinenic.Renderer.Resources {
 	
 	public class ShaderProgramResource : Resource<ShaderProgramResource.Import> {
-
-		static ShaderProgramResource() {
-			ResourceRegistry.RegisterFormat<ShaderProgramResource, Import>();
-		}
 		
 		public override Type SettingsType => typeof(Import);
 		public override string[] FileExtensions => [ ".program" ];
@@ -43,15 +39,7 @@ namespace Cinenic.Renderer.Resources {
 			Shaders = [];
 
 			foreach(var shaderPath in shaderPaths) {
-				string realPath = "";
-				bool explicitPath = false;
-
-				if(shaderPath.StartsWith('/')) {
-					realPath = shaderPath;
-				} else {
-					realPath = Path.GetDirectoryName(filePath) + Path.DirectorySeparatorChar + shaderPath;
-					explicitPath = true;
-				}
+				var realPath = ResourceManager.ResolvePath(Path.GetDirectoryName(filePath), shaderPath, out var explicitPath);
 				
 				var shader = ResourceManager.Load<ShaderResource>(
 					platform,

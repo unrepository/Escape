@@ -19,6 +19,7 @@ namespace Cinenic.Components {
 			RegisterComponents<ComponentAttribute>();
 		}
 		
+		// TODO move this reflection thingy to a common extension thing so it can be used also e.g. in Renderer.Resources.ResourceRegistry
 		private static void RegisterComponents<TAttribute>()
 			where TAttribute : Attribute
 		{
@@ -31,7 +32,7 @@ namespace Cinenic.Components {
 				}
 			}
 		}
-
+		
 		private static void RegisterComponent(Type type) {
 			var size = (int?)
 				typeof(Unsafe)

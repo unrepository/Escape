@@ -1,8 +1,8 @@
 {
     "shader_paths": {
         "vulkan": [
-            "../shaders/vk/scene.frag",
-            "../shaders/vk/scene.vert"
+            "acc218ba-15ab-4071-9b8f-93d33c44fa5e",
+            "5dac8408-b4be-4f3a-b7f4-bfd9cba9c5ab"
         ]
     }
 }
