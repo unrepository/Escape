@@ -17,7 +17,7 @@ namespace Cinenic.Resources {
 		public delegate void ReloadedEventHandler(Resource<TImportSettings> sender);
 		public event ReloadedEventHandler? Reloaded;
 
-		public abstract Type SettingsType { get; }
+		public abstract Type MetadataType { get; }
 		public abstract string[] FileExtensions { get; }
 
 		public IPlatform Platform { get; protected set; }
@@ -115,7 +115,7 @@ namespace Cinenic.Resources {
 
 	public interface IResource : IRefCounted, IReloadable {
 		
-		public Type SettingsType { get; }
+		public Type MetadataType { get; }
 		public string[] FileExtensions { get; }
 		
 		public IPlatform Platform { get; }

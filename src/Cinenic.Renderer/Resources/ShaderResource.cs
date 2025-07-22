@@ -5,7 +5,7 @@ namespace Cinenic.Renderer.Resources {
 	
 	public class ShaderResource : Resource<ShaderResource.Import> {
 		
-		public override Type SettingsType => typeof(Import);
+		public override Type MetadataType => typeof(Import);
 		public override string[] FileExtensions => [ ".frag", ".vert", ".tesc", ".tese", ".geom", ".comp", ".glsl", ".shader" ];
 
 		public Shader.Shader? Shader { get; private set; }

@@ -9,7 +9,7 @@ namespace Cinenic.Renderer.Resources {
 	
 	public class ShaderProgramResource : Resource<ShaderProgramResource.Import> {
 		
-		public override Type SettingsType => typeof(Import);
+		public override Type MetadataType => typeof(Import);
 		public override string[] FileExtensions => [ ".program" ];
 
 		public List<Ref<ShaderResource>> Shaders { get; private set; }

@@ -140,18 +140,18 @@ namespace Cinenic.Resources {
 			}
 			
 			var tempInstance = new TResource();
-			var settingsType = tempInstance.SettingsType;
+			var metadataType = tempInstance.MetadataType;
 			var fileExtensions = tempInstance.FileExtensions;
 			
 			ImportMetadata? importMeta = null;
 
 			if(File.Exists(metaPath)) {
-				importMeta = ImportMetadata.Load(metaPath, settingsType);
+				importMeta = ImportMetadata.Load(metaPath, metadataType);
 			}
 			
 			if(importMeta is null) {
 				_logger.Debug("Creating a new default ImportSettings instance as an existing one could not be found");
-				importMeta = (ImportMetadata) settingsType.GetConstructor([]).Invoke(null);
+				importMeta = (ImportMetadata) metadataType.GetConstructor([]).Invoke(null);
 			}
 
 			importMeta.Path = metaPath;
