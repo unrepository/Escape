@@ -1,19 +1,24 @@
-using EcsWorld = Arch.Core.World;
+using Arch.Core;
+using Cinenic.Systems;
 
 namespace Cinenic {
 	
 	public class WorldUpdater : IUpdater {
 
 		public string Id { get; }
-		public EcsWorld World { get; set; }
+		public World World { get; set; }
+
+		private MainUpdateSystem _primarySystem;
 		
-		public WorldUpdater(string id, EcsWorld world) {
+		public WorldUpdater(string id, World world) {
 			Id = id;
 			World = world;
+
+			_primarySystem = new MainUpdateSystem(world);
 		}
 		
 		public virtual void Update(TimeSpan delta) {
-			//World.Progress((float) delta.TotalSeconds);
+			_primarySystem.Update(delta);
 		}
 	}
 }

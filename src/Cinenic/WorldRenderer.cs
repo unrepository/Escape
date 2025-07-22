@@ -5,9 +5,9 @@ using Arch.System;
 using Cinenic.Components;
 using Cinenic.Renderer;
 using Cinenic.Renderer.Camera;
+using Cinenic.Systems;
 using NLog;
 using Camera3D = Cinenic.Components.Camera3D;
-using EcsWorld = Arch.Core.World;
 
 namespace Cinenic {
 	
@@ -16,21 +16,22 @@ namespace Cinenic {
 		public string Id { get; }
 		public int Priority { get; init; }
 		
-		public EcsWorld World { get; set; }
+		public World World { get; set; }
 		public ObjectRenderer ObjectRenderer { get; }
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		
 		private readonly Dictionary<Entity, RenderableObject> _entityRenderableMap = [];
-		private readonly QueryDescription _camera3DQuery = new QueryDescription().WithAll<Camera3D>();
-		private readonly RenderUpdateSystem _mainSystem;
 		
-		public WorldRenderer(string id, EcsWorld world, ObjectRenderer objectRenderer) {
+		private readonly QueryDescription _camera3DQuery = new QueryDescription().WithAll<Camera3D>();
+		private readonly RenderUpdateSystem _primarySystem;
+		
+		public WorldRenderer(string id, World world, ObjectRenderer objectRenderer) {
 			Id = id;
 			World = world;
 			ObjectRenderer = objectRenderer;
 			
-			_mainSystem = new RenderUpdateSystem(world, objectRenderer);
+			_primarySystem = new RenderUpdateSystem(world, objectRenderer);
 			
 			World.SubscribeComponentAdded((in Entity e, ref RenderableObject obj) => {
 				_logger.Trace("(ecs observer) RenderableObject/Add");
@@ -84,41 +85,7 @@ namespace Cinenic {
 				ObjectRenderer.ShaderPipeline.CameraData.Size = (uint) sizeof(CameraData);
 			}
 			
-			_mainSystem.Update(delta);
-		}
-	}
-	
-	public partial class RenderUpdateSystem : BaseSystem<EcsWorld, TimeSpan> {
-
-		private ObjectRenderer _objectRenderer;
-
-		public RenderUpdateSystem(EcsWorld world, ObjectRenderer objectRenderer) : base(world) {
-			_objectRenderer = objectRenderer;
-		}
-		
-		[Query(Parallel = true)]
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Camera3D_Update(ref Camera3D c3d) {
-			if(!c3d.Enabled) return;
-			c3d.Camera.Update();
-		}
-
-		[Query(Parallel = true)]
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Transform3D_Camera3D_Synchronize(ref Camera3D c3d, ref Transform3D t3d) {
-			c3d.Camera.Position = t3d.Position;
-			c3d.Camera.Target = t3d.Position + Vector3.Transform(Vector3.UnitZ, t3d.Rotation);
-		}
-
-		[Query]
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void Transform3D_Update(ref RenderableObject obj, ref Transform3D t3d) {
-			var matrix =
-				Matrix4x4.CreateScale(t3d.Scale)
-				* Matrix4x4.CreateFromQuaternion(t3d.Rotation)
-				* Matrix4x4.CreateTranslation(t3d.Position);
-
-			_objectRenderer.SetMatrix(obj, matrix);
+			_primarySystem.Update(delta);
 		}
 	}
 }
