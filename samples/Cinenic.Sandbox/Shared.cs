@@ -1,10 +1,10 @@
 using System.Drawing;
+using Arch.Core;
 using Cinenic;
 using Cinenic.Renderer;
 using Cinenic.Renderer.Shader.Pipelines;
 using Cinenic.Renderer.Vulkan;
-using Cinenic.World;
-using Flecs.NET.Core;
+using Schedulers;
 
 public static class Shared {
 	
@@ -93,7 +93,7 @@ public static class Shared {
 		UpdateManager.Add(new WorldUpdater("world", world));
 
 		var objectRenderer = ObjectRenderer.Create(platform, shaderPipeline);
-		RenderManager.Add(new WorldRenderer("world", objectRenderer, world), renderQueue);
+		RenderManager.Add(new WorldRenderer("world", world, objectRenderer), renderQueue);
 		RenderManager.Add(objectRenderer, renderQueue);
 	}
 }

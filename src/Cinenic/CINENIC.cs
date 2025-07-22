@@ -1,6 +1,10 @@
 using System.Diagnostics;
+using System.Reflection;
+using Arch.Core;
 using Cinenic.Extensions.CSharp;
 using Cinenic.Resources;
+using Schedulers;
+using ComponentRegistry = Cinenic.Components.ComponentRegistry;
 
 namespace Cinenic {
 	
@@ -19,12 +23,26 @@ namespace Cinenic {
 
 		private static Stopwatch _updateStopwatch = new();
 		private static Stopwatch _renderStopwatch = new();
+
+		private static JobScheduler _sharedWorldScheduler;
 		
 		public static void Run() {
+			ComponentRegistry.AddAssembly(Assembly.GetExecutingAssembly());
+			ComponentRegistry.RegisterComponents();
+			
+			_sharedWorldScheduler = new JobScheduler(new JobScheduler.Config {
+				ThreadPrefixName = "Cinenic.WJS",
+				ThreadCount = 0,
+				MaxExpectedConcurrentJobs = 32,
+				StrictAllocationMode = false
+			});
+			
+			World.SharedJobScheduler = _sharedWorldScheduler;
+			
 			IsRunning = true;
 			
-			UpdateThread = new Thread(_UpdateLoop);
-			UpdateThread.Start();
+			/*UpdateThread = new Thread(_UpdateLoop);
+			UpdateThread.Start();*/
 			
 			// render loop in main thread
 			_RenderLoop();
@@ -32,7 +50,8 @@ namespace Cinenic {
 
 		public static void Stop() {
 			IsRunning = false;
-			UpdateThread.Join(); // wait for update thread to finish
+			//UpdateThread.Join(); // wait for update thread to finish
+			_sharedWorldScheduler.Dispose();
 		}
 
 		private static void _UpdateLoop() {
@@ -64,9 +83,12 @@ namespace Cinenic {
 				var sinceLastRender = currentTime - LastRender;
 
 				RenderDelta = sinceLastRender;
+				UpdateDelta = sinceLastRender;
 				ThreadScheduler.RunSchedules();
 				RenderManager.Render(sinceLastRender);
+				UpdateManager.Update(sinceLastRender);
 				LastRender = currentTime;
+				LastUpdate = currentTime;
 
 				if(RenderPipelineManager.PipelineStates.All(kv => !kv.Value)) {
 					// nothing left to render, so we quit

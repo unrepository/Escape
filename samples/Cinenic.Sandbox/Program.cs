@@ -1,1 +1,1 @@
-ResourcesTest.Start(args);
+WorldSandbox.Start(args);

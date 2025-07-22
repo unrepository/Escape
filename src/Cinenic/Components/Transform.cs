@@ -2,9 +2,9 @@ using System.Numerics;
 using Cinenic.Extensions.CSharp;
 using Cinenic.UnitTypes;
 
-namespace Cinenic.World.Components {
+namespace Cinenic.Components {
 
-	// TODO should we change euler rotations to RotationF from UnitTypes?
+	[Component]
 	public struct Transform3D {
 
 		public Vector3 Position;

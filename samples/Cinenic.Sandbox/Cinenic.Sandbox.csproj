@@ -15,7 +15,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Cinenic.Compute\Cinenic.Compute.csproj" />
-      <ProjectReference Include="..\..\src\Cinenic.World\Cinenic.World.csproj" />
       <ProjectReference Include="..\..\src\Cinenic\Cinenic.csproj" />
     </ItemGroup>
 
@@ -27,10 +26,6 @@
 
     <ItemGroup>
         <EmbeddedResource Include="Resources\**\*"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Resources\Textures\" />
     </ItemGroup>
 	
 	<!-- asset (sym)linking !-->

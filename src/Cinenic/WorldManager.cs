@@ -1,4 +1,4 @@
-namespace Cinenic.World {
+namespace Cinenic {
 	
 	public class WorldManager {
 		

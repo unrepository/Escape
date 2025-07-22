@@ -1,6 +1,6 @@
-using EcsWorld = Flecs.NET.Core.World;
+using EcsWorld = Arch.Core.World;
 
-namespace Cinenic.World {
+namespace Cinenic {
 	
 	public class WorldUpdater : IUpdater {
 
@@ -13,7 +13,7 @@ namespace Cinenic.World {
 		}
 		
 		public virtual void Update(TimeSpan delta) {
-			World.Progress((float) delta.TotalSeconds);
+			//World.Progress((float) delta.TotalSeconds);
 		}
 	}
 }

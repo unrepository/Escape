@@ -10,7 +10,13 @@
     <ItemGroup>
       <ProjectReference Include="..\Cinenic.Renderer\Cinenic.Renderer.csproj" />
       <ProjectReference Include="..\Cinenic.Resources\Cinenic.Resources.csproj" />
-      <ProjectReference Include="..\Cinenic.World\Cinenic.World.csproj" />
+      <ProjectReference Include="..\Cinenic.UnitTypes\Cinenic.UnitTypes.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Arch-Events" Version="2.1.0" />
+      <PackageReference Include="Arch.System" Version="1.1.0" />
+      <PackageReference Include="Arch.System.SourceGenerator" Version="2.1.0" />
     </ItemGroup>
 
 </Project>

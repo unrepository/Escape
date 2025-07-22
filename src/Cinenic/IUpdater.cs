@@ -1,6 +1,6 @@
 using Cinenic.Renderer;
 
-namespace Cinenic.World {
+namespace Cinenic {
 	
 	public interface IUpdater {
 		

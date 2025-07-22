@@ -1,18 +1,18 @@
 using System.Drawing;
 using System.Numerics;
+using Arch.Core;
+using Arch.Core.Extensions;
 using Cinenic;
+using Cinenic.Components;
 using Cinenic.Renderer;
 using Cinenic.Renderer.Camera;
 using Cinenic.Renderer.Resources;
 using Cinenic.Renderer.Shader.Pipelines;
 using Cinenic.Renderer.Vulkan;
 using Cinenic.Resources;
-using Cinenic.World;
-using Cinenic.World.Components;
-using Flecs.NET.Core;
 using NLog;
 using static Shared;
-using Camera3D = Cinenic.World.Components.Camera3D;
+using Camera3D = Cinenic.Components.Camera3D;
 
 public static class ResourcesTest {
 	
@@ -48,48 +48,47 @@ public static class ResourcesTest {
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);
 		
 		// create entities
-		world
-			.Entity("1")
-			.Set(new Transform3D(new Vector3(0, 0, 0), Quaternion.Zero, Vector3.One))
-			.Set(new RenderableObject(model1));
+		world.Create(
+			new Transform3D(new Vector3(0, 0, 0), Quaternion.Zero, Vector3.One),
+			new RenderableObject(model1)
+		);
 		
-		world
-			.Entity("2")
-			.Set(new Transform3D(new Vector3(-2, 0, 0), Quaternion.Zero, Vector3.One))
-			.Set(new RenderableObject(model2));
+		world.Create(
+			new Transform3D(new Vector3(-2, 0, 0), Quaternion.Zero, Vector3.One),
+			new RenderableObject(model2)
+		);
 		
-		world
-			.Entity("3")
-			.Set(new Transform3D(new Vector3(2, 0, 0), Quaternion.Zero, Vector3.One))
-			.Set(new RenderableObject(model3));
+		world.Create(
+			new Transform3D(new Vector3(2, 0, 0), Quaternion.Zero, Vector3.One),
+			new RenderableObject(model3)
+		);
 		
-		world
-			.Entity("4")
-			.Set(new Transform3D(new Vector3(0, 2, 0), Quaternion.Zero, Vector3.One))
-			.Set(new RenderableObject(model4));
+		world.Create(
+			new Transform3D(new Vector3(0, 2, 0), Quaternion.Zero, Vector3.One),
+			new RenderableObject(model4)
+		);
 		
-		world
-			.Entity("5")
-			.Set(new Transform3D(new Vector3(-2, 2, 0), Quaternion.Zero, Vector3.One))
-			.Set(new RenderableObject(model5));
+		world.Create(
+			new Transform3D(new Vector3(-2, 2, 0), Quaternion.Zero, Vector3.One),
+			new RenderableObject(model5)
+		);
 		
-		world
-			.Entity("6")
-			.Set(new Transform3D(new Vector3(2, 2, 0), Quaternion.Zero, Vector3.One))
-			.Set(new RenderableObject(model6));
+		world.Create(
+			new Transform3D(new Vector3(2, 2, 0), Quaternion.Zero, Vector3.One),
+			new RenderableObject(model6)
+		);
 		
 		// create camera entity
-		var camera =
-			world
-				.Entity("camera")
-				.Set(new Transform3D(new Vector3(0, 1, -5), Quaternion.Zero, Vector3.One))
-				.Set(new Camera3D(
-					new PerspectiveCamera3D(window.Framebuffer) {
-						FieldOfView = 60
-					}
-				));
+		var camera = world.Create(
+			new Transform3D(new Vector3(0, 1, -5), Quaternion.Zero, Vector3.One),
+			new Camera3D(
+				new PerspectiveCamera3D(window.Framebuffer) {
+					FieldOfView = 60
+				}
+			)
+		);
 		
-		camera.GetMut<Transform3D>().LookAt(new Vector3(0, 1, 0));
+		camera.Get<Transform3D>().LookAt(new Vector3(0, 1, 0));
 		
 		// run loop
 		CINENIC.Run();
