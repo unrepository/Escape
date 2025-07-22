@@ -65,6 +65,8 @@ namespace Cinenic.Resources {
 			
 			var fullPath = explicitPath ? path : baseDirectory + Path.DirectorySeparatorChar + path;
 			fullPath = Path.GetFullPath(fullPath); // resolve the real path
+
+			var metaPath = fullPath + ImportMetadata.FILE_EXTENSION;
 			
 			if(_loadedResources.TryGetValue(fullPath, out var loadedResource)) {
 				Debug.Assert(loadedResource is TResource);
@@ -73,7 +75,7 @@ namespace Cinenic.Resources {
 				return new((TResource) loadedResource);
 			}
 			
-			if(!File.Exists(fullPath)) {
+			if(!File.Exists(metaPath) && !File.Exists(fullPath)) {
 				_logger.Warn("Resource file not found: {FilePath}", fullPath);
 
 				if(required) {
@@ -86,59 +88,84 @@ namespace Cinenic.Resources {
 			var tempInstance = new TResource();
 			var settingsType = tempInstance.SettingsType;
 			var fileExtensions = tempInstance.FileExtensions;
+			
+			ImportMetadata? importMeta = null;
 
-			if(!fileExtensions.Any(e => fullPath.EndsWith(e, StringComparison.OrdinalIgnoreCase))) {
-				_logger.Warn("Invalid extension for resource type {Type}", typeof(TResource).Name);
-				_logger.Warn("Valid extensions are: {Extensions}", string.Join(", ", fileExtensions));
-
-				if(required) {
-					throw new ArgumentException($"Invalid extension for resource type {typeof(TResource).Name}", path);
-				}
-
-				return null;
+			if(File.Exists(metaPath)) {
+				using var importStream = new FileStream(metaPath, FileMode.Open);
+				importMeta = (ImportMetadata?) JsonSerializer.Deserialize(importStream, settingsType, ImportMetadata.DefaultSerializerOptions);
 			}
-
-			ImportMetadata? importSettings = null;
-
-			if(File.Exists(fullPath + ImportMetadata.FileExtension)) {
-				using var importStream = new FileStream(fullPath + ImportMetadata.FileExtension, FileMode.Open);
-				importSettings = (ImportMetadata?) JsonSerializer.Deserialize(importStream, settingsType, ImportMetadata.DefaultSerializerOptions);
-			}
-
-			if(importSettings is null) {
+			
+			if(importMeta is null) {
 				_logger.Debug("Creating a new default ImportSettings instance as an existing one could not be found");
-				importSettings = (ImportMetadata) settingsType.GetConstructor([]).Invoke(null);
+				importMeta = (ImportMetadata) settingsType.GetConstructor([]).Invoke(null);
 			}
 
-			var format = ResourceRegistry.GetFormat(importSettings.FormatId);
+			importMeta.MetaPath = metaPath;
+			
+			string? realPath = fullPath;
+			Stream stream;
+
+			if(importMeta.File is not null) {
+				if(importMeta.File.StartsWith('/')) {
+					realPath = baseDirectory + Path.DirectorySeparatorChar + importMeta.File;
+					realPath = Path.GetFullPath(realPath);
+				} else {
+					realPath = Path.GetDirectoryName(metaPath) + Path.DirectorySeparatorChar + importMeta.File;
+					realPath = Path.GetFullPath(realPath);
+				}
+			}
+
+			if(importMeta.Data is not null) {
+				_logger.Debug("Loading resource from embedded data; reloading will be disabled");
+				
+				realPath = null;
+				stream = new MemoryStream(importMeta.Data);
+			} else {
+				if(!fileExtensions.Any(e => realPath.EndsWith(e, StringComparison.OrdinalIgnoreCase))) {
+					_logger.Warn("Invalid extension for resource type {Type}", typeof(TResource).Name);
+					_logger.Warn("Valid extensions are: {Extensions}", string.Join(", ", fileExtensions));
+
+					if(required) {
+						throw new ArgumentException($"Invalid extension for resource type {typeof(TResource).Name}", path);
+					}
+
+					return null;
+				}
+				
+				stream = new FileStream(realPath, FileMode.Open);
+			}
+
+			var format = ResourceRegistry.GetFormat(importMeta.FormatId);
 
 			if(format is null) {
-				_logger.Warn("Could not find import format for resource type {Type}", importSettings.FormatId);
+				stream.Dispose();
+				_logger.Warn("Could not find import format for resource type {Type}", importMeta.FormatId);
 
 				if(required) {
-					throw new TargetException($"Could not find import format for resource type {importSettings.FormatId}");
+					throw new TargetException($"Could not find import format for resource type {importMeta.FormatId}");
 				}
 
 				return null;
 			}
-
-			using var fileStream = new FileStream(fullPath, FileMode.Open);
 
 			var instance = format.Value.Constructor.Invoke(null);
 
 			try {
 				format.Value.LoadMethod.Invoke(
 					instance,
-					[platform, fullPath, fileStream, assembly, importSettings]
+					[platform, realPath, stream, assembly, importMeta]
 				);
 			} catch(Exception e) {
-				_logger.Warn(e, "Resource {Path} could not be loaded", fullPath);
+				_logger.Warn(e, "Resource {Path} could not be loaded", realPath);
 
 				if(required) {
-                    throw;
-                }
+					throw;
+				}
 
 				return null;
+			} finally {
+				stream.Dispose();
 			}
 			
 			Debug.Assert(instance is not null);
@@ -147,84 +174,57 @@ namespace Cinenic.Resources {
 
 			// TODO configurable hot-reload outside of debug builds?
 		#if DEBUG
-			if(!_resourceWatchers.TryGetValue(@namespace, out var watcher)) {
-				watcher = new FileSystemWatcher(baseDirectory) {
-					EnableRaisingEvents = true,
-					NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.CreationTime,
-					IncludeSubdirectories = true
-				};
-
-				_resourceWatchers[@namespace] = watcher;
-			}
-
 			void WatcherChanged(object s, FileSystemEventArgs e) {
 				// TODO confirm if dependency handling works
 				if(
-					(e.FullPath == fullPath || resourceInstance.Dependencies.Any(dependency => dependency.FilePath == e.FullPath))
-					&& !_reloadLocks.GetValueOrDefault(fullPath, false)
+					(e.FullPath == realPath || resourceInstance.Dependencies.Any(dependency => dependency.FilePath == e.FullPath))
+					&& !_reloadLocks.GetValueOrDefault(realPath, false)
 				) {
-					_reloadLocks[fullPath] = true;
+					_reloadLocks[realPath] = true;
 					
 					platform.PlatformThread.ScheduleAction(() => {
 						resourceInstance.Reload();
-						_reloadLocks[fullPath] = false;
+						_reloadLocks[realPath] = false;
 					});
 				}
 			}
+			
+			if(realPath is not null) {
+				if(!_resourceWatchers.TryGetValue(@namespace, out var watcher)) {
+					watcher = new FileSystemWatcher(baseDirectory) {
+						EnableRaisingEvents = true,
+						NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.CreationTime,
+						IncludeSubdirectories = true
+					};
 
-			watcher.Changed += WatcherChanged;
-			watcher.Created += WatcherChanged;
-			watcher.Renamed += WatcherChanged;
+					_resourceWatchers[@namespace] = watcher;
+				}
+
+				watcher.Changed += WatcherChanged;
+				watcher.Created += WatcherChanged;
+				watcher.Renamed += WatcherChanged;
+			}
 		#endif
 			
-			_loadedResources[fullPath] = resourceInstance;
+			_loadedResources[metaPath] = resourceInstance;
 			
 			resourceInstance.Freed += _ => {
 			#if DEBUG
-				if(_resourceWatchers.TryGetValue(@namespace, out var watcher)) {
-					watcher.Changed -= WatcherChanged;
-					watcher.Created -= WatcherChanged;
-					watcher.Renamed -= WatcherChanged;
+				if(realPath is not null) {
+					if(_resourceWatchers.TryGetValue(@namespace, out var watcher)) {
+						watcher.Changed -= WatcherChanged;
+						watcher.Created -= WatcherChanged;
+						watcher.Renamed -= WatcherChanged;
+					}
 				}
 			#endif
 				
-				_loadedResources.Remove(fullPath);
-				_logger.Trace("Removed resource {Path} from loaded resources as it's no longer valid", fullPath);
+				_loadedResources.Remove(metaPath);
+				_logger.Trace("Removed resource {Path} from loaded resources as it's no longer valid", realPath);
 			};
 			
-			_logger.Debug("Successfully loaded resource of type {Type} at {Path}", typeof(TResource).Name, fullPath);
+			_logger.Debug("Successfully loaded resource of type {Type} at {Path}", typeof(TResource).Name, realPath);
 			return new(resourceInstance);
 		}
-
-		/*public static void AddFormatAssembly(Assembly assembly) {
-			_formatAssemblies.Add(assembly);
-			_logger.Debug("Assembly added for format loading: {AssemblyName}", assembly.GetName().FullName);
-		}
-		
-		public static void Initialize() {
-			foreach(var assembly in _formatAssemblies) {
-				foreach(var type in assembly.GetTypes()) {
-					if(!type.IsSubclassOf(typeof(IResource))) continue;
-					
-					var initInstance = type.GetConstructor([])?.Invoke(null);
-		
-					if(initInstance is null) {
-						_logger.Warn("Could not create instance of type {TypeName}, skipping", type.FullName ?? type.Name);
-						continue;
-					}
-		
-					// these should never be null if inheriting Resource
-					var formatIdProperty = type.GetProperty("TypeId")!;
-					var formatId = (string) formatIdProperty.GetValue(initInstance)!;
-					
-					_formats[formatId] = type;
-					
-					_logger.Info(
-						"Loaded resource format {FormatId} ({TypeName}) from {AssemblyName}",
-						formatId, type.Name, assembly.FullName ?? "?"
-					);
-				}
-			}
-		}*/
 	}
 }

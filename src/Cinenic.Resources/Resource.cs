@@ -61,11 +61,11 @@ namespace Cinenic.Resources {
 				ImportMetadata.DefaultSerializerOptions
 			);
 			
-			File.WriteAllBytes(FilePath + ImportMetadata.FileExtension, importSettingsData);
+			File.WriteAllBytes(Settings.MetaPath, importSettingsData);
 			
 			_logger.Debug(
 				"Saved {Type} import settings to {Path}",
-				GetType().Name, FilePath + ImportMetadata.FileExtension
+				GetType().Name, Settings.MetaPath
 			);
 			
 			return true;
@@ -86,8 +86,8 @@ namespace Cinenic.Resources {
 			
 			TImportSettings? importSettings = null;
 
-			if(File.Exists(FilePath + ImportMetadata.FileExtension)) {
-				using var importStream = new FileStream(FilePath + ImportMetadata.FileExtension, FileMode.Open);
+			if(File.Exists(FilePath + ImportMetadata.FILE_EXTENSION)) {
+				using var importStream = new FileStream(FilePath + ImportMetadata.FILE_EXTENSION, FileMode.Open);
 				importSettings = JsonSerializer.Deserialize<TImportSettings>(importStream, ImportMetadata.DefaultSerializerOptions);
 			}
 
