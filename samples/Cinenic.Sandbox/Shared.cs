@@ -1,10 +1,16 @@
 using System.Drawing;
+using System.Numerics;
 using Arch.Core;
+using Arch.Core.Extensions;
 using Cinenic;
+using Cinenic.Components;
 using Cinenic.Renderer;
+using Cinenic.Renderer.Camera;
 using Cinenic.Renderer.Shader.Pipelines;
 using Cinenic.Renderer.Vulkan;
+using Cinenic.Sandbox;
 using Schedulers;
+using Camera3D = Cinenic.Components.Camera3D;
 
 public static class Shared {
 	
@@ -95,5 +101,25 @@ public static class Shared {
 		var objectRenderer = ObjectRenderer.Create(platform, shaderPipeline);
 		RenderManager.Add(new WorldRenderer("world", world, objectRenderer), renderQueue);
 		RenderManager.Add(objectRenderer, renderQueue);
+	}
+
+	public static void CreateOrbitalCamera(
+		ref World world,
+		Window window,
+		out Entity entity,
+		out OrbitCamera3D oc3d
+	) {
+		entity = world.Create(
+			new Transform3D(Vector3.Zero, Quaternion.Zero, Vector3.One),
+			new Camera3D(
+				new PerspectiveCamera3D(window.Framebuffer) {
+					FieldOfView = 60
+				}
+			)
+		);
+		//entity.Get<Transform3D>().LookAt(new Vector3(0, 0, 0));
+
+		oc3d = new OrbitCamera3D("oc3d", entity, window);
+		UpdateManager.Add(oc3d);
 	}
 }

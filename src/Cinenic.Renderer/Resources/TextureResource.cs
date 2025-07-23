@@ -42,7 +42,7 @@ namespace Cinenic.Renderer.Resources {
 
 			public override string FormatId => "texture";
 
-			public Texture.TextureFilter Filter { get; set; } = Texture.TextureFilter.Nearest;
+			public Texture.TextureFilter Filter { get; set; } = Texture.TextureFilter.Linear;
 			public Texture.TextureWrapMode WrapMode { get; set; } = Texture.TextureWrapMode.Repeat;
 			public Texture.TextureFormat Format { get; set; } = Texture.TextureFormat.RGBA8;
 		}

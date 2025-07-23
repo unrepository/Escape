@@ -102,6 +102,10 @@ namespace Cinenic.Renderer.Vulkan {
 				matrixOffset += 1;
 			}
 
+			// nothing to render
+			if(totalVertices.Count < 0 || totalIndices.Count < 0) return;
+			if(totalMaterials.Count < 0 || totalMatrices.Count < 0) return;
+
 			// upload data to GPU
 			ShaderPipeline.VertexData.Size = (uint)(totalVertices.Count * sizeof(Vertex));
 			ShaderPipeline.IndexData.Size = (uint)(totalIndices.Count * sizeof(uint));

@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Cinenic.Compute\Cinenic.Compute.csproj" />
+      <ProjectReference Include="..\..\src\Cinenic.Extensions.Assimp\Cinenic.Extensions.Assimp.csproj" />
       <ProjectReference Include="..\..\src\Cinenic\Cinenic.csproj" />
     </ItemGroup>
 

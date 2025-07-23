@@ -33,7 +33,7 @@ namespace Cinenic.Renderer.Camera {
 		// }
 		
 		public Vector3 Target = Vector3.Zero;
-		public Vector3 Up = Vector3.UnitY;
+		public Vector3 Up = -Vector3.UnitY;
 
 		protected Camera3D(Framebuffer framebuffer) : base(framebuffer) { }
 		protected Camera3D(int width, int height) : base(width, height) { }

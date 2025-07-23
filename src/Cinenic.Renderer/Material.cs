@@ -21,10 +21,6 @@ namespace Cinenic.Renderer {
 		
 		public static implicit operator Material(Color color)
 			=> new Material { AlbedoColor = color };
-		
-		// public override string ToString() {
-		// 	return $"[Albedo={Albedo}]";
-		// }
 
 		public Data CreateData() {
 			var data = new Data {
@@ -51,6 +47,13 @@ namespace Cinenic.Renderer {
 				NormalTexture = NormalTexture,
 				RoughnessTexture = RoughnessTexture
 			};
+		}
+		
+		public override string ToString() {
+			return 
+				$"[Albedo={AlbedoColor}, Roughness={Roughness}, Metallic={Metallic}, "
+				+ $"AlbedoTexture={AlbedoTexture?.Get().Id}, NormalTexture={NormalTexture?.Get().Id}, "
+				+ $"RoughnessTexture={RoughnessTexture?.Get().Id}, MetallicTexture={MetallicTexture?.Get().Id}]";
 		}
 
 		[StructLayout(LayoutKind.Explicit)]

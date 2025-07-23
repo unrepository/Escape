@@ -1,1 +1,1 @@
-WorldSandbox.Start(args);
+GLTFTest.Start(args);
