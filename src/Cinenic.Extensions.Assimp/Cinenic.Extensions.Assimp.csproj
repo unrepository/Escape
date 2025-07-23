@@ -8,7 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Cinenic.Extensions.Scene\Cinenic.Extensions.Scene.csproj" />
+	  <ProjectReference Include="..\Cinenic.Extensions.Scene\Cinenic.Extensions.Scene.csproj" />
 	  <ProjectReference Include="..\Cinenic.Renderer\Cinenic.Renderer.csproj" />
 	  <ProjectReference Include="..\Cinenic\Cinenic.csproj" />
 	</ItemGroup>

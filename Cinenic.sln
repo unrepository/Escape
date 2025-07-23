@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinenic.Renderer.Platform",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinenic.Extensions.Assimp", "src\Cinenic.Extensions.Assimp\Cinenic.Extensions.Assimp.csproj", "{41FE3F9A-A23D-4C96-9A2A-3C2AFA4670EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinenic.Extensions.Scene", "Cinenic.Extensions.Scene\Cinenic.Extensions.Scene.csproj", "{7E8801AD-2A9C-4564-A796-7EB034AD93EB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinenic.Extensions.Scene", "src\Cinenic.Extensions.Scene\Cinenic.Extensions.Scene.csproj", "{7E8801AD-2A9C-4564-A796-7EB034AD93EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
