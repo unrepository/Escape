@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using Cinenic.Renderer;
+using Cinenic.Renderer.Vulkan;
 using Hexa.NET.ImGui;
 
 using HImGui = Hexa.NET.ImGui.ImGui;
@@ -51,6 +52,7 @@ namespace Cinenic.Extensions.ImGui {
 
 			HImGui.StyleColorsDark();
 
+			// save settings at exit
 			AppDomain.CurrentDomain.ProcessExit += (_, _) => {
 				HImGui.SetCurrentContext(Context);
 				HImGui.SaveIniSettingsToDisk($"imgui_{id}.ini");
@@ -72,6 +74,13 @@ namespace Cinenic.Extensions.ImGui {
 
 		public abstract void Dispose();
 
+		public static ImGuiController Create(IPlatform platform, string id, RenderQueue queue, Window window) {
+			return platform switch {
+				VkPlatform vkPlatform => new VkImGuiController(id, vkPlatform, queue, window),
+				_ => throw new NotImplementedException("PlatformImpl")
+			};
+		}
+		
 		public static ImGuiController? Get(RenderQueue queue) {
 			if(_controllers.TryGetValue(queue, out var controller)) {
 				return controller;

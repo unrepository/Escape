@@ -4,44 +4,25 @@ using Cinenic;
 using Cinenic.Components;
 using Cinenic.Extensions.ImGui;
 using Cinenic.Renderer;
-using Cinenic.Renderer.Shader.Pipelines;
-using Cinenic.Renderer.Vulkan;
 using Hexa.NET.ImGui;
-using Hexa.NET.ImGui.Backends.GLFW;
-using Hexa.NET.ImGui.Backends.Vulkan;
-using Silk.NET.Core;
-using Silk.NET.Vulkan;
 using static Shared;
-using VkDevice = Cinenic.Renderer.Vulkan.VkDevice;
 
 public static class ImGuiTest {
 
 	public unsafe static void Start(string[] args) {
-		// var platform = new VkPlatform();
-		// platform.Initialize();
-		//
-		// platform.PrimaryDevice = platform.CreateDevice(0);
-		
 		SetupVulkan(out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
 		CreateWindow(platform, "ImGui Test", ref renderQueue, out var window);
 
-		// var window = Window.Create(platform);
-		// window.Title = "ImGui Test";
-		//
-		// UpdateManager.Add((WindowUpdater) window);
+		ImGuiController.Create(platform, "test", renderQueue, window);
 		
-		_ = new VkImGuiController("main", platform, renderQueue, window);
-		
-		// window.Initialize(controller.Queue);
-		
-		RenderManager.Add(renderQueue, "dumb shit", (queue, delta) => {
+		RenderManager.Add(renderQueue, "imgui test", (_, _) => {
 			ImGui.ShowDemoWindow();
 		});
 		
-		RenderManager.Add(renderQueue, "dumb shit", (queue, delta) => {
-			ImGui.Begin("lilili");
-			ImGui.Text("lalala");
-			ImGui.Button("lololo");
+		RenderManager.Add(renderQueue, "imgui test", (_, _) => {
+			ImGui.Begin("Hello, world!");
+			ImGui.Text("meow");
+			ImGui.Button("wah");
 			ImGui.End();
 		});
 	
@@ -53,8 +34,6 @@ public static class ImGuiTest {
 			new Transform3D(),
 			new RenderableObject(CubeModel)
 		);
-		
-		
 		
 		CINENIC.Run();
 	}
