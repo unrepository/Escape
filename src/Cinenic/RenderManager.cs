@@ -3,6 +3,11 @@ using Cinenic.Renderer;
 namespace Cinenic {
 	
 	public static class RenderManager {
+
+		public static void Add(RenderQueue queue, string id, Action<RenderQueue, TimeSpan> render, int priority = 0) {
+			var renderer = new LambdaRenderer(id, priority, render);
+			Add(queue, renderer);
+		}
 		
 		public static void Add(RenderQueue queue, params IRenderer[] renderers) {
 			foreach(var renderer in renderers) {
@@ -56,6 +61,24 @@ namespace Cinenic {
 			
 			pipeline.Queue.Render(delta);
 			pipeline.End();
+		}
+
+		public class LambdaRenderer : IRenderer {
+
+			public string Id { get; }
+			public int Priority { get; init; }
+
+			public Action<RenderQueue, TimeSpan> RenderAction { get; set; }
+			
+			public LambdaRenderer(string id, int priority, Action<RenderQueue, TimeSpan> render) {
+				Id = id;
+				Priority = priority;
+				RenderAction = render;
+			}
+			
+			public void Render(RenderQueue queue, TimeSpan delta) {
+				RenderAction.Invoke(queue, delta);
+			}
 		}
 	}
 }
