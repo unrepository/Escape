@@ -30,16 +30,20 @@ public static class ImGuiTest {
 		//
 		// UpdateManager.Add((WindowUpdater) window);
 		
-		var controller = new VkImGuiController(platform);
+		_ = new VkImGuiController("main", platform, renderQueue, window);
 		
 		// window.Initialize(controller.Queue);
-		controller.Initialize(window, renderQueue);
 		
 		RenderManager.Add(renderQueue, "dumb shit", (queue, delta) => {
-			controller.Begin();
 			ImGui.ShowDemoWindow();
-			controller.End(renderQueue);
-		}, priority: 1000);
+		});
+		
+		RenderManager.Add(renderQueue, "dumb shit", (queue, delta) => {
+			ImGui.Begin("lilili");
+			ImGui.Text("lalala");
+			ImGui.Button("lololo");
+			ImGui.End();
+		});
 	
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);
 		CreateOrbitalCamera(ref world, window, out var cameraEntity, out var orbitalCamera);

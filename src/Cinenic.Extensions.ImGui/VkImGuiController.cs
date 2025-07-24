@@ -18,67 +18,18 @@ namespace Cinenic.Extensions.ImGui {
 		private readonly VkRenderQueue _queue;
 		private readonly VkRenderPipeline _pipeline;
 		
-		public unsafe VkImGuiController(VkPlatform platform) : base(platform) {
+		public unsafe VkImGuiController(string id, VkPlatform platform, RenderQueue queue, Window window) : base(id, platform, queue) {
 			_platform = platform;
-			//_queue = (VkRenderQueue) queue;
+			_queue = (VkRenderQueue) queue;
 			
-			//Debug.Assert(_pipeline.Queue.RenderTarget is not null, "Render queue must have a target set!");
-			//Debug.Assert(_pipeline.Queue.RenderTarget == window.Framebuffer, "Window must belong to the render queue!");
-
-			Context = HImGui.CreateContext();
-			
-			// _queue = (VkRenderQueue) RenderQueueManager.Create(platform, $"imgui_{GetHashCode()}");
-			// Queue = _queue;
-			//
-			// _pipeline = new VkImGuiRenderPipeline(platform, _queue) {
-			// 	Controller = this
-			// };
-			//
-			// Pipeline = _pipeline;
-			// RenderPipelineManager.Add($"imgui_{GetHashCode()}", _pipeline);
-		}
-
-		public unsafe void Initialize(Window window, RenderQueue queue) {
-			//Queue.RenderTarget = window.Framebuffer;
-			
-			HImGui.SetCurrentContext(Context);
-
-			IO.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;
-			IO.ConfigFlags |= ImGuiConfigFlags.NavEnableGamepad;
-			IO.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
-
-			HImGui.StyleColorsDark();
+			//Debug.Assert(queue.RenderTarget is not null, "Render queue must have a target set!");
+			Debug.Assert(queue.RenderTarget == window.Framebuffer, "Window must belong to the render queue!");
 			
 			ImGuiImplGLFW.SetCurrentContext(Context);
 
 			if(!ImGuiImplGLFW.InitForVulkan(new GLFWwindowPtr((GLFWwindow*) window.Base.Handle), true)) {
 				throw new PlatformException("Could not initialize the GLFW backend for ImGui");
 			}
-
-			// var queue = new VkImGuiRenderQueue(platform, RenderQueue.Family.Graphics, RenderQueue.Format.R8G8B8A8Srgb) {
-			// 	Controller = this
-			// };
-			//
-			// queue.CreateAttachment(Framebuffer.AttachmentType.Color);
-			// queue.CreateSubpass(
-			// 	[ Framebuffer.AttachmentType.Color ],
-			// 	new SubpassDependency {
-			// 		SrcSubpass = Vk.SubpassExternal,
-			// 		DstSubpass = 0,
-			// 		SrcStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
-			// 		SrcAccessMask = 0,
-			// 		DstStageMask = PipelineStageFlags.ColorAttachmentOutputBit,
-			// 		DstAccessMask = AccessFlags.ColorAttachmentWriteBit
-			// 	}
-			// );
-			//
-			// queue.RenderTarget = window.Framebuffer;
-			// queue.Initialize();
-			//
-			// Queue = queue;
-			// RenderQueueManager.Add($"imgui_{GetHashCode()}", queue);
-
-			var vkQueue = (VkRenderQueue) queue;
 			
 			var info = new ImGuiImplVulkanInitInfo {
 				ApiVersion = Vk.Version10,
@@ -88,9 +39,9 @@ namespace Cinenic.Extensions.ImGui {
 				QueueFamily = (uint) _platform.PrimaryDevice.GraphicsFamily,
 				Queue = new(_platform.PrimaryDevice.GraphicsQueue.Handle),
 				DescriptorPoolSize = 16,
-				RenderPass = new((nint) vkQueue.Base.Handle),
+				RenderPass = new((nint) _queue.Base.Handle),
 				MinImageCount = 2,
-				ImageCount = (uint) vkQueue.CommandBuffers.Length,
+				ImageCount = (uint) _queue.CommandBuffers.Length,
 				MSAASamples = 1,
 				Subpass = 0,
 			};
@@ -102,7 +53,7 @@ namespace Cinenic.Extensions.ImGui {
 			}
 		}
 
-		public void Begin() {
+		public override void Begin() {
 			ImGuiImplGLFW.SetCurrentContext(Context);
 			ImGuiImplVulkan.SetCurrentContext(Context);
 			HImGui.SetCurrentContext(Context);
@@ -112,7 +63,7 @@ namespace Cinenic.Extensions.ImGui {
 			HImGui.NewFrame();
 		}
 		
-		public void End(RenderQueue queue) {
+		public override void End() {
 			ImGuiImplGLFW.SetCurrentContext(Context);
 			ImGuiImplVulkan.SetCurrentContext(Context);
 			HImGui.SetCurrentContext(Context);
@@ -121,7 +72,7 @@ namespace Cinenic.Extensions.ImGui {
 			
 			ImGuiImplVulkan.RenderDrawData(
 				HImGui.GetDrawData(),
-				new(((VkRenderQueue) queue).CommandBuffer.Handle),
+				new(_queue.CommandBuffer.Handle),
 				default
 			);
 			
@@ -132,12 +83,14 @@ namespace Cinenic.Extensions.ImGui {
 		}
 		
 		public override void Dispose() {
+			GC.SuppressFinalize(this);
+			
 			// ImGuiImplGLFW.SetCurrentContext(Context);
 			// ImGuiImplVulkan.SetCurrentContext(Context);
 			// HImGui.SetCurrentContext(Context);
-			//
-			// // ImGuiImplVulkan.Shutdown();
-			// // ImGuiImplGLFW.Shutdown();
+			
+			// ImGuiImplVulkan.Shutdown();
+			// ImGuiImplGLFW.Shutdown();
 			// HImGui.DestroyContext(Context);
 		}
 	}
