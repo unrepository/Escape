@@ -27,19 +27,19 @@ namespace Cinenic.Extensions.ImGui {
 
 			Context = HImGui.CreateContext();
 			
-			_queue = (VkRenderQueue) RenderQueueManager.Create(platform, $"imgui_{GetHashCode()}");
-			Queue = _queue;
-			
-			_pipeline = new VkImGuiRenderPipeline(platform, _queue) {
-				Controller = this
-			};
-			
-			Pipeline = _pipeline;
-			RenderPipelineManager.Add($"imgui_{GetHashCode()}", _pipeline);
+			// _queue = (VkRenderQueue) RenderQueueManager.Create(platform, $"imgui_{GetHashCode()}");
+			// Queue = _queue;
+			//
+			// _pipeline = new VkImGuiRenderPipeline(platform, _queue) {
+			// 	Controller = this
+			// };
+			//
+			// Pipeline = _pipeline;
+			// RenderPipelineManager.Add($"imgui_{GetHashCode()}", _pipeline);
 		}
 
-		public unsafe void Initialize(Window window) {
-			Queue.RenderTarget = window.Framebuffer;
+		public unsafe void Initialize(Window window, RenderQueue queue) {
+			//Queue.RenderTarget = window.Framebuffer;
 			
 			HImGui.SetCurrentContext(Context);
 
@@ -77,6 +77,8 @@ namespace Cinenic.Extensions.ImGui {
 			//
 			// Queue = queue;
 			// RenderQueueManager.Add($"imgui_{GetHashCode()}", queue);
+
+			var vkQueue = (VkRenderQueue) queue;
 			
 			var info = new ImGuiImplVulkanInitInfo {
 				ApiVersion = Vk.Version10,
@@ -86,9 +88,9 @@ namespace Cinenic.Extensions.ImGui {
 				QueueFamily = (uint) _platform.PrimaryDevice.GraphicsFamily,
 				Queue = new(_platform.PrimaryDevice.GraphicsQueue.Handle),
 				DescriptorPoolSize = 16,
-				RenderPass = new((nint) _queue.Base.Handle),
+				RenderPass = new((nint) vkQueue.Base.Handle),
 				MinImageCount = 2,
-				ImageCount = (uint) _queue.CommandBuffers.Length,
+				ImageCount = (uint) vkQueue.CommandBuffers.Length,
 				MSAASamples = 1,
 				Subpass = 0,
 			};
@@ -100,7 +102,7 @@ namespace Cinenic.Extensions.ImGui {
 			}
 		}
 
-		/*public override void Begin() {
+		public void Begin() {
 			ImGuiImplGLFW.SetCurrentContext(Context);
 			ImGuiImplVulkan.SetCurrentContext(Context);
 			HImGui.SetCurrentContext(Context);
@@ -110,28 +112,24 @@ namespace Cinenic.Extensions.ImGui {
 			HImGui.NewFrame();
 		}
 		
-		public override void End() {
+		public void End(RenderQueue queue) {
 			ImGuiImplGLFW.SetCurrentContext(Context);
 			ImGuiImplVulkan.SetCurrentContext(Context);
 			HImGui.SetCurrentContext(Context);
 			
 			HImGui.Render();
-
-			_pipeline.Begin();
 			
 			ImGuiImplVulkan.RenderDrawData(
 				HImGui.GetDrawData(),
-				new(_queue.CommandBuffer.Handle),
+				new(((VkRenderQueue) queue).CommandBuffer.Handle),
 				default
 			);
-
-			_pipeline.End();
 			
 			if((IO.ConfigFlags & ImGuiConfigFlags.ViewportsEnable) != 0) {
 				HImGui.UpdatePlatformWindows();
 				HImGui.RenderPlatformWindowsDefault();
 			}
-		}*/
+		}
 		
 		public override void Dispose() {
 			// ImGuiImplGLFW.SetCurrentContext(Context);
