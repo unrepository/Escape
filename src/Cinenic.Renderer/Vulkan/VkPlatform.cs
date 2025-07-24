@@ -256,8 +256,15 @@ namespace Cinenic.Renderer.Vulkan {
 			DebugUtilsMessageSeverityFlagsEXT severityFlags, DebugUtilsMessageTypeFlagsEXT typeFlags,
 			DebugUtilsMessengerCallbackDataEXT* callbackData, void* userData
 		) {
-			_logger.Debug(Marshal.PtrToStringAnsi((nint) callbackData->PMessage));
-			return Silk.NET.Vulkan.Vk.False;
+			var message = Marshal.PtrToStringAnsi((nint) callbackData->PMessage)!;
+
+			if(message.Contains("vkCmdBindDescriptorSets") && message.Contains("VkDescriptorSet") && message.Contains("textures")) {
+				// we ignore this because yea
+				return 0;
+			}
+			
+			_logger.Debug(message);
+			return 0;
 		}
 
 		public class Options : PlatformOptions {

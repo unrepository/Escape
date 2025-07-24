@@ -85,7 +85,7 @@ namespace Cinenic.Renderer.Vulkan {
 			Base.Dispose();
 		}
 
-		internal class WindowFramebuffer : VkFramebuffer {
+		public class WindowFramebuffer : VkFramebuffer {
 			
 			public VkWindow Window { get; }
 			
