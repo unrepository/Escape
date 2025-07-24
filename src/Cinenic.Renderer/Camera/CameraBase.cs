@@ -35,6 +35,17 @@ namespace Cinenic.Renderer.Camera {
 			};
 		}
 
+		protected CameraBase(Window window)
+			: this(window.Size.X, window.Size.Y)
+		{
+			window.Base.FramebufferResize += newSize => {
+				Width = newSize.X;
+				Height = newSize.Y;
+
+				RecalculateProjectionMatrix();
+			};
+		}
+
 		protected CameraBase(int width, int height) {
 			Width = width;
 			Height = height;

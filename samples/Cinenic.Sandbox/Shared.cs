@@ -91,8 +91,6 @@ public static class Shared {
 		window.Title = title;
 		window.Initialize(renderQueue);
 		renderQueue.RenderTarget = window.Framebuffer;
-		
-		UpdateManager.Add((WindowUpdater) window);
 	}
 
 	public static void CreateWorld(
@@ -123,7 +121,7 @@ public static class Shared {
 		entity = world.Create(
 			new Transform3D(Vector3.Zero, Quaternion.Zero, Vector3.One),
 			new Camera3D(
-				new PerspectiveCamera3D(window.Framebuffer) {
+				new PerspectiveCamera3D(window) {
 					FieldOfView = 60
 				}
 			)

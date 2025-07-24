@@ -209,6 +209,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 		public override void Dispose() {
 			GC.SuppressFinalize(this);
+			_platform.API.DeviceWaitIdle(_platform.PrimaryDevice.Logical);
 
 			unsafe {
 				foreach(var (image, (imageView, imageMemory)) in AttachmentImages) {

@@ -10,7 +10,7 @@ namespace Cinenic.Renderer {
 		public RenderQueue Queue { get; }
 		
 		public ulong Handle { get; protected set; }
-		public Vector2D<uint> Size { get; }
+		public Vector2D<uint> Size { get; protected set; }
 
 		public delegate void ResizeEventHandler(Vector2D<int> newSize);
 		public event ResizeEventHandler? Resized;
@@ -46,7 +46,7 @@ namespace Cinenic.Renderer {
 		public abstract void Dispose();
 
 		protected void OnResized(Vector2D<int> newSize) {
-			Resized(newSize);
+			Resized?.Invoke(newSize);
 		}
 
 		public static Framebuffer Create(

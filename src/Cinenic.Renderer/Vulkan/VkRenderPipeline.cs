@@ -232,15 +232,38 @@ namespace Cinenic.Renderer.Vulkan {
 			Debug.Assert(Queue is VkRenderQueue);
 			Debug.Assert(Queue.RenderTarget is not null, "Queue.RenderTarget is null! Did you forget to assign it?");
 
+			var vkQueue = (VkRenderQueue) Queue;
+			var vkRenderTarget = (VkFramebuffer) Queue.RenderTarget;
+			
+			// TODO should this maybe be somewhere else?
 			if(Queue.RenderTarget is VkWindow.WindowFramebuffer windowFramebuffer) {
-				windowFramebuffer.Window.Base.DoUpdate();
-				if(!windowFramebuffer.Window.Base.IsClosing) windowFramebuffer.Window.Base.DoEvents();
-				if(windowFramebuffer.Window.Base.IsClosing) {
+				var window = windowFramebuffer.Window.Base;
+				
+				window.DoUpdate();
+				
+				if(!window.IsClosing) window.DoEvents();
+				if(window.IsClosing) {
 					Queue.RenderTarget.Dispose();
 					Queue.RenderTarget = null;
+					window.Dispose();
 					return false;
 				}
-				windowFramebuffer.Window.Base.MakeCurrent();
+				
+				window.MakeCurrent();
+
+				if(windowFramebuffer.WindowResizing) {
+					windowFramebuffer.ResizeTimer--;
+
+					if(windowFramebuffer.ResizeTimer <= 0) {
+						RecreateFramebuffer(
+							_platform,
+							(VkFramebuffer) vkQueue.RenderTarget,
+							out var newFramebuffer
+						);
+
+						vkQueue.RenderTarget = newFramebuffer;
+					}
+				}
 			}
 			
 			if(!Queue.Begin()) {
@@ -259,9 +282,6 @@ namespace Cinenic.Renderer.Vulkan {
 				Queue = newQueue;
 				Queue.RenderTarget = newFramebuffer;
 			}
-
-			var vkQueue = (VkRenderQueue) Queue;
-			var vkRenderTarget = (VkFramebuffer) Queue.RenderTarget;
 			
 			_platform.API.CmdBindPipeline(
 				vkQueue.CommandBuffer,
@@ -335,12 +355,14 @@ namespace Cinenic.Renderer.Vulkan {
 				newFramebuffer = new VkWindow.WindowFramebuffer(
 					platform,
 					(VkRenderQueue) windowFramebuffer.Queue,
-					windowFramebuffer.Window,
-					windowFramebuffer.Size
+					windowFramebuffer.Window
 				);
 			} else {
+				throw new NotImplementedException();
 				newFramebuffer = new VkFramebuffer(platform, (VkRenderQueue) oldFramebuffer.Queue, oldFramebuffer.Size);
 			}
+			
+			newFramebuffer.Create();
 		}
 
 		public static void RecreateQueue(VkPlatform platform, in VkRenderQueue oldQueue, out VkRenderQueue newQueue) {

@@ -537,10 +537,16 @@ namespace Cinenic.Renderer.Vulkan {
 		public override void Dispose() {
 			GC.SuppressFinalize(this);
 
+			var device = _platform.PrimaryDevice.Logical;
+			_platform.API.DeviceWaitIdle(device);
+
 			unsafe {
-				var device = _platform.PrimaryDevice.Logical;
-				
 				_platform.API.DestroyRenderPass(device, Base, null);
+
+				fixed(CommandBuffer* commandBuffersPtr = CommandBuffers) {
+					_platform.API.FreeCommandBuffers(device, CommandPool.Value, (uint) CommandBuffers.Length, commandBuffersPtr);
+				}
+				
 				_platform.API.DestroyCommandPool(device, CommandPool.Value, null);
 				
 				for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {

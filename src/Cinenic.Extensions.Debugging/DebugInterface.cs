@@ -57,8 +57,6 @@ namespace Cinenic.Extensions.Debugging {
 			window.Title = "Standard Debugging Interface";
 			window.Initialize(renderQueue);
 			renderQueue.RenderTarget = window.Framebuffer;
-			
-			UpdateManager.Add((WindowUpdater) window);
 
 			return Setup(platform, renderQueue, window);
 		}

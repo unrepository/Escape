@@ -86,7 +86,7 @@ public static class WorldSandbox {
 		var camera = world.Create(
 			new Transform3D(new Vector3(-2, 0, -2), Quaternion.Zero, Vector3.One),
 			new Camera3D(
-				new PerspectiveCamera3D(window.Framebuffer) {
+				new PerspectiveCamera3D(window) {
 					FieldOfView = 70
 				}
 			)

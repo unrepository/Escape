@@ -6,6 +6,7 @@ namespace Cinenic.Renderer.Camera {
 	public class PerspectiveCamera3D : Camera3D {
 
 		public PerspectiveCamera3D(Framebuffer framebuffer) : base(framebuffer) { }
+		public PerspectiveCamera3D(Window window) : base(window) { }
 		public PerspectiveCamera3D(int width, int height) : base(width, height) { }
 
 		protected override void RecalculateProjectionMatrix() {

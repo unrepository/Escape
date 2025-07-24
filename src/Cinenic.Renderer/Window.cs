@@ -22,6 +22,8 @@ namespace Cinenic.Renderer {
 			get => (uint) Base.FramebufferSize.Y;
 			set => Base.Size = new Vector2D<int>(Base.Size.X, (int) value);
 		}
+
+		public Vector2D<int> Size => Base.FramebufferSize;
 		
 		public IPlatform Platform { get; }
 		public Framebuffer Framebuffer;

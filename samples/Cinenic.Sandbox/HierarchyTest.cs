@@ -44,7 +44,7 @@ public static class HierarchyTest {
 		
 		var camera = world.Create(
 			new Transform3D(new Vector3(7, 5, 8), Quaternion.Identity, Vector3.One),
-			new Camera3D(new PerspectiveCamera3D(window.Framebuffer) {
+			new Camera3D(new PerspectiveCamera3D(window) {
 				FieldOfView = 60
 			})
 		);

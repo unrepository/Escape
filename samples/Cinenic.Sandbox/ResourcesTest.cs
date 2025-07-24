@@ -82,7 +82,7 @@ public static class ResourcesTest {
 		var camera = world.Create(
 			new Transform3D(new Vector3(0, 1, -5), Quaternion.Zero, Vector3.One),
 			new Camera3D(
-				new PerspectiveCamera3D(window.Framebuffer) {
+				new PerspectiveCamera3D(window) {
 					FieldOfView = 60
 				}
 			)

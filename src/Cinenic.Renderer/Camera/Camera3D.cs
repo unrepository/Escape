@@ -36,6 +36,7 @@ namespace Cinenic.Renderer.Camera {
 		public Vector3 Up = -Vector3.UnitY;
 
 		protected Camera3D(Framebuffer framebuffer) : base(framebuffer) { }
+		protected Camera3D(Window window) : base(window) { }
 		protected Camera3D(int width, int height) : base(width, height) { }
 
 		/*public void MoveUp(float amount) => Position += Up = Vector3.Multiply(ViewMatrix.PositiveY(), amount);

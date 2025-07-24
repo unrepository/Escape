@@ -45,24 +45,13 @@ namespace Cinenic.Renderer.Vulkan {
 				Input = Base.CreateInput();
 			};
 			
-			Base.FramebufferResize += newSize => {
-				VkRenderPipeline.RecreateFramebuffer(
-					_platform,
-					(VkFramebuffer) queue.RenderTarget,
-					out var newFramebuffer
-				);
-
-				queue.RenderTarget = newFramebuffer;
-				//Base.DoEvents();
-			};
-			
 			Base.Initialize();
 
 			unsafe {
 				Surface = Base.VkSurface!.Create<AllocationCallbacks>(_platform.Vk.ToHandle(), null).ToSurface();
 			}
 			
-			Framebuffer = new WindowFramebuffer(_platform, vkQueue, this, new Vector2D<uint>(Width, Height));
+			Framebuffer = new WindowFramebuffer(_platform, vkQueue, this);
 			Framebuffer.Create();
 		}
 
@@ -78,14 +67,17 @@ namespace Cinenic.Renderer.Vulkan {
 			GC.SuppressFinalize(this);
 			
 			Framebuffer.Dispose();
-			
-			Base.Close();
 			Base.Dispose();
 		}
 
 		public class WindowFramebuffer : VkFramebuffer {
+
+			public const int RESIZE_DELAY = 30; // in frames
 			
 			public VkWindow Window { get; }
+			
+			public bool WindowResizing { get; internal set; }
+			public int ResizeTimer { get; internal set; }
 			
 			public SwapchainKHR Swapchain { get; protected set; }
 
@@ -95,19 +87,22 @@ namespace Cinenic.Renderer.Vulkan {
 			public Silk.NET.Vulkan.Framebuffer[] SwapchainFramebuffers { get; protected set; }
 
 			private readonly VkPlatform _platform;
+			private readonly VkRenderQueue _queue;
 			private readonly VkDevice _device;
 
 			private List<(Image Image, ImageView View, DeviceMemory Memory)> _colorAttachments = [];
 			private List<(Image Image, ImageView View, DeviceMemory Memory)> _depthAttachments = [];
 			
-			public WindowFramebuffer(VkPlatform platform, VkRenderQueue queue, VkWindow window, Vector2D<uint> size)
-				: base(platform, queue, size)
+			public WindowFramebuffer(VkPlatform platform, VkRenderQueue queue, VkWindow window)
+				: base(platform, queue, (Vector2D<uint>) window.Size)
 			{
-				_platform = platform;
 				Window = window;
-				_device = platform.PrimaryDevice;
 				
-				window.Base.FramebufferResize += OnResized;
+				_platform = platform;
+				_queue = queue;
+				_device = platform.PrimaryDevice;
+
+				window.Base.FramebufferResize += _OnWindowFramebufferResize;
 			}
 
 			public unsafe override void Create() {
@@ -154,21 +149,48 @@ namespace Cinenic.Renderer.Vulkan {
 				}
 			}
 
+			public override void Resize(Vector2D<int> size) => throw new NotSupportedException();
+
 			public override void Dispose() {
 				GC.SuppressFinalize(this);
 				base.Dispose();
+				
+				Window.Base.FramebufferResize -= _OnWindowFramebufferResize;
+				var device = _device.Logical;
+				
+				_platform.API.DeviceWaitIdle(device);
 
 				unsafe {
 					if(Swapchain.Handle != 0) {
 						VkExtension
 							.Get<KhrSwapchain>(_platform, _device)
-							.DestroySwapchain(_device.Logical, Swapchain, null);
+							.DestroySwapchain(device, Swapchain, null);
 					}
 
 					foreach(var framebuffer in SwapchainFramebuffers) {
-						_platform.API.DestroyFramebuffer(_device.Logical, framebuffer, null);
+						_platform.API.DestroyFramebuffer(device, framebuffer, null);
+					}
+
+					foreach(var image in SwapchainImages) {
+						_platform.API.DestroyImage(device, image, null);
+					}
+
+					foreach(var attachment in _colorAttachments.Concat(_depthAttachments)) {
+						_platform.API.DestroyImageView(device, attachment.View, null);
+						_platform.API.DestroyImage(device, attachment.Image, null);
+
+						if(attachment.Memory.Handle != 0) {
+							_platform.API.FreeMemory(device, attachment.Memory, null);
+						}
 					}
 				}
+			}
+
+			private void _OnWindowFramebufferResize(Vector2D<int> newSize) {
+				WindowResizing = true;
+				ResizeTimer = RESIZE_DELAY;
+				Size = (Vector2D<uint>) newSize;
+				OnResized(newSize);
 			}
 
 			private unsafe void _CreateSwapchain() {

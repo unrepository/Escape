@@ -10,6 +10,7 @@ namespace Cinenic.Renderer.Camera {
 		public Vector3 Up = Vector3.UnitY;
 
 		public Camera2D(Framebuffer framebuffer) : base(framebuffer) { }
+		public Camera2D(Window window) : base(window) { }
 		public Camera2D(int width, int height) : base(width, height) { }
 		
 		protected override void RecalculateProjectionMatrix() {
