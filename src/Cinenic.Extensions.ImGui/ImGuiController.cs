@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Cinenic.Renderer;
 using Cinenic.Renderer.Vulkan;
@@ -75,10 +76,17 @@ namespace Cinenic.Extensions.ImGui {
 		public abstract void Dispose();
 
 		public static ImGuiController Create(IPlatform platform, string id, RenderQueue queue, Window window) {
-			return platform switch {
-				VkPlatform vkPlatform => new VkImGuiController(id, vkPlatform, queue, window),
-				_ => throw new NotImplementedException("PlatformImpl")
-			};
+			try {
+				return platform switch {
+					VkPlatform vkPlatform => new VkImGuiController(id, vkPlatform, queue, window),
+					_ => throw new NotImplementedException("PlatformImpl")
+				};
+			} catch(InvalidOperationException) { // controller already exists
+				var controller = Get(queue);
+				Debug.Assert(controller is not null, "This should never happen!");
+
+				return controller;
+			}
 		}
 		
 		public static ImGuiController? Get(RenderQueue queue) {

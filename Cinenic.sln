@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinenic.Extensions.Scene", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinenic.Extensions.ImGui", "src\Cinenic.Extensions.ImGui\Cinenic.Extensions.ImGui.csproj", "{34A054C0-4DC2-4FDC-9581-4FBA3BB32621}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinenic.Extensions.Debugging", "src\Cinenic.Extensions.Debugging\Cinenic.Extensions.Debugging.csproj", "{BEADB612-378C-4EDB-9075-0E78CCED2E81}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -173,6 +175,18 @@ Global
 		{34A054C0-4DC2-4FDC-9581-4FBA3BB32621}.Release|x64.Build.0 = Release|Any CPU
 		{34A054C0-4DC2-4FDC-9581-4FBA3BB32621}.Release|x86.ActiveCfg = Release|Any CPU
 		{34A054C0-4DC2-4FDC-9581-4FBA3BB32621}.Release|x86.Build.0 = Release|Any CPU
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81}.Debug|x64.Build.0 = Debug|Any CPU
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81}.Debug|x86.Build.0 = Debug|Any CPU
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81}.Release|x64.ActiveCfg = Release|Any CPU
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81}.Release|x64.Build.0 = Release|Any CPU
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81}.Release|x86.ActiveCfg = Release|Any CPU
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -189,5 +203,6 @@ Global
 		{41FE3F9A-A23D-4C96-9A2A-3C2AFA4670EA} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{7E8801AD-2A9C-4564-A796-7EB034AD93EB} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{34A054C0-4DC2-4FDC-9581-4FBA3BB32621} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{BEADB612-378C-4EDB-9075-0E78CCED2E81} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

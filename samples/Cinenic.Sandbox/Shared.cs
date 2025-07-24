@@ -4,6 +4,8 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Cinenic;
 using Cinenic.Components;
+using Cinenic.Extensions.Debugging;
+using Cinenic.Extensions.Debugging.Providers;
 using Cinenic.Renderer;
 using Cinenic.Renderer.Camera;
 using Cinenic.Renderer.Shader.Pipelines;
@@ -59,6 +61,8 @@ public static class Shared {
         ]
     };
 
+	public static DebugInterface DebugInterface { get; set; }
+
 	public static void SetupVulkan(
 		out VkPlatform platform,
 		out DefaultSceneShaderPipeline shaderPipeline,
@@ -73,6 +77,8 @@ public static class Shared {
 		shaderPipeline = new DefaultSceneShaderPipeline(platform);
 		renderQueue = RenderQueueManager.Create(platform, "main");
 		renderPipeline = RenderPipelineManager.Create(platform, "main", renderQueue, shaderPipeline);
+
+		DebugInterface = DebugInterface.Setup(platform);
 	}
 
 	public static void CreateWindow(
@@ -104,6 +110,8 @@ public static class Shared {
 		RenderManager.Add(objectRenderer, renderQueue);
 
 		_ = new RelationshipTracker(world);
+		
+		DebugInterface.Providers.Add(new HierarchyInfoProvider(world));
 	}
 
 	public static void CreateOrbitalCamera(

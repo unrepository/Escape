@@ -162,7 +162,14 @@ namespace Cinenic.Components {
 		}
 
 		public override string ToString() {
-			return $"[Position={Position}/{GlobalPosition} Rotation={Rotation}/{GlobalRotation} Scale={Scale}/{GlobalScale}]";
+			return
+				$"[Position={Position.ToString("F3")} "
+				+ $"Rotation=<X: {Pitch} Y: {Yaw} Z: {Roll}> "
+				+ $"Scale=<X: {Scale.X:F3} Y: {Scale.Y:F3} Z: {Scale.Z:F3}/\n"
+				
+				+ $"/GlobalPosition={GlobalPosition.ToString("F3")} "
+				+ $"GlobalRotation=<X: {GlobalRotation.GetPitch().ToDegrees():F3} Y: {GlobalRotation.GetYaw().ToDegrees():F3} Z: {GlobalRotation.GetRoll().ToDegrees():F3}> "
+				+ $"GlobalScale=<X: {GlobalScale.X:F3} Y: {GlobalScale.Y:F3} Z: {GlobalScale.Z:F3}]";
 		}
 
 		public static Matrix4x4 CreateMatrix(Transform3D t3d) {

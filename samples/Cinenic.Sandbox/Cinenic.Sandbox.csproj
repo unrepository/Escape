@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\Cinenic.Extensions.Debugging\Cinenic.Extensions.Debugging.csproj" />
       <ProjectReference Include="..\..\src\Cinenic.Compute\Cinenic.Compute.csproj" />
       <ProjectReference Include="..\..\src\Cinenic.Extensions.Assimp\Cinenic.Extensions.Assimp.csproj" />
       <ProjectReference Include="..\..\src\Cinenic.Extensions.ImGui\Cinenic.Extensions.ImGui.csproj" />
@@ -36,6 +37,7 @@
 	<ItemGroup>
 		<AssetLinkProject Include="Cinenic.Sandbox.csproj" />
 		<AssetLinkProject Include="..\..\src\Cinenic.Renderer\Cinenic.Renderer.csproj" />
+		<AssetLinkProject Include="..\..\src\Cinenic.Extensions.Debugging\Cinenic.Extensions.Debugging.csproj" />
 	</ItemGroup>
 	
 </Project>

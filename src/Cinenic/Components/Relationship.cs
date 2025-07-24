@@ -20,13 +20,22 @@ namespace Cinenic.Components {
 		internal Parent(List<Entity> children) {
 			_Children = children;
 		}
+
+		public override string ToString() {
+			return $"[{Children.Count} children]";
+		}
 	}
 
 	/// <summary>
 	/// Indicates that this entity is a child of another entity
 	/// </summary>
 	[Component]
-	public record struct Child(Entity Parent);
+	public record struct Child(Entity Parent) {
+
+		public override string ToString() {
+			return $"[Parent = {Parent.Id}]";
+		}
+	}
 
 	public static class Relationship {
 

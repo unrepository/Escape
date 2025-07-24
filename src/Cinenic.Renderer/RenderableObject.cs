@@ -44,5 +44,9 @@ namespace Cinenic.Renderer {
 		public static bool operator !=(RenderableObject a, RenderableObject b) => !(a == b);
 		
 		public override int GetHashCode() => Id.GetHashCode();
+		
+		public override string ToString() {
+			return $"[Id={Id} Model={Model}]";
+		}
     }
 }

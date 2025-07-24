@@ -29,21 +29,23 @@ namespace Cinenic.Renderer.Vulkan {
 			
 			if(Handle == 0) Build();
 
-			fixed(DescriptorSet* descriptorSetsPtr = _descriptorSetsArray) {
-				_platform.API.CmdBindDescriptorSets(
-					vkQueue.CommandBuffer,
-					pipeline.Queue.Type switch {
-						RenderQueue.Family.Graphics => PipelineBindPoint.Graphics,
-						RenderQueue.Family.Compute => PipelineBindPoint.Compute,
-						_ => throw new NotImplementedException()
-					},
-					vkPipeline.PipelineLayout,
-					0,
-					(uint) _descriptorSetsArray.Length,
-					descriptorSetsPtr,
-					0,
-					null
-				);
+			if(_descriptorSetsArray.Length > 0) {
+				fixed(DescriptorSet* descriptorSetsPtr = _descriptorSetsArray) {
+					_platform.API.CmdBindDescriptorSets(
+						vkQueue.CommandBuffer,
+						pipeline.Queue.Type switch {
+							RenderQueue.Family.Graphics => PipelineBindPoint.Graphics,
+							RenderQueue.Family.Compute => PipelineBindPoint.Compute,
+							_ => throw new NotImplementedException()
+						},
+						vkPipeline.PipelineLayout,
+						0,
+						(uint) _descriptorSetsArray.Length,
+						descriptorSetsPtr,
+						0,
+						null
+					);
+				}
 			}
 		}
 

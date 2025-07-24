@@ -28,7 +28,7 @@ namespace Cinenic.UnitTypes {
 		public bool Equals(Rotation<T> a) => Math.Abs((dynamic) (Degrees - a.Degrees)) < 0.001;
 		public override bool Equals(object? obj) => obj is Rotation<T> other && Equals(other);
 
-		public override string ToString() => $"{Degrees}°";
+		public override string ToString() => $"{Degrees:F3}°";
 
 		public static Rotation<T> FromDegrees(T value) => new() { Degrees = value };
 		public static Rotation<T> FromRadians(T value) => new() { Radians = value };
