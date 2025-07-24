@@ -120,7 +120,6 @@ namespace Cinenic.Renderer.Vulkan {
 		}
 		
 		public void Push() {
-			Debug.Assert(_platform.PrimaryDevice is not null);
 			Debug.Assert(_bufferDataPtr is not null);
 
 			if(Data is null || _data?.Length <= 0) {

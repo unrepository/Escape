@@ -164,7 +164,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 					VkCheck(
 						_platform.API.CreatePipelineLayout(
-							_platform.PrimaryDevice!.Logical,
+							_platform.PrimaryDevice.Logical,
 							pipelineLayoutInfo,
 							null,
 							out PipelineLayout
@@ -207,7 +207,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 							VkCheck(
 								_platform.API.CreateGraphicsPipelines(
-									_platform.PrimaryDevice!.Logical,
+									_platform.PrimaryDevice.Logical,
 									default,
 									1,
 									pipelineInfo,
@@ -328,7 +328,7 @@ namespace Cinenic.Renderer.Vulkan {
 		}
 		
 		public static void RecreateFramebuffer(VkPlatform platform, in VkFramebuffer oldFramebuffer, out VkFramebuffer newFramebuffer) {
-			platform.API.DeviceWaitIdle(platform.PrimaryDevice!.Logical);
+			platform.API.DeviceWaitIdle(platform.PrimaryDevice.Logical);
 			oldFramebuffer.Dispose();
 
 			if(oldFramebuffer is VkWindow.WindowFramebuffer windowFramebuffer) {
@@ -344,7 +344,7 @@ namespace Cinenic.Renderer.Vulkan {
 		}
 
 		public static void RecreateQueue(VkPlatform platform, in VkRenderQueue oldQueue, out VkRenderQueue newQueue) {
-			platform.API.DeviceWaitIdle(platform.PrimaryDevice!.Logical);
+			platform.API.DeviceWaitIdle(platform.PrimaryDevice.Logical);
 			oldQueue.Dispose();
 			
 			newQueue = new VkRenderQueue(platform, oldQueue.Type, oldQueue.ColorFormat) {

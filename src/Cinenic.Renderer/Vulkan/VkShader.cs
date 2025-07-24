@@ -84,7 +84,7 @@ namespace Cinenic.Renderer.Vulkan {
 			
 			Result result;
 			if(
-				(result = _platform.API.CreateShaderModule(_platform.PrimaryDevice!.Logical, &moduleInfo, null, out var module))
+				(result = _platform.API.CreateShaderModule(_platform.PrimaryDevice.Logical, &moduleInfo, null, out var module))
 				!= Result.Success
 			) {
 				throw new PlatformException($"Could not create shader module: {result}");
@@ -102,7 +102,7 @@ namespace Cinenic.Renderer.Vulkan {
 			GC.SuppressFinalize(this);
 
 			unsafe {
-				_platform.API.DestroyShaderModule(_platform.PrimaryDevice!.Logical, Module, null);
+				_platform.API.DestroyShaderModule(_platform.PrimaryDevice.Logical, Module, null);
 			}
 
 			Handle = 0;

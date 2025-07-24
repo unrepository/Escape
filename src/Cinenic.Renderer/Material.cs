@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using Cinenic.Extensions.CSharp;
 using Cinenic.Renderer.Resources;
 using Cinenic.Resources;
-using ILGPU.Runtime.CPU;
 
 namespace Cinenic.Renderer {
 	

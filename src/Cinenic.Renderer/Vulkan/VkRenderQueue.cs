@@ -96,7 +96,7 @@ namespace Cinenic.Renderer.Vulkan {
 			for(int i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 				VkCheck(
 					_platform.API.CreateSemaphore(
-						_platform.PrimaryDevice!.Logical,
+						_platform.PrimaryDevice.Logical,
 						semaphoreInfo,
 						null,
 						out var imageAvailable
@@ -106,7 +106,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 				VkCheck(
 					_platform.API.CreateSemaphore(
-						_platform.PrimaryDevice!.Logical,
+						_platform.PrimaryDevice.Logical,
 						semaphoreInfo,
 						null,
 						out var renderComplete
@@ -116,7 +116,7 @@ namespace Cinenic.Renderer.Vulkan {
 				
 				VkCheck(
 					_platform.API.CreateFence(
-						_platform.PrimaryDevice!.Logical,
+						_platform.PrimaryDevice.Logical,
 						fenceInfo,
 						null,
 						out var inFlight
@@ -136,14 +136,14 @@ namespace Cinenic.Renderer.Vulkan {
 			};
 
 			commandPoolInfo.QueueFamilyIndex = Type switch {
-				Family.Graphics => (uint) _platform.PrimaryDevice!.GraphicsFamily,
-				Family.Compute => (uint) _platform.PrimaryDevice!.ComputeFamily,
+				Family.Graphics => (uint) _platform.PrimaryDevice.GraphicsFamily,
+				Family.Compute => (uint) _platform.PrimaryDevice.ComputeFamily,
 				_ => throw new NotImplementedException()
 			};
 
 			VkCheck(
 				_platform.API.CreateCommandPool(
-					_platform.PrimaryDevice!.Logical,
+					_platform.PrimaryDevice.Logical,
 					commandPoolInfo,
 					null,
 					out var commandPool
@@ -199,7 +199,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 				VkCheck(
 					_platform.API.CreateRenderPass(
-						_platform.PrimaryDevice!.Logical,
+						_platform.PrimaryDevice.Logical,
 						renderPassInfo,
 						null,
 						out var pass
@@ -301,7 +301,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 			// synchronization wait
 			_platform.API.WaitForFences(
-				_platform.PrimaryDevice!.Logical,
+				_platform.PrimaryDevice.Logical,
 				1,
 				_inFlightFrames[CurrentFrame],
 				true,
@@ -484,7 +484,7 @@ namespace Cinenic.Renderer.Vulkan {
 
 			VkCheck(
 				_platform.API.QueueSubmit(
-					_platform.PrimaryDevice!.GraphicsQueue,
+					_platform.PrimaryDevice.GraphicsQueue,
 					1,
 					submitInfo,
 					_inFlightFrames[CurrentFrame]
@@ -538,7 +538,7 @@ namespace Cinenic.Renderer.Vulkan {
 			GC.SuppressFinalize(this);
 
 			unsafe {
-				var device = _platform.PrimaryDevice!.Logical;
+				var device = _platform.PrimaryDevice.Logical;
 				
 				_platform.API.DestroyRenderPass(device, Base, null);
 				_platform.API.DestroyCommandPool(device, CommandPool.Value, null);

@@ -25,8 +25,6 @@ namespace Cinenic.Renderer.Vulkan {
 			: base(platform, options)
 		{
 			_platform = platform;
-			Debug.Assert(_platform.PrimaryDevice != null);
-
 			_device = _platform.PrimaryDevice;
 			
 			if(_device.Headless) {
@@ -107,7 +105,7 @@ namespace Cinenic.Renderer.Vulkan {
 			{
 				_platform = platform;
 				Window = window;
-				_device = platform.PrimaryDevice!;
+				_device = platform.PrimaryDevice;
 				
 				window.Base.FramebufferResize += OnResized;
 			}

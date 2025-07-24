@@ -13,7 +13,7 @@ namespace Cinenic.Renderer {
 		public Vector2D<uint> Size { get; }
 
 		public delegate void ResizeEventHandler(Vector2D<int> newSize);
-		public event ResizeEventHandler Resized;
+		public event ResizeEventHandler? Resized;
 		
 		[Obsolete]
 		protected List<Texture> TextureAttachments { get; } = [];
