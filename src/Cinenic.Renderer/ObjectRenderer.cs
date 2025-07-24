@@ -8,7 +8,7 @@ namespace Cinenic.Renderer {
 	public abstract class ObjectRenderer : IRenderer {
 
 		public string Id { get; }
-		public int Priority { get; init; } = 1000;
+		public int Priority { get; init; } = 100;
 		
 		public DefaultSceneShaderPipeline ShaderPipeline { get; }
 		

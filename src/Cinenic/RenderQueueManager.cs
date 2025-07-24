@@ -10,7 +10,7 @@ namespace Cinenic {
 		
 		public static Dictionary<string, RenderQueue> Queues { get; } = [];
 
-		public unsafe static RenderQueue Create(
+		public static RenderQueue Create(
 			IPlatform platform,
 			string id,
 			Framebuffer? renderTarget = null,
@@ -50,6 +50,10 @@ namespace Cinenic {
 
 			Queues[id] = queue;
 			return queue;
+		}
+
+		public static void Add(string id, RenderQueue queue) {
+			Queues[id] = queue;
 		}
 
 		public static RenderQueue? Get(string id) {

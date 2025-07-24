@@ -17,7 +17,7 @@ namespace Cinenic {
 
 			_primarySystem = new WorldUpdateSystem(world);
 			_hierarchySystem = new HierarchyUpdateSystem(world) {
-				DebugPrintHierarchy = true
+				DebugPrintHierarchy = false
 			};
 		}
 		

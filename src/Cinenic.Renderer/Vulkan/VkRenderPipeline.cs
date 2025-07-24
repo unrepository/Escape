@@ -10,8 +10,8 @@ namespace Cinenic.Renderer.Vulkan {
 	
 	public class VkRenderPipeline : RenderPipeline {
 
-		internal readonly PipelineLayout PipelineLayout;
-		internal readonly Pipeline Pipeline;
+		public readonly PipelineLayout PipelineLayout;
+		public readonly Pipeline Pipeline;
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		
@@ -22,12 +22,17 @@ namespace Cinenic.Renderer.Vulkan {
 
 		private readonly VkPlatform _platform;
 
+		// special constructor just for VkImGuiRenderPipeline <3 :3 OwO
+		public VkRenderPipeline(VkPlatform platform, VkRenderQueue queue) : base(platform, queue, null) {
+			_platform = platform;
+		}
+		
 		public unsafe VkRenderPipeline(VkPlatform platform, VkRenderQueue queue, IShaderPipeline shaderPipeline)
 			: base(platform, queue, shaderPipeline)
 		{
 			//Debug.Assert(((VkRenderQueue) queue).Base.Handle != 0, "RenderQueue.Handle is 0. Did you forget to call Initialize()?");
 			_platform = platform;
-
+			
 			((VkShaderProgram) shaderPipeline.Program.Get()).Build();
 
 		#region Pipeline layout
