@@ -7,6 +7,11 @@ namespace Cinenic {
 		public static Dictionary<string, IUpdater> Updateables { get; } = [];
 		public static Dictionary<string, bool> UpdateableStates { get; } = [];
 
+		public static void Add(string id, Action<TimeSpan> update, bool disabled = false) {
+			var updateable = new LambdaUpdater(id, update);
+			Add(updateable, disabled);
+		}
+		
 		public static void Add(IUpdater updateable, bool disabled = false) {
 			Updateables[updateable.Id] = updateable;
 			UpdateableStates[updateable.Id] = !disabled;
@@ -41,6 +46,21 @@ namespace Cinenic {
 		public static void Update(IUpdater updateable, TimeSpan delta) {
 			if(!IsEnabled(updateable)) return;
 			updateable.Update(delta);
+		}
+
+		public class LambdaUpdater : IUpdater {
+
+			public string Id { get; }
+			public Action<TimeSpan> UpdateAction { get; set; }
+			
+			public LambdaUpdater(string id, Action<TimeSpan> update) {
+				Id = id;
+				UpdateAction = update;
+			}
+			
+			public void Update(TimeSpan delta) {
+				UpdateAction.Invoke(delta);
+			}
 		}
 	}
 }
