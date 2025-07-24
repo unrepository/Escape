@@ -107,10 +107,10 @@ public static class WorldSandbox {
 				}
 			}
 			if(!_cameraLock) return;
-			if(key == Key.W) camera.Get<Transform3D>().Position.Z -= 1f;
-			if(key == Key.S) camera.Get<Transform3D>().Position.Z += 1f;
-			if(key == Key.A) camera.Get<Transform3D>().Position.X -= 1f;
-			if(key == Key.D) camera.Get<Transform3D>().Position.X += 1f;
+			if(key == Key.W) camera.Get<Transform3D>().Translate(z: -1);
+			if(key == Key.S) camera.Get<Transform3D>().Translate(z: +1);
+			if(key == Key.A) camera.Get<Transform3D>().Translate(x: -1);
+			if(key == Key.D) camera.Get<Transform3D>().Translate(x: +1);
 		};
 
 		window.Input.Mice[0].MouseMove += (mouse, position) => {

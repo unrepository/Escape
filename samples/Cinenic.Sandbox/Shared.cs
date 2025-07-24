@@ -9,6 +9,7 @@ using Cinenic.Renderer.Camera;
 using Cinenic.Renderer.Shader.Pipelines;
 using Cinenic.Renderer.Vulkan;
 using Cinenic.Sandbox;
+using Cinenic.Systems;
 using Schedulers;
 using Camera3D = Cinenic.Components.Camera3D;
 
@@ -101,6 +102,8 @@ public static class Shared {
 		var objectRenderer = ObjectRenderer.Create(platform, shaderPipeline);
 		RenderManager.Add(new WorldRenderer("world", world, objectRenderer), renderQueue);
 		RenderManager.Add(objectRenderer, renderQueue);
+
+		_ = new RelationshipTracker(world);
 	}
 
 	public static void CreateOrbitalCamera(
@@ -117,6 +120,7 @@ public static class Shared {
 				}
 			)
 		);
+		entity.MakeChildOf(world.GetRootEntity());
 		//entity.Get<Transform3D>().LookAt(new Vector3(0, 0, 0));
 
 		oc3d = new OrbitCamera3D("oc3d", entity, window);

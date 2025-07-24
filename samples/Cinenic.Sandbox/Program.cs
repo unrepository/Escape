@@ -1,1 +1,1 @@
-GLTFTest.Start(args);
+HierarchyTest.Start(args);

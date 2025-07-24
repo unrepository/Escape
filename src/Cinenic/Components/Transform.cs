@@ -1,4 +1,5 @@
 using System.Numerics;
+using Arch.Core;
 using Cinenic.Extensions.CSharp;
 using Cinenic.UnitTypes;
 
@@ -7,23 +8,87 @@ namespace Cinenic.Components {
 	[Component]
 	public struct Transform3D {
 
-		public Vector3 Position;
-		public Quaternion Rotation;
-		public Vector3 Scale;
+		public Matrix4x4 LocalMatrix;
+		public Matrix4x4 GlobalMatrix;
+
+		public Vector3 Position {
+			get;
+			set {
+				field = value;
+				//LocalMatrix = CreateMatrix(this);
+				IsDirty = true;
+			}
+		}
+
+		public Vector3 GlobalPosition {
+			get {
+				Matrix4x4.Decompose(GlobalMatrix, out _, out _, out var translation);
+				return translation;
+			}
+			set => throw new NotImplementedException();
+		}
+
+		public Quaternion Rotation {
+			get;
+			set {
+				field = value;
+				//LocalMatrix = CreateMatrix(this);
+				IsDirty = true;
+			}
+		}
+
+		public Quaternion GlobalRotation {
+			get {
+				Matrix4x4.Decompose(GlobalMatrix, out _, out var rotation, out _);
+				return rotation;
+			}
+			set => throw new NotImplementedException();
+		}
+
+		public Vector3 Scale {
+			get;
+			set {
+				field = value;
+				//LocalMatrix = CreateMatrix(this);
+				IsDirty = true;
+			}
+		}
+		
+		public Vector3 GlobalScale {
+			get {
+				Matrix4x4.Decompose(GlobalMatrix, out var scale, out _, out _);
+				return scale;
+			}
+			set => throw new NotImplementedException();
+		}
+
+		public bool IsDirty = true;
 		
 		public Rotation<float> Yaw {
 			get => Rotation<float>.FromRadians(Rotation.GetYaw());
-			set => Rotation.SetYaw(value.Radians);
+			set {
+				var q = Rotation;
+				q.SetYaw(value.Radians);
+				Rotation = q;
+			}
 		}
 		
 		public Rotation<float> Pitch {
 			get => Rotation<float>.FromRadians(Rotation.GetPitch());
-			set => Rotation.SetPitch(value.Radians);
+			set {
+				var q = Rotation;
+				q.SetPitch(value.Radians);
+				Rotation = q;
+			}
 		}
 		
 		public Rotation<float> Roll {
 			get => Rotation<float>.FromRadians(Rotation.GetRoll());
-			set => Rotation.SetRoll(value.Radians);
+			set {
+				var q = Rotation;
+				q.SetRoll(value.Radians);
+				Rotation = q;
+			}
 		}
 
 		public Vector3 RotationDegrees {
@@ -50,7 +115,7 @@ namespace Cinenic.Components {
 
 		public Transform3D() {
 			Position = Vector3.Zero;
-			Rotation = Quaternion.Zero;
+			Rotation = Quaternion.Identity;
 			Scale = Vector3.One;
 		}
 
@@ -58,6 +123,22 @@ namespace Cinenic.Components {
 			Position = position;
 			Rotation = rotation;
 			Scale = scale;
+		}
+
+		public void Translate(Vector3 translation) {
+			Position += translation;
+		}
+
+		public void Translate(float x = 0, float y = 0, float z = 0) {
+			Position += new Vector3(x, y, z);
+		}
+
+		public void Rotate(Rotation<float> yaw = default, Rotation<float> pitch = default, Rotation<float> roll = default) {
+			Rotation *= Quaternion.CreateFromYawPitchRoll(
+				yaw.Radians,
+				pitch.Radians,
+				roll.Radians
+			);
 		}
 
 		public void LookAt(Vector3 target) {
@@ -78,6 +159,17 @@ namespace Cinenic.Components {
 			);
 
 			Rotation = Quaternion.CreateFromRotationMatrix(matrix);
+		}
+
+		public override string ToString() {
+			return $"[Position={Position}/{GlobalPosition} Rotation={Rotation}/{GlobalRotation} Scale={Scale}/{GlobalScale}]";
+		}
+
+		public static Matrix4x4 CreateMatrix(Transform3D t3d) {
+			return
+				Matrix4x4.CreateScale(t3d.Scale)
+				* Matrix4x4.CreateFromQuaternion(t3d.Rotation)
+				* Matrix4x4.CreateTranslation(t3d.Position);
 		}
 	}
 }

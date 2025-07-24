@@ -7,6 +7,7 @@ using Cinenic.Components;
 using Cinenic.Extensions.Assimp;
 using Cinenic.Renderer.Camera;
 using Cinenic.Resources;
+using Cinenic.UnitTypes;
 using NLog;
 
 using static Shared;
@@ -23,8 +24,8 @@ public static class GLTFTest {
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);
 		
 		// load scene
-		var scene = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/BarramundiFish.glb")!;
-		scene.Get().Scene!.Export(ref world, null);
+		var scene = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/AntiqueCamera.glb")!;
+		var sceneRoot = scene.Get().Scene!.Export(ref world, null);
 		
 		var q = new QueryDescription().WithNone<Empty>();
 		world

@@ -9,31 +9,29 @@ namespace Cinenic.Extensions.Assimp {
 	public class AssimpScene : IScene {
 
 		internal List<Node> Nodes = [];
-
-		private bool _exported = false;
 		
 		public World AsWorld() {
-			_exported = true;
 			throw new NotImplementedException();
 		}
 		
 		public Entity Export(ref World world, Entity? parent) {
 			var rootEntity = parent ?? world.Create();
 			
-			void ExportNode(ref World world, Node node) {
+			void ExportNode(ref World world, ref Entity parent, Node node) {
 				var entity = world.Create(node.Transform);
 				if(node.Model is not null) entity.Add(new RenderableObject(node.Model));
 
+				entity.MakeChildOf(parent);
+				
 				foreach(var child in node.Children) {
-					ExportNode(ref world, child);
+					ExportNode(ref world, ref entity, child);
 				}
 			}
 			
 			foreach(var node in Nodes) {
-				ExportNode(ref world, node);
+				ExportNode(ref world, ref rootEntity, node);
 			}
 
-			_exported = true;
 			return rootEntity;
 		}
 

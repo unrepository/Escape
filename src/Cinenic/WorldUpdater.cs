@@ -8,17 +8,22 @@ namespace Cinenic {
 		public string Id { get; }
 		public World World { get; set; }
 
-		private MainUpdateSystem _primarySystem;
+		private WorldUpdateSystem _primarySystem;
+		private HierarchyUpdateSystem _hierarchySystem;
 		
 		public WorldUpdater(string id, World world) {
 			Id = id;
 			World = world;
 
-			_primarySystem = new MainUpdateSystem(world);
+			_primarySystem = new WorldUpdateSystem(world);
+			_hierarchySystem = new HierarchyUpdateSystem(world) {
+				DebugPrintHierarchy = true
+			};
 		}
 		
 		public virtual void Update(TimeSpan delta) {
 			_primarySystem.Update(delta);
+			_hierarchySystem.Update(delta);
 		}
 	}
 }

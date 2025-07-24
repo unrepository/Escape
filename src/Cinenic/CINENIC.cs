@@ -8,6 +8,7 @@ using ComponentRegistry = Cinenic.Components.ComponentRegistry;
 
 namespace Cinenic {
 	
+	// TODO separate update/fixedupdate cause forcing update to be threaded is sometimes funky
 	public static class CINENIC {
 
 		public static int UpdatesPerSecond { get; set; } = 100;
@@ -84,12 +85,9 @@ namespace Cinenic {
 				var sinceLastRender = currentTime - LastRender;
 
 				RenderDelta = sinceLastRender;
-				//UpdateDelta = sinceLastRender;
 				ThreadScheduler.RunSchedules();
 				RenderManager.Render(sinceLastRender);
-				//UpdateManager.Update(sinceLastRender);
 				LastRender = currentTime;
-				//LastUpdate = currentTime;
 
 				if(RenderPipelineManager.PipelineStates.All(kv => !kv.Value)) {
 					// nothing left to render, so we quit
