@@ -123,13 +123,12 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
 	return ggx1 * ggx2;
 }
 
-vec3 solveLightSource(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, PointLight l) {
-	vec3 L = normalize(l.position - worldPos);
+float calcAttenuation(float distance) {
+	return 1.0 / (distance * distance); // inverse-square
+}
+
+vec3 brdf(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, vec3 L, vec3 radiance) {
 	vec3 H = normalize(V + L);
-	
-	float distance = length(l.position - worldPos);
-	float attenuation = 1.0 / (distance * distance); // inverse-square law
-	vec3 radiance = l.color * attenuation;
 
 	vec3 F0 = mix(
 		vec3(pow(material.ior - 1, 2) / pow(material.ior + 1, 2)),
@@ -139,14 +138,13 @@ vec3 solveLightSource(vec3 albedo, float roughness, float metallic, vec3 N, vec3
 	// vec3 F0 = vec3(pow(material.ior - 1, 2) / pow(material.ior + 1, 2));
 	
 	vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-	
 	float NDF = distributionGGX(N, H, roughness);
 	float G = geometrySmith(N, V, L, roughness);
 	
 	vec3 numerator = NDF * G * F;
 	
-	float NdotV = dot(N, V);
-	float NdotL = dot(N, L);
+	float NdotV = max(dot(N, V), 0.0);
+	float NdotL = max(dot(N, L), 0.0);
 	float denominator = max(4.0 * NdotV * NdotL, 0.001);
 	
 	vec3 specular = numerator / denominator;
@@ -155,8 +153,37 @@ vec3 solveLightSource(vec3 albedo, float roughness, float metallic, vec3 N, vec3
 	vec3 kD = vec3(1.0) - kS;
 	kD *= 1.0 - metallic;
 	
-	NdotL = max(NdotL, 0.0);
 	return (kD * albedo / PI + specular) * radiance * NdotL;
+}
+
+//= light type functions
+vec3 solveDirectionalLight(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, DirectionalLight l) {
+	vec3 L = normalize(-l.direction);
+	vec3 radiance = l.color;
+
+	return brdf(albedo, roughness, metallic, N, V, L, radiance);
+}
+
+vec3 solvePointLight(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, PointLight l) {
+	vec3 L = normalize(l.position - worldPos);
+	float distance = length(l.position - worldPos);
+	vec3 radiance = l.color * calcAttenuation(distance);
+	
+	return brdf(albedo, roughness, metallic, N, V, L, radiance);
+}
+
+// TODO not sure if this is implemented correctly, but it's very hard to check manually specifying rotations
+vec3 solveSpotLight(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, SpotLight l) {
+	vec3 L = normalize(l.position - worldPos);
+
+	float theta = dot(L, normalize(-l.direction));
+	float epsilon = (l.cutoff + l.cutoffOuter) - l.cutoff;
+	float intensity = clamp((theta - (l.cutoff + l.cutoffOuter)) / epsilon, 0.0, 1.0);
+
+	float distance = length(l.position - worldPos);
+	vec3 radiance = l.color * calcAttenuation(distance) * intensity;
+	
+	return brdf(albedo, roughness, metallic, N, V, L, radiance);
 }
 
 //= entry point
@@ -193,11 +220,19 @@ void main() {
 	vec3 Lo = vec3(0.0);
 
 	//= solve light sources
+	for(int i = 0; i < lightData.dirCount; i++) {
+		Lo += solveDirectionalLight(albedo, roughness, metallic, N, V, dirLightData.lights[i]);
+	}
+	
 	for(int i = 0; i < lightData.pointCount; i++) {
-		Lo += solveLightSource(albedo, roughness, metallic, N, V, pointLightData.lights[i]);
+		Lo += solvePointLight(albedo, roughness, metallic, N, V, pointLightData.lights[i]);
 	}
 
-	vec3 ambient = vec3(0.01) * albedo; // TODO
+	for(int i = 0; i < lightData.spotCount; i++) {
+		Lo += solveSpotLight(albedo, roughness, metallic, N, V, spotLightData.lights[i]);
+	}
+
+	vec3 ambient = vec3(0.0) * albedo; // TODO customizable
 	vec3 color = ambient + Lo;
 	
 	// gamma correction (reinhard)

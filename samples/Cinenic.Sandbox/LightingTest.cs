@@ -8,6 +8,7 @@ using Cinenic.Extensions.Scene;
 using Cinenic.Renderer;
 using Cinenic.Renderer.Camera;
 using Cinenic.Resources;
+using Cinenic.UnitTypes;
 using static Shared;
 using Camera3D = Cinenic.Components.Camera3D;
 using Color = Cinenic.Renderer.Color;
@@ -31,7 +32,7 @@ public static class LightingTest {
 		
 		var m3 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/onyx_cube.glb")!;
 		var e3 = m3.Get().Scene!.Export(ref world, null);
-		e3.Add(new Transform3D(new Vector3(-2, 0, 2), Quaternion.Identity, new Vector3(0.5f)));
+		e3.Add(new Transform3D(new Vector3(-2, 0, 2), Quaternion.Identity, new Vector3(1)));
 		
 		var m4 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/metal_sphere.glb")!;
 		var e4 = m4.Get().Scene!.Export(ref world, null);
@@ -42,14 +43,23 @@ public static class LightingTest {
 		e5.Add(new Transform3D(new Vector3(-2, -2, 0), Quaternion.Identity, new Vector3(0.5f)));
 		
 		// lights
-		world.Create(
+		var dir = world.Create(
 			new Transform3D(),
-			new PointLight(Color.White)
+			new DirectionalLight(Color.White)
 		);
+		dir.Get<Transform3D>().Yaw = Rotation<float>.FromDegrees(-45);
+		dir.Get<Transform3D>().Pitch = Rotation<float>.FromDegrees(20);
+		
+		var spot = world.Create(
+			new Transform3D(new Vector3(-2, 2, 2), Quaternion.Identity, Vector3.One),
+			new SpotLight(new Color(255, 255, 100), intensity: 100, cutoff: Rotation<float>.FromDegrees(15))
+		);
+		spot.Get<Transform3D>().Yaw = Rotation<float>.FromDegrees(-90);
+		spot.Get<Transform3D>().Pitch = Rotation<float>.FromDegrees(-45);
 		
 		world.Create(
-			new Transform3D(new Vector3(-3, 0, -3), Quaternion.Identity, Vector3.One),
-			new PointLight(Color.White)
+			new Transform3D(new Vector3(-5, 0, 0), Quaternion.Identity, Vector3.One),
+			new PointLight(new Color(100, 50, 255))
 		);
 		
 		CreateOrbitalCamera(ref world, window, out var cameraEntity, out var oc3d);
