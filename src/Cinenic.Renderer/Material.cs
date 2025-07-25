@@ -24,7 +24,7 @@ namespace Cinenic.Renderer {
 
 		public Data CreateData() {
 			var data = new Data {
-				AlbedoColor = AlbedoColor.ToVector4(),
+				AlbedoColor = AlbedoColor,
 				Roughness = Roughness,
 				Metallic = Metallic,
 				IOR = IOR

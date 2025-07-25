@@ -19,13 +19,13 @@ public static class HierarchyTest {
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);
 
 		var m1 = CubeModel.Clone();
-		m1.Meshes[0].Material.AlbedoColor = Color.Brown;
+		m1.Meshes[0].Material.AlbedoColor = System.Drawing.Color.Brown;
 		var m2 = CubeModel.Clone();
-		m2.Meshes[0].Material.AlbedoColor = Color.YellowGreen;
+		m2.Meshes[0].Material.AlbedoColor = System.Drawing.Color.YellowGreen;
 		var m3 = CubeModel.Clone();
-		m3.Meshes[0].Material.AlbedoColor = Color.Purple;
+		m3.Meshes[0].Material.AlbedoColor = System.Drawing.Color.Purple;
 		var m4 = CubeModel.Clone();
-		m4.Meshes[0].Material.AlbedoColor = Color.Lavender;
+		m4.Meshes[0].Material.AlbedoColor = System.Drawing.Color.Lavender;
 		
 		var e1 = world.Create();
 		var t3d1 = world.Create(new Transform3D());

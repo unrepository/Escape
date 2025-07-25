@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Drawing;
 using System.Numerics;
 using System.Text;
 using Arch.Core;
@@ -147,12 +146,12 @@ namespace Cinenic.Extensions.Assimp {
 						switch(mProp->MKey.AsString) {
 							case "$clr.base":
 								Debug.Assert(mProp->MDataLength == 16);
-								
-								material.AlbedoColor = Color.FromArgb(
-									(byte) (*(vF + 3) * 255),
-									(byte) (*vF * 255),
-									(byte) (*(vF + 1) * 255),
-									(byte) (*(vF + 2) * 255)
+
+								material.AlbedoColor = new Color(
+									*(vF + 0),
+									*(vF + 1),
+									*(vF + 2),
+									*(vF + 3)
 								);
 								break;
 							case "$mat.metallicFactor":
