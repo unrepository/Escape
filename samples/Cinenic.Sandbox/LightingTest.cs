@@ -35,6 +35,10 @@ public static class LightingTest {
 		var e4 = m4.Get().Scene!.Export(ref world, null);
 		e4.Add(new Transform3D(new Vector3(-2, 2, 0), Quaternion.Identity, new Vector3(0.5f)));
 		
+		var m5 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/wood_cube.glb")!;
+		var e5 = m5.Get().Scene!.Export(ref world, null);
+		e5.Add(new Transform3D(new Vector3(-2, -2, 0), Quaternion.Identity, new Vector3(0.5f)));
+		
 		CreateOrbitalCamera(ref world, window, out var cameraEntity, out var oc3d);
 		cameraEntity.Get<Transform3D>().LookAt(new Vector3(-2, 0, 0));
 		

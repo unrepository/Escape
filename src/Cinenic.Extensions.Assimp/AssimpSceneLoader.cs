@@ -95,6 +95,8 @@ namespace Cinenic.Extensions.Assimp {
 					for(int vi = 0; vi < vertices.Length; vi++) {
 						vertices[vi].Position = mesh->MVertices[vi];
 						vertices[vi].Normal = mesh->MNormals[vi];
+						vertices[vi].Tangent = mesh->MTangents[vi];
+						vertices[vi].Bitangent = mesh->MBitangents[vi];
 
 						if(mesh->MTextureCoords[0] != null) {
 							var uv = mesh->MTextureCoords[0][vi];

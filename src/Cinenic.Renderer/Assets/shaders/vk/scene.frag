@@ -26,6 +26,8 @@ layout(push_constant) uniform PushConstants {
 struct Vertex {
 	vec3 position;
 	vec3 normal;
+	vec3 tangent;
+	vec3 bitangent;
 	vec2 uv;
 };
 
@@ -43,6 +45,7 @@ layout(location = 1) in Vertex vertex;
 layout(location = 10) flat in Material material;
 layout(location = 20) in vec3 worldPos;
 layout(location = 21) in vec3 normal;
+layout(location = 22) in mat3 TBN;
 
 //= structs
 struct Light {
@@ -124,24 +127,33 @@ vec3 solveLightSource(vec3 albedo, float roughness, float metallic, vec3 N, vec3
 }
 
 void main() {
-	vec3 albedo = material.albedo.rgb; // TODO tex
-	float roughness = material.roughness; // TODO tex
-	float metallic = material.metallic; // TODO tex
+	vec3 albedo = material.albedo.rgb;
+	float roughness = material.roughness;
+	float metallic = material.metallic;
 	
 	if(pc.albedoTextureIndex > 0) {
 		albedo *= pow(texture(textures[pc.albedoTextureIndex], vertex.uv).rgb, vec3(gamma));
 	}
 
 	if(pc.metallicTextureIndex > 0) {
-		metallic *= texture(textures[pc.metallicTextureIndex], vertex.uv).r;
+		metallic = texture(textures[pc.metallicTextureIndex], vertex.uv).r;
 	}
 
 	if(pc.roughnessTextureIndex > 0) {
-		roughness *= texture(textures[pc.roughnessTextureIndex], vertex.uv).r;
+		roughness = texture(textures[pc.roughnessTextureIndex], vertex.uv).r;
+	}
+	
+	//= normal mapping
+	vec3 n = normal;
+	
+	if(pc.normalTextureIndex > 0) {
+		n = texture(textures[pc.normalTextureIndex], vertex.uv).rgb;
+		n = n * 2.0 - 1.0;
+		n = normalize(TBN * n);
 	}
 
 	//=
-	vec3 N = normalize(normal);
+	vec3 N = normalize(n);
 	vec3 V = normalize(cameraData.position - worldPos);
 
 	vec3 Lo = vec3(0.0);

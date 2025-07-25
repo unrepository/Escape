@@ -12,6 +12,8 @@ layout(set = 1, binding = 0, std430) readonly buffer CameraBuffer {
 struct Vertex {
 	vec3 position;
 	vec3 normal;
+	vec3 tangent;
+	vec3 bitangent;
 	vec2 uv;
 };
 
@@ -53,6 +55,7 @@ layout(location = 1) out Vertex outVertex;
 layout(location = 10) flat out Material outMaterial;
 layout(location = 20) out vec3 worldPos;
 layout(location = 21) out vec3 normal;
+layout(location = 22) out mat3 TBN;
 
 void main() {
 	uint index = indices[pc.indexOffset + gl_VertexIndex];
@@ -68,4 +71,11 @@ void main() {
 	
 	worldPos = vec3(matrix * vec4(v.position, 1.0));
 	normal = v.normal * transpose(inverse(mat3(matrix)));
+	
+	vec3 T = normalize(vec3(matrix * vec4(v.tangent, 0.0)));
+	vec3 N = normalize(vec3(matrix * vec4(v.normal, 0.0)));
+	//vec3 B = normalize(vec3(matrix * vec4(v.bitangent, 0.0)));
+	T = normalize(T - dot(T, N) * N);
+	vec3 B = cross(T, N);
+	TBN = mat3(T, B, N);
 }
