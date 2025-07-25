@@ -53,5 +53,9 @@ namespace Cinenic.Extensions.CSharp {
 			
 	        yaw = MathF.Atan2(siny_cosp, cosy_cosp);
 	    }
+
+		public static Vector3 GetDirectionVector(this Quaternion q) {
+			return Vector3.Transform(Vector3.UnitZ, q);
+		}
 	}
 }

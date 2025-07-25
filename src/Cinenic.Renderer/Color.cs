@@ -8,6 +8,8 @@ namespace Cinenic.Renderer {
 
 	#region Known colors
 		public static readonly Color White = new(255, 255, 255);
+		public static readonly Color Black = new(0, 0, 0);
+		public static readonly Color Transparent = new(0, 0, 0, 0);
 	#endregion
 		
 		[FieldOffset(0)] public float R;
@@ -29,6 +31,9 @@ namespace Cinenic.Renderer {
 			A = a;
 		}
 
+		public static Color operator *(Color a, Color b) => new(a.R * b.R, a.G * b.G, a.B * b.B, a.A * b.A);
+		public static Color operator *(Color a, float b) => new(a.R * b, a.G * b, a.B * b, a.A * b);
+		
 		public static implicit operator Color(System.Drawing.Color c) => new(c.R, c.G, c.B, c.A);
 		public static implicit operator System.Drawing.Color(Color c) => System.Drawing.Color.FromArgb((int) (c.A * 255), (int) (c.R * 255), (int) (c.G * 255), (int) (c.B * 255));
 		

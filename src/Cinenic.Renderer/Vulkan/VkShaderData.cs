@@ -28,7 +28,8 @@ namespace Cinenic.Renderer.Vulkan {
 					return;
 				}
 				
-				Debug.Assert(value > 0);
+				//Debug.Assert(value > 0);
+				if(value == 0) return;
 				
 				if(value > _bufferSize) {
 					value = value.CeilIncrement(1024);
@@ -88,7 +89,7 @@ namespace Cinenic.Renderer.Vulkan {
 			_platform = platform;
 			_program = (VkShaderProgram) program;
 
-			if(size == 0) size = 1024 * 1024; // 1 MiB
+			Debug.Assert(size > 0);
 			
 			Binding = binding;
 			Data = data;
@@ -137,7 +138,7 @@ namespace Cinenic.Renderer.Vulkan {
 		public void Push() {
 			Debug.Assert(_bufferDataPtr is not null);
 			
-			if(Data is null) {
+			if(Data is null || Size == 0) {
 				return;
 			}
 

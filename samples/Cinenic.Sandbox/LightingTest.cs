@@ -10,6 +10,7 @@ using Cinenic.Renderer.Camera;
 using Cinenic.Resources;
 using static Shared;
 using Camera3D = Cinenic.Components.Camera3D;
+using Color = Cinenic.Renderer.Color;
 
 public static class LightingTest {
 
@@ -19,6 +20,7 @@ public static class LightingTest {
 		CreateWindow(platform, "Lighting Test", ref renderQueue, out var window);
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);
 
+		// test objects
 		var m1 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/brick_cube.glb")!;
 		var e1 = m1.Get().Scene!.Export(ref world, null);
 		e1.Add(new Transform3D(new Vector3(-2, 0, -2), Quaternion.Identity, new Vector3(0.5f)));
@@ -38,6 +40,17 @@ public static class LightingTest {
 		var m5 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/wood_cube.glb")!;
 		var e5 = m5.Get().Scene!.Export(ref world, null);
 		e5.Add(new Transform3D(new Vector3(-2, -2, 0), Quaternion.Identity, new Vector3(0.5f)));
+		
+		// lights
+		world.Create(
+			new Transform3D(),
+			new PointLight(Color.White)
+		);
+		
+		world.Create(
+			new Transform3D(new Vector3(-3, 0, -3), Quaternion.Identity, Vector3.One),
+			new PointLight(Color.White)
+		);
 		
 		CreateOrbitalCamera(ref world, window, out var cameraEntity, out var oc3d);
 		cameraEntity.Get<Transform3D>().LookAt(new Vector3(-2, 0, 0));

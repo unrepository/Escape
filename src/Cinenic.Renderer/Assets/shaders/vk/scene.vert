@@ -2,11 +2,11 @@
 
 layout(set = 1, binding = 0, std430) readonly buffer CameraBuffer {
 	mat4 projection;
-	mat4 inverse_projection;
+	mat4 inverseProjection;
 	mat4 view;
-	mat4 inverse_view;
+	mat4 inverseView;
 	vec3 position;
-	float aspect_ratio;
+	float aspectRatio;
 } cameraData;
 
 struct Vertex {

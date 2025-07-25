@@ -3,26 +3,6 @@
 
 const float gamma = 2.2;
 
-layout(set = 1, binding = 0, std430) readonly buffer CameraBuffer {
-	mat4 projection;
-	mat4 inverse_projection;
-	mat4 view;
-	mat4 inverse_view;
-	vec3 position;
-	float aspect_ratio;
-} cameraData;
-
-layout(push_constant) uniform PushConstants {
-	uint vertexOffset;
-	uint indexOffset;
-	uint materialOffset;
-	uint matrixOffset;
-	int albedoTextureIndex;
-	int normalTextureIndex;
-	int metallicTextureIndex;
-	int roughnessTextureIndex;
-} pc;
-
 struct Vertex {
 	vec3 position;
 	vec3 normal;
@@ -38,6 +18,65 @@ struct Material {
 	float ior;
 };
 
+//= lights
+struct DirectionalLight {
+	vec3 color;
+	vec3 direction;
+};
+
+struct PointLight {
+	vec3 color;
+	vec3 position;
+};
+
+struct SpotLight {
+	vec3 color;
+	vec3 position;
+	vec3 direction;
+	
+	float cutoff;
+	float cutoffOuter;
+};
+
+//= buffers
+layout(set = 1, binding = 0, std430) readonly buffer CameraBuffer {
+	mat4 projection;
+	mat4 inverseProjection;
+	mat4 view;
+	mat4 inverseView;
+	vec3 position;
+	float aspectRatio;
+} cameraData;
+
+layout(set = 6, binding = 10) readonly buffer LightCountData {
+	uint dirCount;
+	uint pointCount;
+	uint spotCount;
+} lightData;
+
+layout(set = 7, binding = 11) readonly buffer DirectionalLightBuffer {
+	DirectionalLight lights[];
+} dirLightData;
+
+layout(set = 8, binding = 12) readonly buffer PointLightBuffer {
+	PointLight lights[];
+} pointLightData;
+
+layout(set = 9, binding = 13) readonly buffer SpotLightBuffer {
+	SpotLight lights[];
+} spotLightData;
+
+layout(push_constant) uniform PushConstants {
+	uint vertexOffset;
+	uint indexOffset;
+	uint materialOffset;
+	uint matrixOffset;
+	int albedoTextureIndex;
+	int normalTextureIndex;
+	int metallicTextureIndex;
+	int roughnessTextureIndex;
+} pc;
+
 layout(set = 0, binding = 0) uniform sampler2D textures[1024];
 
 layout(location = 0) out vec4 fragColor;
@@ -46,12 +85,6 @@ layout(location = 10) flat in Material material;
 layout(location = 20) in vec3 worldPos;
 layout(location = 21) in vec3 normal;
 layout(location = 22) in mat3 TBN;
-
-//= structs
-struct Light {
-	vec3 position;
-	vec3 color;
-};
 
 //= functions
 vec3 fresnelSchlick(float cosTheta, vec3 F0) {
@@ -90,7 +123,7 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
 	return ggx1 * ggx2;
 }
 
-vec3 solveLightSource(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, Light l) {
+vec3 solveLightSource(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, PointLight l) {
 	vec3 L = normalize(l.position - worldPos);
 	vec3 H = normalize(V + L);
 	
@@ -126,6 +159,7 @@ vec3 solveLightSource(vec3 albedo, float roughness, float metallic, vec3 N, vec3
 	return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 
+//= entry point
 void main() {
 	vec3 albedo = material.albedo.rgb;
 	float roughness = material.roughness;
@@ -158,12 +192,12 @@ void main() {
 
 	vec3 Lo = vec3(0.0);
 
-	//= solve single light source at the center of the scene (for now)
-	for(int i = 0; i < 1; i++) {
-		Lo += solveLightSource(albedo, roughness, metallic, N, V, Light(vec3(0.0), vec3(100.0)));
+	//= solve light sources
+	for(int i = 0; i < lightData.pointCount; i++) {
+		Lo += solveLightSource(albedo, roughness, metallic, N, V, pointLightData.lights[i]);
 	}
 
-	vec3 ambient = vec3(0.03) * albedo; // TODO
+	vec3 ambient = vec3(0.01) * albedo; // TODO
 	vec3 color = ambient + Lo;
 	
 	// gamma correction (reinhard)

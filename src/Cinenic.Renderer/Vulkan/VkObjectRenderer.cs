@@ -107,10 +107,10 @@ namespace Cinenic.Renderer.Vulkan {
 			if(totalMaterials.Count < 0 || totalMatrices.Count < 0) return;
 
 			// upload data to GPU
-			ShaderPipeline.VertexData.Size = (uint)(totalVertices.Count * sizeof(Vertex));
-			ShaderPipeline.IndexData.Size = (uint)(totalIndices.Count * sizeof(uint));
-			ShaderPipeline.MaterialData.Size = (uint)(totalMaterials.Count * sizeof(Material.Data));
-			ShaderPipeline.MatrixData.Size = (uint)(totalMatrices.Count * sizeof(Matrix4x4));
+			ShaderPipeline.VertexData.Size = (uint) (totalVertices.Count * sizeof(Vertex));
+			ShaderPipeline.IndexData.Size = (uint) (totalIndices.Count * sizeof(uint));
+			ShaderPipeline.MaterialData.Size = (uint) (totalMaterials.Count * sizeof(Material.Data));
+			ShaderPipeline.MatrixData.Size = (uint) (totalMatrices.Count * sizeof(Matrix4x4));
 
 			ShaderPipeline.VertexData.Data = totalVertices.ToArrayNoCopy();
 			ShaderPipeline.IndexData.Data = totalIndices.ToArrayNoCopy();
