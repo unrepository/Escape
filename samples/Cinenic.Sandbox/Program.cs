@@ -1,1 +1,1 @@
-HierarchyTest.Start(args);
+LightingTest.Start(args);

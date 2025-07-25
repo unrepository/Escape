@@ -2,8 +2,11 @@
 
 layout(set = 1, binding = 0, std430) readonly buffer CameraBuffer {
 	mat4 projection;
+	mat4 inverse_projection;
 	mat4 view;
+	mat4 inverse_view;
 	vec3 position;
+	float aspect_ratio;
 } cameraData;
 
 struct Vertex {
@@ -24,7 +27,7 @@ struct Material {
 	vec4 albedo;
 	float roughness;
 	float metallic;
-	int useTextures;
+	float ior;
 };
 
 layout(set = 4, binding = 3, std430) readonly buffer MaterialBuffer {
@@ -48,6 +51,8 @@ layout(push_constant) uniform PushConstants {
 
 layout(location = 1) out Vertex outVertex;
 layout(location = 10) flat out Material outMaterial;
+layout(location = 20) out vec3 worldPos;
+layout(location = 21) out vec3 normal;
 
 void main() {
 	uint index = indices[pc.indexOffset + gl_VertexIndex];
@@ -60,4 +65,7 @@ void main() {
 
 	outVertex = v;
 	outMaterial = mat;
+	
+	worldPos = vec3(matrix * vec4(v.position, 1.0));
+	normal = v.normal * transpose(inverse(mat3(matrix)));
 }

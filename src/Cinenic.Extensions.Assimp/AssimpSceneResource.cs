@@ -21,7 +21,7 @@ namespace Cinenic.Extensions.Assimp {
 			".smd", ".vta"
 		];
 		
-		public IScene? Scene { get; private set; }
+		public AssimpScene? Scene { get; private set; }
 
 		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings) {
 			base.Load(platform, filePath, stream, resourceAssembly, settings);
@@ -33,6 +33,8 @@ namespace Cinenic.Extensions.Assimp {
 			Scene?.Dispose();
 			base.Dispose(reloading);
 		}
+		
+		public static implicit operator AssimpScene(AssimpSceneResource resource) => resource.Scene;
 
 		public class Import : ImportMetadata {
 

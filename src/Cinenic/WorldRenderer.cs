@@ -65,7 +65,10 @@ namespace Cinenic {
 			var cameraData = new CameraData {
 				Position = Vector3.One,
 				Projection = Matrix4x4.Identity,
-				View = Matrix4x4.Identity
+				InverseProjection = Matrix4x4.Identity,
+				View = Matrix4x4.Identity,
+				InverseView = Matrix4x4.Identity,
+				AspectRatio = 0
 			};
 			
 			World.Query(in _camera3DQuery, (ref Camera3D c3d) => {
@@ -76,7 +79,10 @@ namespace Cinenic {
 				// of course, there should also be a way to set a specific camera as the "current" one
 				//   and disable all other cameras TODO
 				cameraData.Projection *= c3d.Camera.ProjectionMatrix;
+				cameraData.InverseProjection *= c3d.Camera.InverseProjectionMatrix;
 				cameraData.View *= c3d.Camera.ViewMatrix;
+				cameraData.InverseView *= c3d.Camera.InverseViewMatrix;
+				cameraData.AspectRatio = c3d.Camera.Width / c3d.Camera.Height;
 			});
 
 			ObjectRenderer.ShaderPipeline.CameraData.Data = cameraData;
