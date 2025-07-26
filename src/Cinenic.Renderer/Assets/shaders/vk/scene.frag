@@ -75,6 +75,7 @@ layout(push_constant) uniform PushConstants {
 	int normalTextureIndex;
 	int metallicTextureIndex;
 	int roughnessTextureIndex;
+	int displacementTextureIndex;
 } pc;
 
 layout(set = 0, binding = 0) uniform sampler2D textures[1024];
@@ -82,9 +83,14 @@ layout(set = 0, binding = 0) uniform sampler2D textures[1024];
 layout(location = 0) out vec4 fragColor;
 layout(location = 1) in Vertex vertex;
 layout(location = 10) flat in Material material;
-layout(location = 20) in vec3 worldPos;
-layout(location = 21) in vec3 normal;
-layout(location = 22) in mat3 TBN;
+layout(location = 20) in vec3 fragPos;
+layout(location = 21) in vec3 viewDir;
+layout(location = 22) in vec3 normal;
+layout(location = 23) in mat3 TBN;
+layout(location = 26) in mat3 tTBN;
+layout(location = 29) in vec3 tViewPos;
+layout(location = 30) in vec3 tFragPos;
+layout(location = 31) in vec3 tViewDir;
 
 //= functions
 vec3 fresnelSchlick(float cosTheta, vec3 F0) {
@@ -165,8 +171,8 @@ vec3 solveDirectionalLight(vec3 albedo, float roughness, float metallic, vec3 N,
 }
 
 vec3 solvePointLight(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, PointLight l) {
-	vec3 L = normalize(l.position - worldPos);
-	float distance = length(l.position - worldPos);
+	vec3 L = normalize(l.position - fragPos);
+	float distance = length(l.position - fragPos);
 	vec3 radiance = l.color * calcAttenuation(distance);
 	
 	return brdf(albedo, roughness, metallic, N, V, L, radiance);
@@ -174,48 +180,64 @@ vec3 solvePointLight(vec3 albedo, float roughness, float metallic, vec3 N, vec3 
 
 // TODO not sure if this is implemented correctly, but it's very hard to check manually specifying rotations
 vec3 solveSpotLight(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, SpotLight l) {
-	vec3 L = normalize(l.position - worldPos);
+	vec3 L = normalize(l.position - fragPos);
 
 	float theta = dot(L, normalize(-l.direction));
 	float epsilon = (l.cutoff + l.cutoffOuter) - l.cutoff;
 	float intensity = clamp((theta - (l.cutoff + l.cutoffOuter)) / epsilon, 0.0, 1.0);
 
-	float distance = length(l.position - worldPos);
+	float distance = length(l.position - fragPos);
 	vec3 radiance = l.color * calcAttenuation(distance) * intensity;
 	
 	return brdf(albedo, roughness, metallic, N, V, L, radiance);
 }
 
+//=
+vec2 parallaxMap(vec2 uv, vec3 viewDir) {
+	return uv; // TODO
+}
+
 //= entry point
 void main() {
+	vec2 uv = vertex.uv;
+	
 	vec3 albedo = material.albedo.rgb;
 	float roughness = material.roughness;
 	float metallic = material.metallic;
+
+	//= parallax mapping
+	if(pc.displacementTextureIndex > 0) {
+		uv = parallaxMap(vertex.uv, tViewDir);
+
+		if(uv.x > 1.0 || uv.y > 1.0 || uv.x < 0.0 || uv.y < 0.0) {
+			discard;
+		}
+	}
 	
 	if(pc.albedoTextureIndex > 0) {
-		albedo *= pow(texture(textures[pc.albedoTextureIndex], vertex.uv).rgb, vec3(gamma));
+		albedo *= pow(texture(textures[pc.albedoTextureIndex], uv).rgb, vec3(gamma));
 	}
 
 	if(pc.metallicTextureIndex > 0) {
-		metallic = texture(textures[pc.metallicTextureIndex], vertex.uv).r;
+		metallic = texture(textures[pc.metallicTextureIndex], uv).r;
 	}
 
 	if(pc.roughnessTextureIndex > 0) {
-		roughness = texture(textures[pc.roughnessTextureIndex], vertex.uv).r;
+		roughness = texture(textures[pc.roughnessTextureIndex], uv).r;
 	}
 	
 	//= normal mapping
 	vec3 n = normal;
 	
 	if(pc.normalTextureIndex > 0) {
-		n = texture(textures[pc.normalTextureIndex], vertex.uv).rgb;
+		n = texture(textures[pc.normalTextureIndex], uv).rgb;
 		n = n * 2.0 - 1.0;
 		n = normalize(TBN * n);
 	}
 
 	//=
 	vec3 N = normalize(n);
-	vec3 V = normalize(cameraData.position - worldPos);
+	vec3 V = viewDir;
 
 	vec3 Lo = vec3(0.0);
 

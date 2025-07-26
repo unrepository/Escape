@@ -236,6 +236,8 @@ namespace Cinenic.Extensions.Assimp {
 					material.NormalTexture = LoadTexture(AiTextureType.Normals);
 					material.RoughnessTexture = LoadTexture(AiTextureType.DiffuseRoughness);
 					material.MetallicTexture = LoadTexture(AiTextureType.Metalness);
+					// TODO no displacement maps in glTF (when exporting from Blender), need workaround
+					material.DisplacementTexture = LoadTexture(AiTextureType.Displacement);
 					
 					_logger.Trace("Material construction complete");
 					_logger.Trace(material);

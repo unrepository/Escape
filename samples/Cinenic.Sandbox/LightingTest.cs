@@ -7,6 +7,7 @@ using Cinenic.Extensions.Assimp;
 using Cinenic.Extensions.Scene;
 using Cinenic.Renderer;
 using Cinenic.Renderer.Camera;
+using Cinenic.Renderer.Resources;
 using Cinenic.Resources;
 using Cinenic.UnitTypes;
 using static Shared;
@@ -25,10 +26,12 @@ public static class LightingTest {
 		var m1 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/brick_cube.glb")!;
 		var e1 = m1.Get().Scene!.Export(ref world, null);
 		e1.Add(new Transform3D(new Vector3(-2, 0, -2), Quaternion.Identity, new Vector3(0.5f)));
+		e1.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.DisplacementTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Bricks097_1K-JPG_Displacement.jpg");
 		
 		var m2 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/concrete_cube.glb")!;
 		var e2 = m2.Get().Scene!.Export(ref world, null);
 		e2.Add(new Transform3D(new Vector3(-2, 0, 0), Quaternion.Identity, new Vector3(0.5f)));
+		e2.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.DisplacementTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Concrete041B_1K-JPG_Displacement.jpg");
 		
 		var m3 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/onyx_cube.glb")!;
 		var e3 = m3.Get().Scene!.Export(ref world, null);

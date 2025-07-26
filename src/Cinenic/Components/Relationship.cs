@@ -86,11 +86,11 @@ namespace Cinenic.Components {
 		}
 
 		public static Entity GetChild(this Entity entity, int id = -1, int index = -1) {
-			if((id < 0 && index < 0) | (id > 0 && index > 0)) throw new ArgumentException("Only one of id or index must be specified");
+			if((id < 0 && index < 0) | (id >= 0 && index >= 0)) throw new ArgumentException("Only one of id or index must be specified");
 
 			var children = entity.GetChildren();
 
-			if(index > 0) {
+			if(index >= 0) {
 				return children[index];
 			}
 

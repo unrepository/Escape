@@ -18,6 +18,7 @@ namespace Cinenic.Renderer {
 		public Ref<TextureResource>? NormalTexture;
 		public Ref<TextureResource>? MetallicTexture;
 		public Ref<TextureResource>? RoughnessTexture;
+		public Ref<TextureResource>? DisplacementTexture;
 		
 		public static implicit operator Material(Color color)
 			=> new Material { AlbedoColor = color };
@@ -43,18 +44,21 @@ namespace Cinenic.Renderer {
 				AlbedoColor = AlbedoColor,
 				Roughness = Roughness,
 				Metallic = Metallic,
+				IOR = IOR,
 				AlbedoTexture = AlbedoTexture,
 				MetallicTexture = MetallicTexture,
 				NormalTexture = NormalTexture,
-				RoughnessTexture = RoughnessTexture
+				RoughnessTexture = RoughnessTexture,
+				DisplacementTexture = DisplacementTexture
 			};
 		}
 		
 		public override string ToString() {
 			return 
-				$"[Albedo={AlbedoColor}, Roughness={Roughness}, Metallic={Metallic}, "
+				$"[Albedo={AlbedoColor}, Roughness={Roughness}, Metallic={Metallic}, IOR={IOR}, "
 				+ $"AlbedoTexture={AlbedoTexture?.Get().Id}, NormalTexture={NormalTexture?.Get().Id}, "
-				+ $"RoughnessTexture={RoughnessTexture?.Get().Id}, MetallicTexture={MetallicTexture?.Get().Id}]";
+				+ $"RoughnessTexture={RoughnessTexture?.Get().Id}, MetallicTexture={MetallicTexture?.Get().Id}, "
+				+ $"DisplacementTexture={DisplacementTexture?.Get().Id}]";
 		}
 
 		[StructLayout(LayoutKind.Explicit)]

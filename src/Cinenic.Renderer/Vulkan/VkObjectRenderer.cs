@@ -132,6 +132,7 @@ namespace Cinenic.Renderer.Vulkan {
 					if(mesh.Material.NormalTexture?.Get().Texture is VkTexture normal) pc.NormalTextureIndex = normal.Index;
 					if(mesh.Material.MetallicTexture?.Get().Texture is VkTexture metallic) pc.MetallicTextureIndex = metallic.Index;
 					if(mesh.Material.RoughnessTexture?.Get().Texture is VkTexture roughness) pc.RoughnessTextureIndex = roughness.Index;
+					if(mesh.Material.DisplacementTexture?.Get().Texture is VkTexture displacement) pc.DisplacementTextureIndex = displacement.Index;
 
 					vkPlatform.API.CmdPushConstants(
 						vkQueue.CommandBuffer,
@@ -147,6 +148,7 @@ namespace Cinenic.Renderer.Vulkan {
 					mesh.Material.NormalTexture?.Get().Texture?.Bind(queue, 0);
 					mesh.Material.MetallicTexture?.Get().Texture?.Bind(queue, 0);
 					mesh.Material.RoughnessTexture?.Get().Texture?.Bind(queue, 0);
+					mesh.Material.DisplacementTexture?.Get().Texture?.Bind(queue, 0);
 
 					vkPlatform.API.CmdDraw(
 						vkQueue.CommandBuffer,
@@ -210,6 +212,7 @@ namespace Cinenic.Renderer.Vulkan {
 			[FieldOffset(20)] public int NormalTextureIndex;
 			[FieldOffset(24)] public int MetallicTextureIndex;
 			[FieldOffset(28)] public int RoughnessTextureIndex;
+			[FieldOffset(32)] public int DisplacementTextureIndex;
 		}
 	}
 }
