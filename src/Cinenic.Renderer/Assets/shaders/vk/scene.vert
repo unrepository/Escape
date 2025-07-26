@@ -65,6 +65,7 @@ void main() {
 	Material mat = materials[pc.materialOffset];
 	
 	gl_Position = cameraData.projection * cameraData.view * matrix * vec4(v.position, 1.0);
+	gl_Position.y *= -1.0; // Vulkan has funky coordinates so we need to flip
 
 	outVertex = v;
 	outMaterial = mat;

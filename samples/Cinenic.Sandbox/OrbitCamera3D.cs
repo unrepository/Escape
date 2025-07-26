@@ -73,11 +73,11 @@ namespace Cinenic.Sandbox {
 			var mouseCaptured = false;
 
 			if(!mouseCaptured) {
-				float div = 100.0f;
+				float div = 200.0f;
 				
 				// rotation
 				if(AllowRotating && MovementMouse.IsButtonPressed(MouseButton.Left)) {
-					t3d.Yaw += Rotation<float>.FromDegrees((float) deltaX);
+					t3d.Yaw -= Rotation<float>.FromDegrees((float) deltaX);
 					t3d.Pitch += Rotation<float>.FromDegrees((float) deltaY);
 				}
 

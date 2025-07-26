@@ -1,3 +1,4 @@
+using Cinenic.Extensions.ImGui;
 using ImGui_ = Hexa.NET.ImGui.ImGui;
 
 namespace Cinenic.Extensions.Debugging.Providers {

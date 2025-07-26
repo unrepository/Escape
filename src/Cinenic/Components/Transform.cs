@@ -8,8 +8,8 @@ namespace Cinenic.Components {
 	[Component]
 	public struct Transform3D {
 
-		public Matrix4x4 LocalMatrix;
-		public Matrix4x4 GlobalMatrix;
+		public Matrix4x4 LocalMatrix { get; internal set; }
+		public Matrix4x4 GlobalMatrix { get; internal set; }
 
 		public Vector3 Position {
 			get;
@@ -119,10 +119,30 @@ namespace Cinenic.Components {
 			Scale = Vector3.One;
 		}
 
-		public Transform3D(Vector3 position, Quaternion rotation, Vector3 scale) {
+		public Transform3D(Vector3 position, Quaternion? rotation = null, Vector3? scale = null) {
 			Position = position;
-			Rotation = rotation;
-			Scale = scale;
+			Rotation = rotation ?? Quaternion.Identity;
+			Scale = scale ?? Vector3.One;
+		}
+		
+		public Transform3D(
+			Vector3 position,
+			Rotation<float>? yaw = null, Rotation<float>? pitch = null, Rotation<float>? roll = null,
+			Vector3? scale = null
+		) {
+			Position = position;
+
+			yaw ??= Rotation<float>.FromRadians(0);
+			pitch ??= Rotation<float>.FromRadians(0);
+			roll ??= Rotation<float>.FromRadians(0);
+			
+			Rotation = Quaternion.CreateFromYawPitchRoll(
+				yaw.Value.Radians,
+				pitch.Value.Radians,
+				roll.Value.Radians
+			);
+			
+			Scale = scale ?? Vector3.One;
 		}
 
 		public void Translate(Vector3 translation) {
