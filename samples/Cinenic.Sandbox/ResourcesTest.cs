@@ -4,6 +4,7 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Cinenic;
 using Cinenic.Components;
+using Cinenic.Extensions.Debugging.Providers;
 using Cinenic.Renderer;
 using Cinenic.Renderer.Camera;
 using Cinenic.Renderer.Resources;
@@ -89,6 +90,8 @@ public static class ResourcesTest {
 		);
 		
 		camera.Get<Transform3D>().LookAt(new Vector3(0, 1, 0));
+		
+		DebugInterface.Providers.Add(new TransformGizmoProvider(world, camera.Get<Camera3D>()));
 		
 		// run loop
 		CINENIC.Run();

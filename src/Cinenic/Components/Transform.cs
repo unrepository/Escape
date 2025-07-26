@@ -8,8 +8,8 @@ namespace Cinenic.Components {
 	[Component]
 	public struct Transform3D {
 
-		public Matrix4x4 LocalMatrix;
-		public Matrix4x4 GlobalMatrix;
+		public Matrix4x4 LocalMatrix { get; internal set; }
+		public Matrix4x4 GlobalMatrix { get; internal set; }
 
 		public Vector3 Position {
 			get;

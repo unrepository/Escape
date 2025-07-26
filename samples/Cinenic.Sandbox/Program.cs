@@ -1,1 +1,1 @@
-HierarchyTest.Start(args);
+ResourcesTest.Start(args);
