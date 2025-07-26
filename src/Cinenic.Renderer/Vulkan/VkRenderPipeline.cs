@@ -94,7 +94,7 @@ namespace Cinenic.Renderer.Vulkan {
 					PolygonMode = PolygonMode.Fill,
 					LineWidth = 1.0f,
 					CullMode = CullModeFlags.BackBit,
-					FrontFace = FrontFace.Clockwise,
+					FrontFace = FrontFace.CounterClockwise,
 					DepthBiasEnable = false,
 					DepthBiasConstantFactor = 0.0f,
 					DepthBiasClamp = 0.0f,
