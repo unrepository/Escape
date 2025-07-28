@@ -1,5 +1,6 @@
 #version 450
 #define PI radians(180)
+#define MIN_SAFE_VALUE 0.000001
 
 const float gamma = 2.2;
 
@@ -33,7 +34,7 @@ struct SpotLight {
 	vec3 color;
 	vec3 position;
 	vec3 direction;
-	
+
 	float cutoff;
 	float cutoffOuter;
 };
@@ -86,134 +87,75 @@ layout(location = 10) flat in Material material;
 layout(location = 20) in vec3 fragPos;
 layout(location = 21) in vec3 viewDir;
 layout(location = 22) in vec3 normal;
-layout(location = 23) in mat3 TBN;
-layout(location = 26) in mat3 tTBN;
-layout(location = 29) in vec3 tViewPos;
-layout(location = 30) in vec3 tFragPos;
-layout(location = 31) in vec3 tViewDir;
 
 //= functions
-vec3 fresnelSchlick(float cosTheta, vec3 F0) {
-	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
-}
+// GGX/Trowbridge-Reitz
+float normalDistribution(float alpha, vec3 N, vec3 H) {
+	float numerator = pow(alpha, 2.0);
 
-float distributionGGX(vec3 N, vec3 H, float roughness) {
-	float a = roughness * roughness;
-	float a2 = a * a;
 	float NdotH = max(dot(N, H), 0.0);
-	float NdotH2 = NdotH * NdotH;
-	
-	float num = a2;
-	float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-	denom = PI * denom * denom;
-	
-	return num / denom;
+	float denominator = PI * pow(pow(NdotH, 2.0) * (pow(alpha, 2.0) - 1.0) + 1.0, 2.0);
+	denominator = max(denominator, MIN_SAFE_VALUE);
+
+	return numerator / denominator;
 }
 
-float geometrySchlickGGX(float NdotV, float roughness) {
-	float r = roughness + 1.0;
-	float k = (r * r) / 8.0;
-	
-	float num = NdotV;
-	float denom = NdotV * (1.0 - k) + k;
-	
-	return num / denom;
+// Schlick-Beckmann
+float geometryShadowing1(float alpha, vec3 N, vec3 X) {
+	float numerator = max(dot(N, X), 0.0);
+
+	float k = alpha / 2.0;
+	float denominator = max(dot(N, X), 0.0) * (1.0 - k) + k;
+	denominator = max(denominator, MIN_SAFE_VALUE);
+
+	return numerator / denominator;
 }
 
-float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
-	float NdotV = max(dot(N, V), 0.0);
-	float NdotL = max(dot(N, L), 0.0);
-	float ggx2  = geometrySchlickGGX(NdotV, roughness);
-	float ggx1  = geometrySchlickGGX(NdotL, roughness);
-
-	return ggx1 * ggx2;
+// Smith
+float geometryShadowing(float alpha, vec3 N, vec3 V, vec3 L) {
+	return geometryShadowing1(alpha, N, V) * geometryShadowing1(alpha, N, L);
 }
 
-float calcAttenuation(float distance) {
-	return 1.0 / (distance * distance); // inverse-square
+// Fresnel-Schlick
+vec3 fresnel(vec3 F0, vec3 V, vec3 H) {
+	return F0 + (vec3(1.0) - F0) * pow(1 - max(dot(V, H), 0.0), 5.0);
 }
 
-vec3 brdf(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, vec3 L, vec3 radiance) {
+vec3 brdf(vec3 albedo, float roughness, float metallic, float alpha, vec3 Lc, vec3 N, vec3 V, vec3 L, vec3 F0) {
 	vec3 H = normalize(V + L);
 
-	vec3 F0 = mix(
-		vec3(pow(material.ior - 1, 2) / pow(material.ior + 1, 2)),
-		albedo,
-		metallic
-	);
-	// vec3 F0 = vec3(pow(material.ior - 1, 2) / pow(material.ior + 1, 2));
-	
-	vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-	float NDF = distributionGGX(N, H, roughness);
-	float G = geometrySmith(N, V, L, roughness);
-	
-	vec3 numerator = NDF * G * F;
-	
-	float NdotV = max(dot(N, V), 0.0);
-	float NdotL = max(dot(N, L), 0.0);
-	float denominator = max(4.0 * NdotV * NdotL, 0.001);
-	
-	vec3 specular = numerator / denominator;
-	
-	vec3 kS = F;
+	vec3 kS = fresnel(F0, V, H);
 	vec3 kD = vec3(1.0) - kS;
-	kD *= 1.0 - metallic;
-	
-	return (kD * albedo / PI + specular) * radiance * NdotL;
+
+	vec3 lambert = albedo / PI;
+
+	// Cook-Torrance
+	vec3 ctNumerator = normalDistribution(alpha, N, H) * geometryShadowing(alpha, N, V, L) * kS;
+	float ctDenominator = 4.0 * max(dot(V, N), 0.0) * max(dot(L, N), 0.0);
+	ctDenominator = max(ctDenominator, MIN_SAFE_VALUE);
+	vec3 ct = ctNumerator / ctDenominator;
+
+	vec3 BRDF = kD * lambert + ct;
+	vec3 Lo = BRDF * Lc * max(dot(L, N), 0.0); // outgoing light
+
+	return Lo;
 }
 
-//= light type functions
-vec3 solveDirectionalLight(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, DirectionalLight l) {
-	vec3 L = normalize(-l.direction);
-	vec3 radiance = l.color;
-
-	return brdf(albedo, roughness, metallic, N, V, L, radiance);
-}
-
-vec3 solvePointLight(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, PointLight l) {
-	vec3 L = normalize(l.position - fragPos);
-	float distance = length(l.position - fragPos);
-	vec3 radiance = l.color * calcAttenuation(distance);
-	
-	return brdf(albedo, roughness, metallic, N, V, L, radiance);
-}
-
-// TODO not sure if this is implemented correctly, but it's very hard to check manually specifying rotations
-vec3 solveSpotLight(vec3 albedo, float roughness, float metallic, vec3 N, vec3 V, SpotLight l) {
-	vec3 L = normalize(l.position - fragPos);
-
-	float theta = dot(L, normalize(-l.direction));
-	float epsilon = (l.cutoff + l.cutoffOuter) - l.cutoff;
-	float intensity = clamp((theta - (l.cutoff + l.cutoffOuter)) / epsilon, 0.0, 1.0);
-
-	float distance = length(l.position - fragPos);
-	vec3 radiance = l.color * calcAttenuation(distance) * intensity;
-	
-	return brdf(albedo, roughness, metallic, N, V, L, radiance);
-}
-
-//=
-vec2 parallaxMap(vec2 uv, vec3 viewDir) {
-	return uv; // TODO
+vec3 attenuation_radiance(vec3 position, vec3 color) {
+	float distance = length(position - fragPos);
+	float attenuation = 1.0 / (distance * distance);
+	return color * attenuation;
 }
 
 //= entry point
 void main() {
 	vec2 uv = vertex.uv;
-	
+
 	vec3 albedo = material.albedo.rgb;
+	float opacity = material.albedo.a;
 	float roughness = material.roughness;
 	float metallic = material.metallic;
 
-	//= parallax mapping
-	if(pc.displacementTextureIndex > 0) {
-		uv = parallaxMap(vertex.uv, tViewDir);
-
-		if(uv.x > 1.0 || uv.y > 1.0 || uv.x < 0.0 || uv.y < 0.0) {
-			discard;
-		}
-	}
-	
 	if(pc.albedoTextureIndex > 0) {
 		albedo *= pow(texture(textures[pc.albedoTextureIndex], uv).rgb, vec3(gamma));
 	}
@@ -225,41 +167,62 @@ void main() {
 	if(pc.roughnessTextureIndex > 0) {
 		roughness = texture(textures[pc.roughnessTextureIndex], uv).r;
 	}
-	
-	//= normal mapping
-	vec3 n = normal;
-	
-	if(pc.normalTextureIndex > 0) {
-		n = texture(textures[pc.normalTextureIndex], uv).rgb;
-		n = n * 2.0 - 1.0;
-		n = normalize(TBN * n);
-	}
+
+	float alpha = roughness * roughness;
 
 	//=
-	vec3 N = normalize(n);
-	vec3 V = viewDir;
+	vec3 N = normalize(normal);
+	vec3 V = normalize(cameraData.position - fragPos);
+
+	vec3 F0 = vec3(0.04);
+	F0 = mix(F0, albedo, metallic);
 
 	vec3 Lo = vec3(0.0);
 
-	//= solve light sources
 	for(int i = 0; i < lightData.dirCount; i++) {
-		Lo += solveDirectionalLight(albedo, roughness, metallic, N, V, dirLightData.lights[i]);
+		DirectionalLight l = dirLightData.lights[i];
+
+		vec3 L = normalize(-l.direction);
+		Lo += brdf(albedo, roughness, metallic, alpha, l.color, N, V, L, F0);
 	}
-	
+
 	for(int i = 0; i < lightData.pointCount; i++) {
-		Lo += solvePointLight(albedo, roughness, metallic, N, V, pointLightData.lights[i]);
+		PointLight l = pointLightData.lights[i];
+
+		vec3 L = normalize(l.position - fragPos);
+		vec3 radiance = attenuation_radiance(l.position, l.color);
+
+		Lo += brdf(albedo, roughness, metallic, alpha, radiance, N, V, L, F0);
 	}
 
+	// TODO broken and I don't know how to fix it
 	for(int i = 0; i < lightData.spotCount; i++) {
-		Lo += solveSpotLight(albedo, roughness, metallic, N, V, spotLightData.lights[i]);
+		SpotLight l = spotLightData.lights[i];
+
+		vec3 L = normalize(l.position - fragPos);
+		
+		//float inner = min(l.cutoff, l.cutoffOuter);
+		//float outer = max(l.cutoff, l.cutoffOuter);
+		float inner = l.cutoff;
+		float outer = l.cutoffOuter;
+		
+		float theta = dot(L, normalize(-l.direction));
+		
+		if(theta > inner) {
+			float epsilon = inner - outer;
+			float intensity = clamp((theta - outer) / epsilon, 0.0, 1.0);
+			
+			vec3 radiance = attenuation_radiance(l.position, l.color) * intensity;
+			Lo += brdf(albedo, roughness, metallic, alpha, radiance, N, V, L, F0);
+		}
 	}
 
-	vec3 ambient = vec3(0.0) * albedo; // TODO customizable
-	vec3 color = ambient + Lo;
-	
+	vec3 ambient = vec3(0.004);
+	vec3 color = ambient * albedo + Lo;
+
 	// gamma correction (reinhard)
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0 / gamma));
-	
-	fragColor = vec4(color, 1.0);
+
+	fragColor = vec4(color, opacity); // simple alpha blending
 }

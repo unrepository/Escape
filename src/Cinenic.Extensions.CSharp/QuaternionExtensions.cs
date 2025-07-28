@@ -55,7 +55,7 @@ namespace Cinenic.Extensions.CSharp {
 	    }
 
 		public static Vector3 GetDirectionVector(this Quaternion q) {
-			return Vector3.Transform(Vector3.UnitZ, q);
+			return Vector3.Normalize(Vector3.Transform(Vector3.UnitZ, q));
 		}
 	}
 }

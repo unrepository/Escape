@@ -126,8 +126,8 @@ namespace Cinenic {
 					Color = light.Color * light.Intensity,
 					Position = t3d.GlobalPosition,
 					Direction = t3d.GlobalRotation.GetDirectionVector(),
-					Cutoff = light.Cutoff.Radians,
-					CutoffOuter = light.CutoffOuter.Radians
+					Cutoff = MathF.Cos(light.Cutoff.Radians),
+					CutoffOuter = MathF.Cos(light.CutoffOuter.Radians)
 				});
 			});
 			
