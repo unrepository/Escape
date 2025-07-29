@@ -291,6 +291,8 @@ namespace Cinenic.Renderer.Vulkan {
 						};
 			
 						_platform.API.UpdateDescriptorSets(device, 1, writeDescriptorSet, 0, null);
+						
+						// TODO is there anything to free after uploading to GPU?
 					}
 				);
 				

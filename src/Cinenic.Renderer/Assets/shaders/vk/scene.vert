@@ -56,6 +56,8 @@ layout(location = 1) out Vertex outVertex;
 layout(location = 10) flat out Material outMaterial;
 layout(location = 20) out vec3 fragPos;
 layout(location = 22) out vec3 normal;
+layout(location = 23) out mat3 TBN;
+layout(location = 26) out vec3 V;
 
 void main() {
 	uint index = indices[pc.indexOffset + gl_VertexIndex];
@@ -69,7 +71,15 @@ void main() {
 
 	outVertex = v;
 	outMaterial = mat;
+	
+	vec3 T = normalize(vec3(matrix * vec4(v.tangent, 0.0)));
+	vec3 N = normalize(vec3(matrix * vec4(v.normal, 0.0)));
+	T = normalize(T - dot(T, N) * N);
+	vec3 B = cross(N, T);
+	TBN = transpose(mat3(T, B, N));
 
-	fragPos = vec3(matrix * vec4(v.position, 1.0));
+	fragPos = TBN * vec3(matrix * vec4(v.position, 1.0));
 	normal = v.normal * transpose(inverse(mat3(matrix)));
+
+	V = TBN * normalize(cameraData.position - fragPos);
 }

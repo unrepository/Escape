@@ -87,6 +87,8 @@ layout(location = 10) flat in Material material;
 layout(location = 20) in vec3 fragPos;
 layout(location = 21) in vec3 viewDir;
 layout(location = 22) in vec3 normal;
+layout(location = 23) in mat3 TBN;
+layout(location = 26) in vec3 V;
 
 //= functions
 // GGX/Trowbridge-Reitz
@@ -167,12 +169,19 @@ void main() {
 	if(pc.roughnessTextureIndex > 0) {
 		roughness = texture(textures[pc.roughnessTextureIndex], uv).r;
 	}
-
-	float alpha = roughness * roughness;
+	
+	//= normal mapping
+	vec3 n = normal;
+	
+	if(pc.normalTextureIndex > 0) {
+		n = texture(textures[pc.normalTextureIndex], uv).rgb;
+		n = normalize((n * 2.0 - 1.0));
+	}
 
 	//=
-	vec3 N = normalize(normal);
-	vec3 V = normalize(cameraData.position - fragPos);
+	float alpha = roughness * roughness;
+	
+	vec3 N = normalize(n);
 
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0, albedo, metallic);
@@ -182,14 +191,14 @@ void main() {
 	for(int i = 0; i < lightData.dirCount; i++) {
 		DirectionalLight l = dirLightData.lights[i];
 
-		vec3 L = normalize(-l.direction);
+		vec3 L = TBN * normalize(-l.direction);
 		Lo += brdf(albedo, roughness, metallic, alpha, l.color, N, V, L, F0);
 	}
 
 	for(int i = 0; i < lightData.pointCount; i++) {
 		PointLight l = pointLightData.lights[i];
 
-		vec3 L = normalize(l.position - fragPos);
+		vec3 L = TBN * normalize(l.position - fragPos);
 		vec3 radiance = attenuation_radiance(l.position, l.color);
 
 		Lo += brdf(albedo, roughness, metallic, alpha, radiance, N, V, L, F0);
@@ -199,7 +208,7 @@ void main() {
 	for(int i = 0; i < lightData.spotCount; i++) {
 		SpotLight l = spotLightData.lights[i];
 
-		vec3 L = normalize(l.position - fragPos);
+		vec3 L = TBN * normalize(l.position - fragPos);
 		
 		//float inner = min(l.cutoff, l.cutoffOuter);
 		//float outer = max(l.cutoff, l.cutoffOuter);

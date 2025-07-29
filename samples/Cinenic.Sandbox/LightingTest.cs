@@ -26,10 +26,10 @@ public static class LightingTest {
 		// scene.Get().Scene!.Export(ref world, null);
 		
 		// test objects
-		// var m1 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/brick_cube.glb")!;
-		// var e1 = m1.Get().Scene!.Export(ref world, null);
-		// e1.Add(new Transform3D(new Vector3(-2, 0, -2), Quaternion.Identity, new Vector3(0.5f)));
-		// e1.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.DisplacementTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Bricks097_1K-JPG_Displacement.jpg");
+		var m01 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/brick_cube.glb")!;
+		var e01 = m01.Get().Scene!.Export(ref world, null);
+		e01.Add(new Transform3D(new Vector3(0, 0.7f, 0.1f), Quaternion.Identity, new Vector3(0.2f)));
+		e01.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.DisplacementTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Bricks097_1K-JPG_Displacement.jpg");
 		//
 		// var m2 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/concrete_cube.glb")!;
 		// var e2 = m2.Get().Scene!.Export(ref world, null);
@@ -83,7 +83,7 @@ public static class LightingTest {
 		dir.Get<Transform3D>().Pitch = Rotation<float>.FromDegrees(50);
 		
 		// directional light "sun" visualisation
-		lightObject.Get().Scene!.Export(ref world, dir);
+		//lightObject.Get().Scene!.Export(ref world, dir);
 		dir.Get<Transform3D>().Scale = new Vector3(2);
 		dir.Get<Transform3D>().Position = Vector3.Transform(-Vector3.UnitZ, dir.Get<Transform3D>().Rotation) * 5;
 
@@ -92,7 +92,7 @@ public static class LightingTest {
 			new PointLight(new Color(255, 255, 50), Intensity: 30)
 		);
 
-		lightObject.Get().Scene!.Export(ref world, point);
+		//lightObject.Get().Scene!.Export(ref world, point);
 		
 		// TODO spot lights are broken
 		/*var spot = world.Create(

@@ -189,7 +189,7 @@ namespace Cinenic.Extensions.Assimp {
 								if(Debugger.IsAttached) Debugger.Break();
 								break;
 							default:
-								_logger.Warn($"Unhandled property: {mProp->MKey.AsString} (type={mProp->MType})");
+								_logger.Debug($"Unhandled property: {mProp->MKey.AsString} (type={mProp->MType})");
 								break;
 						}
 					}
@@ -199,7 +199,7 @@ namespace Cinenic.Extensions.Assimp {
 						_ai.GetMaterialTexture(mMat, type, 0, &path, null, null, null, null, null, null);
 
 						if(path.Length == 0) {
-							_logger.Debug("Not loading texture type {Type} for material", type);
+							_logger.Warn("Not loading texture type {Type} for material", type);
 							return null;
 						}
 						
