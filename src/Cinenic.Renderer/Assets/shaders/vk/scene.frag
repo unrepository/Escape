@@ -85,7 +85,7 @@ layout(location = 0) out vec4 fragColor;
 layout(location = 1) in Vertex vertex;
 layout(location = 10) flat in Material material;
 layout(location = 20) in vec3 fragPos;
-layout(location = 21) in vec3 viewDir;
+layout(location = 21) in vec3 viewPos;
 layout(location = 22) in vec3 normal;
 layout(location = 23) in mat3 TBN;
 layout(location = 26) in vec3 V;
@@ -149,6 +149,50 @@ vec3 attenuation_radiance(vec3 position, vec3 color) {
 	return color * attenuation;
 }
 
+//= parallax mapping
+// steep parallax mapping with occlusion mapping
+vec2 spm_o(vec2 uv, vec3 viewDir, sampler2D heightMap, bool opm) {
+	const float heightScale = -0.07; // TODO
+	
+	const float minLayers = 8;
+	const float maxLayers = 64;
+	
+	// steep parallax mapping
+	float NdotV = clamp(dot(normal, viewDir), 0.0, 1.0);
+	
+	float layers = mix(maxLayers, minLayers, NdotV * NdotV);
+	float layerHeight = 1.0 / layers;
+	float currentLayerHeight = 0.0;
+	
+	vec2 P = viewDir.xy * heightScale;
+	vec2 deltaUV = P / layers;
+	
+	vec2 currentUV = uv;
+	float currentHeight = texture(heightMap, currentUV).r;
+	
+	while(currentLayerHeight < currentHeight) {
+		currentUV -= deltaUV;
+		currentHeight = texture(heightMap, currentUV).r;
+		currentLayerHeight += layerHeight;
+	}
+
+	// occlusion parallax mapping
+	if(opm) {
+		vec2 prevUV = currentUV + deltaUV;
+
+		float heightAfter = currentHeight - currentLayerHeight;
+		float heightBefore = texture(heightMap, prevUV).r - currentLayerHeight + layerHeight;
+
+		// interpolate UVs
+		float weight = heightAfter / (heightAfter - heightBefore);
+		vec2 finalUV = prevUV * weight + currentUV * (1.0 - weight);
+		
+		return finalUV;
+	}
+	
+	return currentUV;
+}
+
 //= entry point
 void main() {
 	vec2 uv = vertex.uv;
@@ -158,6 +202,12 @@ void main() {
 	float roughness = material.roughness;
 	float metallic = material.metallic;
 
+	//= parallax mapping
+	if(pc.displacementTextureIndex > 0) {
+		uv = spm_o(uv, normalize(viewPos - fragPos), textures[pc.displacementTextureIndex], true);
+	}
+
+	//= textures
 	if(pc.albedoTextureIndex > 0) {
 		albedo *= pow(texture(textures[pc.albedoTextureIndex], uv).rgb, vec3(gamma));
 	}
@@ -178,7 +228,7 @@ void main() {
 		n = normalize((n * 2.0 - 1.0));
 	}
 
-	//=
+	//= lights
 	float alpha = roughness * roughness;
 	
 	vec3 N = normalize(n);
@@ -225,7 +275,8 @@ void main() {
 			Lo += brdf(albedo, roughness, metallic, alpha, radiance, N, V, L, F0);
 		}
 	}
-
+	
+	//= final
 	vec3 ambient = vec3(0.004);
 	vec3 color = ambient * albedo + Lo;
 

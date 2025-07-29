@@ -54,7 +54,8 @@ layout(push_constant) uniform PushConstants {
 
 layout(location = 1) out Vertex outVertex;
 layout(location = 10) flat out Material outMaterial;
-layout(location = 20) out vec3 fragPos;
+layout(location = 20) out vec3 tgFragPos;
+layout(location = 21) out vec3 tgViewPos;
 layout(location = 22) out vec3 normal;
 layout(location = 23) out mat3 TBN;
 layout(location = 26) out vec3 V;
@@ -78,8 +79,9 @@ void main() {
 	vec3 B = cross(N, T);
 	TBN = transpose(mat3(T, B, N));
 
-	fragPos = TBN * vec3(matrix * vec4(v.position, 1.0));
+	tgFragPos = TBN * vec3(matrix * vec4(v.position, 1.0));
+	tgViewPos = TBN * cameraData.position;
 	normal = v.normal * transpose(inverse(mat3(matrix)));
 
-	V = TBN * normalize(cameraData.position - fragPos);
+	V = TBN * normalize(cameraData.position - tgFragPos);
 }

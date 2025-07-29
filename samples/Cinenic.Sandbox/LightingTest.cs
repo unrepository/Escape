@@ -26,20 +26,25 @@ public static class LightingTest {
 		// scene.Get().Scene!.Export(ref world, null);
 		
 		// test objects
+		// var m00 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/rocks.glb")!;
+		// var e00 = m00.Get().Scene!.Export(ref world, null);
+		// e00.Add(new Transform3D(new Vector3(0, 0, 0), Quaternion.Identity, new Vector3(2)));
+		// e00.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.DisplacementTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Rocks019_4K-JPG_Displacement.jpg");
+		
 		var m01 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/brick_cube.glb")!;
 		var e01 = m01.Get().Scene!.Export(ref world, null);
 		e01.Add(new Transform3D(new Vector3(0, 0.7f, 0.1f), Quaternion.Identity, new Vector3(0.2f)));
-		e01.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.DisplacementTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Bricks097_1K-JPG_Displacement.jpg");
-		//
-		// var m2 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/concrete_cube.glb")!;
-		// var e2 = m2.Get().Scene!.Export(ref world, null);
-		// e2.Add(new Transform3D(new Vector3(-2, 0, 0), Quaternion.Identity, new Vector3(0.5f)));
-		// e2.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.DisplacementTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Concrete041B_1K-JPG_Displacement.jpg");
-		//
-		// var m3 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/onyx_cube.glb")!;
-		// var e3 = m3.Get().Scene!.Export(ref world, null);
-		// e3.Add(new Transform3D(new Vector3(-2, 0, 2), Quaternion.Identity, new Vector3(1)));
-		//
+		e01.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.DisplacementTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Bricks059_1K-JPG/Bricks059_1K-JPG_Displacement.jpg");
+		
+		var m02 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/concrete_cube.glb")!;
+		var e02 = m02.Get().Scene!.Export(ref world, null);
+		e02.Add(new Transform3D(new Vector3(-0.5f, 0.7f, 0.1f), Quaternion.Identity, new Vector3(0.2f)));
+		e02.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.DisplacementTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Concrete041B_1K-JPG_Displacement.jpg");
+		
+		var m03 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/onyx_cube.glb")!;
+		var e03 = m03.Get().Scene!.Export(ref world, null);
+		e03.Add(new Transform3D(new Vector3(0.5f, 0.7f, 0.1f), Quaternion.Identity, new Vector3(0.2f)));
+		
 		// var m4 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/metal_sphere.glb")!;
 		// var e4 = m4.Get().Scene!.Export(ref world, null);
 		// e4.Add(new Transform3D(new Vector3(-2, 2, 0), Quaternion.Identity, new Vector3(0.5f)));
@@ -104,7 +109,9 @@ public static class LightingTest {
 		lightObject.Get().Scene!.Export(ref world, spot);*/
 		
 		CreateOrbitalCamera(ref world, window, out var cameraEntity, out var oc3d);
-		cameraEntity.Get<Transform3D>().LookAt(new Vector3(-2, 0, 0));
+		oc3d.Target = new Vector3(0, 0.5f, 1);
+		oc3d.Distance = 3.2f;
+		//cameraEntity.Get<Transform3D>().Rotate(pitch: Rotation<float>.FromDegrees(35), yaw: Rotation<float>.FromDegrees(60));
 		
 		CINENIC.Run();
 	}
