@@ -21,8 +21,8 @@ namespace Cinenic.Renderer.Camera {
 		
 		//public CameraData Data { get; protected set; }
 		
-		protected float Width { get; private set; }
-		protected float Height { get; private set; }
+		public float Width { get; private set; }
+		public float Height { get; private set; }
 
 		protected CameraBase(Framebuffer framebuffer)
 			: this((int) framebuffer.Size.X, (int) framebuffer.Size.Y)

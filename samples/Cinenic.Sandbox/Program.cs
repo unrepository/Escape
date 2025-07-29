@@ -1,1 +1,1 @@
-ResourcesTest.Start(args);
+LightingTest.Start(args);

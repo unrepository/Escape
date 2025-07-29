@@ -107,10 +107,10 @@ namespace Cinenic.Renderer.Vulkan {
 			if(totalMaterials.Count < 0 || totalMatrices.Count < 0) return;
 
 			// upload data to GPU
-			ShaderPipeline.VertexData.Size = (uint)(totalVertices.Count * sizeof(Vertex));
-			ShaderPipeline.IndexData.Size = (uint)(totalIndices.Count * sizeof(uint));
-			ShaderPipeline.MaterialData.Size = (uint)(totalMaterials.Count * sizeof(Material.Data));
-			ShaderPipeline.MatrixData.Size = (uint)(totalMatrices.Count * sizeof(Matrix4x4));
+			ShaderPipeline.VertexData.Size = (uint) (totalVertices.Count * sizeof(Vertex));
+			ShaderPipeline.IndexData.Size = (uint) (totalIndices.Count * sizeof(uint));
+			ShaderPipeline.MaterialData.Size = (uint) (totalMaterials.Count * sizeof(Material.Data));
+			ShaderPipeline.MatrixData.Size = (uint) (totalMatrices.Count * sizeof(Matrix4x4));
 
 			ShaderPipeline.VertexData.Data = totalVertices.ToArrayNoCopy();
 			ShaderPipeline.IndexData.Data = totalIndices.ToArrayNoCopy();
@@ -132,6 +132,7 @@ namespace Cinenic.Renderer.Vulkan {
 					if(mesh.Material.NormalTexture?.Get().Texture is VkTexture normal) pc.NormalTextureIndex = normal.Index;
 					if(mesh.Material.MetallicTexture?.Get().Texture is VkTexture metallic) pc.MetallicTextureIndex = metallic.Index;
 					if(mesh.Material.RoughnessTexture?.Get().Texture is VkTexture roughness) pc.RoughnessTextureIndex = roughness.Index;
+					if(mesh.Material.HeightTexture?.Get().Texture is VkTexture displacement) pc.HeightTextureIndex = displacement.Index;
 
 					vkPlatform.API.CmdPushConstants(
 						vkQueue.CommandBuffer,
@@ -147,6 +148,7 @@ namespace Cinenic.Renderer.Vulkan {
 					mesh.Material.NormalTexture?.Get().Texture?.Bind(queue, 0);
 					mesh.Material.MetallicTexture?.Get().Texture?.Bind(queue, 0);
 					mesh.Material.RoughnessTexture?.Get().Texture?.Bind(queue, 0);
+					mesh.Material.HeightTexture?.Get().Texture?.Bind(queue, 0);
 
 					vkPlatform.API.CmdDraw(
 						vkQueue.CommandBuffer,
@@ -210,6 +212,7 @@ namespace Cinenic.Renderer.Vulkan {
 			[FieldOffset(20)] public int NormalTextureIndex;
 			[FieldOffset(24)] public int MetallicTextureIndex;
 			[FieldOffset(28)] public int RoughnessTextureIndex;
+			[FieldOffset(32)] public int HeightTextureIndex;
 		}
 	}
 }

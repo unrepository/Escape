@@ -113,12 +113,12 @@ namespace Cinenic.Renderer.Vulkan {
 
 				var colorBlendAttachment = new PipelineColorBlendAttachmentState {
 					ColorWriteMask = ColorComponentFlags.RBit | ColorComponentFlags.GBit | ColorComponentFlags.BBit | ColorComponentFlags.ABit,
-					BlendEnable = false,
-					SrcColorBlendFactor = BlendFactor.One,
-					DstColorBlendFactor = BlendFactor.Zero,
+					BlendEnable = true,
+					SrcColorBlendFactor = BlendFactor.SrcAlpha,
+					DstColorBlendFactor = BlendFactor.OneMinusSrcAlpha,
 					ColorBlendOp = BlendOp.Add,
-					SrcAlphaBlendFactor = BlendFactor.One,
-					DstAlphaBlendFactor = BlendFactor.Zero,
+					SrcAlphaBlendFactor = BlendFactor.SrcAlpha,
+					DstAlphaBlendFactor = BlendFactor.OneMinusSrcAlpha,
 					AlphaBlendOp = BlendOp.Add
 				};
 

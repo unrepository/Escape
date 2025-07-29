@@ -24,7 +24,7 @@ public static class GLTFTest {
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);
 		
 		// load scene
-		var scene = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/AntiqueCamera.glb")!;
+		var scene = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/Corset.glb")!;
 		var sceneRoot = scene.Get().Scene!.Export(ref world, null);
 		
 		var q = new QueryDescription().WithNone<Empty>();

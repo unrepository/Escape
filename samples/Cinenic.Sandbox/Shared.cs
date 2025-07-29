@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Numerics;
 using Arch.Core;
 using Arch.Core.Extensions;

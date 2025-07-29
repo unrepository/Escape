@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Drawing;
 using System.Numerics;
 using System.Text;
 using Arch.Core;
@@ -95,6 +94,8 @@ namespace Cinenic.Extensions.Assimp {
 					for(int vi = 0; vi < vertices.Length; vi++) {
 						vertices[vi].Position = mesh->MVertices[vi];
 						vertices[vi].Normal = mesh->MNormals[vi];
+						vertices[vi].Tangent = mesh->MTangents[vi];
+						vertices[vi].Bitangent = mesh->MBitangents[vi];
 
 						if(mesh->MTextureCoords[0] != null) {
 							var uv = mesh->MTextureCoords[0][vi];
@@ -145,12 +146,12 @@ namespace Cinenic.Extensions.Assimp {
 						switch(mProp->MKey.AsString) {
 							case "$clr.base":
 								Debug.Assert(mProp->MDataLength == 16);
-								
-								material.AlbedoColor = Color.FromArgb(
-									(byte) (*(vF + 3) * 255),
-									(byte) (*vF * 255),
-									(byte) (*(vF + 1) * 255),
-									(byte) (*(vF + 2) * 255)
+
+								material.AlbedoColor = new Color(
+									*(vF + 0),
+									*(vF + 1),
+									*(vF + 2),
+									*(vF + 3)
 								);
 								break;
 							case "$mat.metallicFactor":
@@ -188,7 +189,7 @@ namespace Cinenic.Extensions.Assimp {
 								if(Debugger.IsAttached) Debugger.Break();
 								break;
 							default:
-								_logger.Warn($"Unhandled property: {mProp->MKey.AsString} (type={mProp->MType})");
+								_logger.Debug($"Unhandled property: {mProp->MKey.AsString} (type={mProp->MType})");
 								break;
 						}
 					}
@@ -198,7 +199,7 @@ namespace Cinenic.Extensions.Assimp {
 						_ai.GetMaterialTexture(mMat, type, 0, &path, null, null, null, null, null, null);
 
 						if(path.Length == 0) {
-							_logger.Debug("Not loading texture type {Type} for material", type);
+							_logger.Warn("Not loading texture type {Type} for material", type);
 							return null;
 						}
 						
@@ -235,6 +236,8 @@ namespace Cinenic.Extensions.Assimp {
 					material.NormalTexture = LoadTexture(AiTextureType.Normals);
 					material.RoughnessTexture = LoadTexture(AiTextureType.DiffuseRoughness);
 					material.MetallicTexture = LoadTexture(AiTextureType.Metalness);
+					// TODO no displacement maps in glTF (when exporting from Blender), need workaround
+					material.HeightTexture = LoadTexture(AiTextureType.Displacement);
 					
 					_logger.Trace("Material construction complete");
 					_logger.Trace(material);
