@@ -34,12 +34,12 @@ public static class LightingTest {
 		var m01 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/brick_cube.glb")!;
 		var e01 = m01.Get().Scene!.Export(ref world, null);
 		e01.Add(new Transform3D(new Vector3(0, 0.7f, 0.1f), Quaternion.Identity, new Vector3(0.2f)));
-		e01.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.DisplacementTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Bricks059_1K-JPG/Bricks059_1K-JPG_Displacement.jpg");
+		e01.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.HeightTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Bricks059_1K-JPG/Bricks059_1K-JPG_Displacement.jpg");
 		
 		var m02 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/concrete_cube.glb")!;
 		var e02 = m02.Get().Scene!.Export(ref world, null);
 		e02.Add(new Transform3D(new Vector3(-0.5f, 0.7f, 0.1f), Quaternion.Identity, new Vector3(0.2f)));
-		e02.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.DisplacementTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Concrete041B_1K-JPG_Displacement.jpg");
+		e02.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.HeightTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Concrete041B_1K-JPG_Displacement.jpg");
 		
 		var m03 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/onyx_cube.glb")!;
 		var e03 = m03.Get().Scene!.Export(ref world, null);

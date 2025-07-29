@@ -17,6 +17,12 @@ struct Material {
 	float roughness;
 	float metallic;
 	float ior;
+	
+	// parallax mapping options
+	bool pmComplex;
+	uint pmMinLayers;
+	uint pmMaxLayers;
+	float pmHeightScale;
 };
 
 //= lights
@@ -76,7 +82,7 @@ layout(push_constant) uniform PushConstants {
 	int normalTextureIndex;
 	int metallicTextureIndex;
 	int roughnessTextureIndex;
-	int displacementTextureIndex;
+	int heightTextureIndex;
 } pc;
 
 layout(set = 0, binding = 0) uniform sampler2D textures[1024];
@@ -150,26 +156,32 @@ vec3 attenuation_radiance(vec3 position, vec3 color) {
 }
 
 //= parallax mapping
+// simple
+vec2 pm(Material material, vec2 uv, vec3 viewDir, sampler2D heightMap) {
+	float height = texture(heightMap, uv).r;
+	return uv - viewDir.xy * (height * material.pmHeightScale);
+}
+
 // steep parallax mapping with occlusion mapping
-vec2 spm_o(vec2 uv, vec3 viewDir, sampler2D heightMap, bool opm) {
-	const float heightScale = -0.07; // TODO
+vec2 spm_o(Material material, vec2 uv, vec3 viewDir, sampler2D heightMap) {
+	float heightScale = material.pmHeightScale;
 	
-	const float minLayers = 8;
-	const float maxLayers = 64;
-	
+	const float minLayers = material.pmMinLayers;
+	const float maxLayers = material.pmMaxLayers;
+
 	// steep parallax mapping
 	float NdotV = clamp(dot(normal, viewDir), 0.0, 1.0);
-	
+
 	float layers = mix(maxLayers, minLayers, NdotV * NdotV);
 	float layerHeight = 1.0 / layers;
 	float currentLayerHeight = 0.0;
-	
+
 	vec2 P = viewDir.xy * heightScale;
 	vec2 deltaUV = P / layers;
-	
+
 	vec2 currentUV = uv;
 	float currentHeight = texture(heightMap, currentUV).r;
-	
+
 	while(currentLayerHeight < currentHeight) {
 		currentUV -= deltaUV;
 		currentHeight = texture(heightMap, currentUV).r;
@@ -177,20 +189,16 @@ vec2 spm_o(vec2 uv, vec3 viewDir, sampler2D heightMap, bool opm) {
 	}
 
 	// occlusion parallax mapping
-	if(opm) {
-		vec2 prevUV = currentUV + deltaUV;
+	vec2 prevUV = currentUV + deltaUV;
 
-		float heightAfter = currentHeight - currentLayerHeight;
-		float heightBefore = texture(heightMap, prevUV).r - currentLayerHeight + layerHeight;
+	float heightAfter = currentHeight - currentLayerHeight;
+	float heightBefore = texture(heightMap, prevUV).r - currentLayerHeight + layerHeight;
 
-		// interpolate UVs
-		float weight = heightAfter / (heightAfter - heightBefore);
-		vec2 finalUV = prevUV * weight + currentUV * (1.0 - weight);
-		
-		return finalUV;
-	}
-	
-	return currentUV;
+	// interpolate UVs
+	float weight = heightAfter / (heightAfter - heightBefore);
+	vec2 finalUV = prevUV * weight + currentUV * (1.0 - weight);
+
+	return finalUV;
 }
 
 //= entry point
@@ -203,8 +211,14 @@ void main() {
 	float metallic = material.metallic;
 
 	//= parallax mapping
-	if(pc.displacementTextureIndex > 0) {
-		uv = spm_o(uv, normalize(viewPos - fragPos), textures[pc.displacementTextureIndex], true);
+	if(pc.heightTextureIndex > 0) {
+		vec3 viewDir = normalize(viewPos - fragPos);
+		
+		if(material.pmComplex) {
+			uv = spm_o(material, uv, viewDir, textures[pc.heightTextureIndex]);
+		} else {
+			uv = pm(material, uv, viewDir, textures[pc.heightTextureIndex]);
+		}
 	}
 
 	//= textures
@@ -225,15 +239,15 @@ void main() {
 	
 	if(pc.normalTextureIndex > 0) {
 		n = texture(textures[pc.normalTextureIndex], uv).rgb;
-		n = normalize((n * 2.0 - 1.0));
+		n = normalize(n * 2.0 - 1.0);
 	}
 
 	//= lights
 	float alpha = roughness * roughness;
-	
 	vec3 N = normalize(n);
 
-	vec3 F0 = vec3(0.04);
+	//vec3 F0 = mix(vec3(0.04), albedo, metallic);
+	vec3 F0 = vec3(pow((material.ior - 1) / (material.ior + 1), 2));
 	F0 = mix(F0, albedo, metallic);
 
 	vec3 Lo = vec3(0.0);

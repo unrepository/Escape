@@ -30,6 +30,11 @@ struct Material {
 	float roughness;
 	float metallic;
 	float ior;
+	
+	bool pmComplex;
+	uint pmMinLayers;
+	uint pmMaxLayers;
+	float pmHeightScale;
 };
 
 layout(set = 4, binding = 3, std430) readonly buffer MaterialBuffer {
@@ -49,7 +54,7 @@ layout(push_constant) uniform PushConstants {
 	int normalTextureIndex;
 	int metallicTextureIndex;
 	int roughnessTextureIndex;
-	int displacementTextureIndex;
+	int heightTextureIndex;
 } pc;
 
 layout(location = 1) out Vertex outVertex;
