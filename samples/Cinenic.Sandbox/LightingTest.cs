@@ -82,7 +82,7 @@ public static class LightingTest {
 		// lights
 		var dir = world.Create(
 			new Transform3D(),
-			new DirectionalLight(Color.White, Intensity: 10)
+			new DirectionalLight(Color.White, Intensity: 2)
 		);
 		dir.Get<Transform3D>().Yaw = Rotation<float>.FromDegrees(-35);
 		dir.Get<Transform3D>().Pitch = Rotation<float>.FromDegrees(50);
@@ -91,27 +91,33 @@ public static class LightingTest {
 		//lightObject.Get().Scene!.Export(ref world, dir);
 		dir.Get<Transform3D>().Scale = new Vector3(2);
 		dir.Get<Transform3D>().Position = Vector3.Transform(-Vector3.UnitZ, dir.Get<Transform3D>().Rotation) * 5;
-
+		
 		var point = world.Create(
 			new Transform3D(position: new Vector3(0, 1, 1), rotation: Quaternion.Identity),
-			new PointLight(new Color(255, 255, 50), Intensity: 30)
+			new PointLight(new Color(255, 255, 50), Intensity: 1)
 		);
-
-		//lightObject.Get().Scene!.Export(ref world, point);
+		lightObject.Get().Scene!.Export(ref world, point);
 		
-		// TODO spot lights are broken
-		/*var spot = world.Create(
-			new Transform3D(new Vector3(-2, 1.1f, 2), Quaternion.Identity, Vector3.One),
-			new SpotLight(new Color(255, 255, 255), intensity: 100, cutoff: Rotation<float>.FromDegrees(25), cutoffOuter: Rotation<float>.FromDegrees(5))
+		var spot = world.Create(
+			new Transform3D(new Vector3(1.8f, 1.5f, 1.1f), Quaternion.Identity, Vector3.One),
+			new SpotLight(new Color(255, 0, 0), intensity: 3, cutoff: Rotation<float>.FromDegrees(45))
 		);
 		spot.Get<Transform3D>().Pitch = Rotation<float>.FromDegrees(90);
-
-		lightObject.Get().Scene!.Export(ref world, spot);*/
+		//lightObject.Get().Scene!.Export(ref world, spot);
 		
 		CreateOrbitalCamera(ref world, window, out var cameraEntity, out var oc3d);
 		oc3d.Target = new Vector3(0, 0.5f, 1);
 		oc3d.Distance = 3.2f;
 		//cameraEntity.Get<Transform3D>().Rotate(pitch: Rotation<float>.FromDegrees(35), yaw: Rotation<float>.FromDegrees(60));
+		
+		// move around point light
+		UpdateManager.Add("point light move", _ => {
+			point.Get<Transform3D>().Position = new Vector3(
+				MathF.Sin((float) window.Base.Time) * 2,
+				1.2f,
+				0.5f + MathF.Cos((float) window.Base.Time) * 2
+			);
+		});
 		
 		CINENIC.Run();
 	}

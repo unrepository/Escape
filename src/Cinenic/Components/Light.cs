@@ -23,7 +23,7 @@ namespace Cinenic.Components {
 			Intensity = intensity;
 
 			Cutoff = cutoff ?? Rotation<float>.FromDegrees(45);
-			CutoffOuter = cutoffOuter ?? Rotation<float>.FromDegrees(2);
+			CutoffOuter = cutoffOuter ?? /*Cutoff + */Rotation<float>.FromDegrees(5);
 		}
 	}
 }

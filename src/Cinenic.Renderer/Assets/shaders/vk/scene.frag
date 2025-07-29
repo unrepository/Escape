@@ -268,30 +268,28 @@ void main() {
 		Lo += brdf(albedo, roughness, metallic, alpha, radiance, N, V, L, F0);
 	}
 
-	// TODO broken and I don't know how to fix it
+	// TODO (probably) broken and I don't know how to fix it
 	for(int i = 0; i < lightData.spotCount; i++) {
 		SpotLight l = spotLightData.lights[i];
 
 		vec3 L = TBN * normalize(l.position - fragPos);
+		float theta = dot(L, normalize(TBN * -l.direction));
 		
-		//float inner = min(l.cutoff, l.cutoffOuter);
-		//float outer = max(l.cutoff, l.cutoffOuter);
-		float inner = l.cutoff;
-		float outer = l.cutoffOuter;
+		// apparently calculating cos on the CPU breaks everything shrug
+		float inner = cos(l.cutoff);
+		float outer = cos(l.cutoffOuter);
 		
-		float theta = dot(L, normalize(-l.direction));
-		
-		if(theta > inner) {
+		if(theta > outer) {
 			float epsilon = inner - outer;
 			float intensity = clamp((theta - outer) / epsilon, 0.0, 1.0);
-			
+
 			vec3 radiance = attenuation_radiance(l.position, l.color) * intensity;
 			Lo += brdf(albedo, roughness, metallic, alpha, radiance, N, V, L, F0);
 		}
 	}
 	
 	//= final
-	vec3 ambient = vec3(0.004);
+	vec3 ambient = vec3(0.0);
 	vec3 color = ambient * albedo + Lo;
 
 	// gamma correction (reinhard)
