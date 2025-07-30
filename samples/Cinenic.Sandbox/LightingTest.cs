@@ -118,6 +118,16 @@ public static class LightingTest {
 				0.5f + MathF.Cos((float) window.Base.Time) * 2
 			);
 		});
+
+		/*bool a = false;
+		
+		UpdateManager.Add("removal test", _ => {
+			if(a) return;
+			if(window.Base.Time > 15) {
+				world.Destroy(e1);
+				a = true;
+			}
+		});*/
 		
 		CINENIC.Run();
 	}

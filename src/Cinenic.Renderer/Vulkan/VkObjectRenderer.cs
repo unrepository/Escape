@@ -14,7 +14,8 @@ namespace Cinenic.Renderer.Vulkan {
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-		private readonly Dictionary<RenderableObject, ObjectDrawData> _drawDatas = [];
+		private readonly Dictionary<RenderableObject, ObjectDrawData> _drawData = [];
+		//private readonly List<RenderableObject> _objects = [];
 
 		public VkObjectRenderer(string id, DefaultSceneShaderPipeline shaderPipeline) : base(id, shaderPipeline) { }
 
@@ -26,43 +27,46 @@ namespace Cinenic.Renderer.Vulkan {
 			var indices = model.Meshes.SelectMany(m => m.Indices).ToArray();
 			var materials = model.Meshes.Select(m => m.Material.CreateData()).ToArray();
 
-			var lastData = _drawDatas.Values.LastOrDefault();
+			var lastData = _drawData.Values.LastOrDefault(new ObjectDrawData(0, 0, 0, 0, 0, 0, -1));
 			var data = new ObjectDrawData(
-				obj,
-				lastData.VertexOffset + lastData.VertexCount,
+				lastData.VertexIndex + lastData.VertexCount,
 				(uint) vertices.Length,
-				lastData.IndexOffset + lastData.IndexCount,
+				lastData.IndexIndex + lastData.IndexCount,
 				(uint) indices.Length,
-				lastData.MaterialOffset + lastData.MaterialCount,
+				lastData.MaterialIndex + lastData.MaterialCount,
 				(uint) materials.Length,
-				lastData.MatrixOffset + 1
+				lastData.MatrixIndex + 1
 			);
 
-			_drawDatas[obj] = data;
+			_drawData[obj] = data;
 			
-			//lock(ShaderPipeline) {
-				// ShaderPipeline.VertexData.Size += (uint) (vertices.Length * sizeof(Vertex));
-				// ShaderPipeline.IndexData.Size += (uint) (indices.Length * sizeof(uint));
-				// ShaderPipeline.MaterialData.Size += (uint) (materials.Length * sizeof(Material.Data));
-				// ShaderPipeline.MatrixData.Size += (uint) (1 * sizeof(Matrix4x4));
-			//}
-			
-			ShaderPipeline.VertexData.Write(data.VertexOffset, vertices);
-			ShaderPipeline.IndexData.Write(data.IndexOffset, indices);
-			ShaderPipeline.MaterialData.Write(data.MaterialOffset, materials);
-			ShaderPipeline.MatrixData.Write(data.MatrixOffset, [ matrix.Value ]);
+			ShaderPipeline.VertexData.Write(data.VertexIndex, vertices);
+			ShaderPipeline.IndexData.Write(data.IndexIndex, indices);
+			ShaderPipeline.MaterialData.Write(data.MaterialIndex, materials);
+			ShaderPipeline.MatrixData.Write((uint) data.MatrixIndex, [ matrix.Value ]);
 
 			_logger.Trace("Added object {Id}", obj.Id);
 			return true;
 		}
 
 		public unsafe override bool SetMatrix(RenderableObject obj, Matrix4x4 matrix) {
-			ShaderPipeline.MatrixData.Write(_drawDatas[obj].MatrixOffset, [ matrix ]);
+			ShaderPipeline.MatrixData.Write((uint) _drawData[obj].MatrixIndex, [ matrix ]);
 			return true;
 		}
 
+		// TODO broken under stupid circumstances
 		public override bool RemoveObject(RenderableObject obj) {
-			throw new NotImplementedException();
+			if(!_drawData.TryGetValue(obj, out var data)) return false;
+
+			if(!ShaderPipeline.VertexData.Remove(data.VertexIndex, data.VertexCount)) return false;
+			if(!ShaderPipeline.IndexData.Remove(data.IndexIndex, data.IndexCount)) return false;
+			if(!ShaderPipeline.MaterialData.Remove(data.MaterialIndex, data.MaterialCount)) return false;
+			if(!ShaderPipeline.MatrixData.Remove((uint) data.MatrixIndex, 1)) return false;
+
+			data.VertexCount = 0;
+			_drawData[obj] = data;
+			//return _drawData.Remove(obj);
+			return true;
 		}
 
 		public unsafe override void Render(RenderQueue queue, TimeSpan delta) {
@@ -72,36 +76,23 @@ namespace Cinenic.Renderer.Vulkan {
 
 			ShaderPipeline.PushData();
 
-			/*var barrier = new MemoryBarrier {
-				SType = StructureType.MemoryBarrier,
-				SrcAccessMask =	AccessFlags.HostWriteBit,
-				DstAccessMask = AccessFlags.ShaderReadBit
-			};
-			
-			vkPlatform.API.CmdPipelineBarrier(
-				vkQueue.CommandBuffer,
-				PipelineStageFlags.HostBit,
-				PipelineStageFlags.VertexShaderBit | PipelineStageFlags.FragmentShaderBit,
-				0,
-				1,
-				&barrier,
-				0,
-				null,
-				0,
-				null
-			);*/
+			uint vo = 0;
+			uint io = 0;
+			uint mo = 0;
+			uint mxo = 0;
 
-			foreach(var (obj, data) in _drawDatas) {
-				var vo = data.VertexOffset;
-				var io = data.IndexOffset;
-				var mo = data.MaterialOffset;
+			foreach(var (obj, data) in _drawData) {
+				if(data.VertexCount == 0 || data.IndexCount == 0) {
+					mxo += 1;
+					continue;
+				}
 				
 				foreach(var mesh in obj.Model.Meshes) {
 					var pc = new PushConstants {
 						VertexOffset = vo,
 						IndexOffset = io,
 						MaterialOffset = mo,
-						MatrixOffset = data.MatrixOffset
+						MatrixOffset = mxo
 					};
 
 					if(mesh.Material.AlbedoTexture?.Get().Texture is VkTexture albedo) pc.AlbedoTextureIndex = albedo.Index;
@@ -128,32 +119,33 @@ namespace Cinenic.Renderer.Vulkan {
 
 					vkPlatform.API.CmdDraw(
 						vkQueue.CommandBuffer,
-						(uint)mesh.Indices.Length,
+						(uint) mesh.Indices.Length,
 						1,
 						0,
 						0
 					);
 
-					vo += (uint)mesh.Vertices.Length;
-					io += (uint)mesh.Indices.Length;
+					vo += (uint) mesh.Vertices.Length;
+					io += (uint) mesh.Indices.Length;
 					mo += 1;
 				}
+
+				mxo += 1;
 			}
 		}
 
 		public override void Reset() {
-			_drawDatas.Clear();
+			_drawData.Clear();
 		}
 
 		private record struct ObjectDrawData(
-			RenderableObject Renderable,
-			uint VertexOffset,
+			uint VertexIndex,
 			uint VertexCount,
-			uint IndexOffset,
+			uint IndexIndex,
 			uint IndexCount,
-			uint MaterialOffset,
+			uint MaterialIndex,
 			uint MaterialCount,
-			uint MatrixOffset
+			int MatrixIndex
 		);
 
 		[StructLayout(LayoutKind.Explicit)]

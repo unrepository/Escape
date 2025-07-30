@@ -1,6 +1,7 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Arch.Core;
+using Arch.Core.Extensions;
 using Arch.System;
 using Cinenic.Components;
 using Cinenic.Extensions.CSharp;
@@ -68,7 +69,7 @@ namespace Cinenic {
 			
 			World.SubscribeComponentRemoved((in Entity e, ref RenderableObject obj) => {
 				_logger.Trace("(ecs observer) RenderableObject/Remove");
-					
+				
 				_entityRenderableMap.Remove(e);
 				ObjectRenderer.RemoveObject(obj);
 			});

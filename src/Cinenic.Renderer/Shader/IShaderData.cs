@@ -12,6 +12,8 @@ namespace Cinenic.Renderer.Shader {
 		public T? Data { get; set; }
 		public uint Size { get; set; }
 
+		public bool IsDirty { get; set; }
+
 		public void Push();
 		public void Read();
 	}

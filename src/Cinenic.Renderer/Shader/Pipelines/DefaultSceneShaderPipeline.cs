@@ -62,13 +62,13 @@ namespace Cinenic.Renderer.Shader.Pipelines {
 			// was would be a local variable, but that seems kinda eh, maybe in the future
 			CameraData = IShaderData.Create<CameraData>(platform, Program.Get(), 0, default);
 
-			const int INITIAL_SIZE = 1024 * 1024; // 1 MiB to prevent huge reallocations (?)
+			const int INITIAL_SIZE = 1024 * 1024; // 1 MiB to start
 			
 			VertexData = IShaderArrayData.Create<Vertex>(platform, Program.Get(), 1, null, INITIAL_SIZE);
 			IndexData = IShaderArrayData.Create<uint>(platform, Program.Get(), 2, null, INITIAL_SIZE);
 			MaterialData = IShaderArrayData.Create<Material.Data>(platform, Program.Get(), 3, null, INITIAL_SIZE);
 			MatrixData = IShaderArrayData.Create<Matrix4x4>(platform, Program.Get(), 4, null, INITIAL_SIZE);
-
+ 
 			LightData = IShaderData.Create<LightData>(platform, Program.Get(), 10, default);
 			DirectionalLightData = IShaderArrayData.Create<DirectionalLight>(platform, Program.Get(), 11, null, 64);
 			PointLightData = IShaderArrayData.Create<PointLight>(platform, Program.Get(), 12, null, 64);

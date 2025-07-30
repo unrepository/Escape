@@ -18,7 +18,7 @@ namespace Cinenic.Renderer.Vulkan {
 		public T? Data {
 			get => _data;
 			set {
-				_dirty = true;
+				IsDirty = true;
 				_data = value;
 			}
 		}
@@ -26,7 +26,7 @@ namespace Cinenic.Renderer.Vulkan {
 		public uint Size {
 			get;
 			set {
-				_dirty = true;
+				IsDirty = true;
 				
 				if(_bufferSize == 0) {
 					field = value;
@@ -70,6 +70,8 @@ namespace Cinenic.Renderer.Vulkan {
 			}
 		}
 
+		public bool IsDirty { get; set; }
+
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		
 		private readonly VkPlatform _platform;
@@ -83,8 +85,6 @@ namespace Cinenic.Renderer.Vulkan {
 
 		private Buffer _buffer;
 		private DeviceMemory _bufferMemory;
-
-		private bool _dirty = false;
 
 		public VkShaderData(
 			VkPlatform platform,
@@ -143,7 +143,7 @@ namespace Cinenic.Renderer.Vulkan {
 		}
 		
 		public void Push() {
-			if(!_dirty) return;
+			if(!IsDirty) return;
 			Debug.Assert(_bufferDataPtr is not null);
 			
 			if(Data is null || Size == 0) {

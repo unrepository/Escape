@@ -45,6 +45,27 @@ namespace Cinenic.Systems {
 					e.MakeChildOf(world.GetRootEntity());
 				}
 			});
+			
+			// destroy all children once parent is destroyed
+			world.SubscribeEntityDestroyed((in Entity e) => {
+				foreach(var child in new List<Entity>(e.GetChildren())) {
+					world.Destroy(child);
+				}
+				
+				//world.Destroy(e);
+				
+				/*void Process(Entity e) {
+					var children = e.GetChildren();
+				
+					foreach(var child in new List<Entity>(children)) {
+						Process(child);
+					}
+					
+					world.Destroy(e);
+				}
+				
+				Process(e);*/
+			});
 		#endregion
 		}
 	}

@@ -18,7 +18,7 @@ namespace Cinenic.Renderer.Vulkan {
 		public T[]? Data {
 			get => _data;
 			set {
-				_dirty = true;
+				IsDirty = true;
 				_data = value;
 			}
 		}
@@ -26,7 +26,7 @@ namespace Cinenic.Renderer.Vulkan {
 		public uint Size {
 			get;
 			set {
-				_dirty = true;
+				IsDirty = true;
 				
 				if(_bufferSize == 0) {
 					field = value;
@@ -70,6 +70,8 @@ namespace Cinenic.Renderer.Vulkan {
 			}
 		}
 
+		public bool IsDirty { get; set; }
+
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		
 		private readonly VkPlatform _platform;
@@ -83,8 +85,6 @@ namespace Cinenic.Renderer.Vulkan {
 
 		private Buffer _buffer;
 		private DeviceMemory _bufferMemory;
-
-		private bool _dirty = false;
 
 		public VkShaderArrayData(
 			VkPlatform platform,
@@ -128,7 +128,7 @@ namespace Cinenic.Renderer.Vulkan {
 		}
 		
 		public void Push() {
-			if(!_dirty) return;
+			if(!IsDirty) return;
 			Debug.Assert(_bufferDataPtr is not null);
 
 			if(Data is null || Size == 0 || _data?.Length <= 0) {
@@ -143,50 +143,6 @@ namespace Cinenic.Renderer.Vulkan {
 		public void Read() {
 			throw new NotImplementedException();
 		}
-
-		public void Write(uint index, T[] data) {
-			if(_data is null) {
-				_data = new T[index + data.Length];
-			}
-
-			if(_data.Length < index + data.Length) {
-				var nData = new T[index + data.Length];
-				Array.Copy(_data, 0, nData, 0, _data.Length);
-				_data = nData;
-			}
-
-			uint memorySize = (uint) (index * sizeof(T) + data.Length * sizeof(T));
-			if(Size < memorySize) {
-				Size = memorySize;
-			}
-			
-			Array.Copy(data, 0, _data, index, data.Length);
-			_dirty = true;
-		}
-
-		/*public void Write(uint offset, T[] data, uint? size = null) {
-			size ??= (uint) (data.Length * sizeof(T));
-
-			fixed(void* src = data) {
-				void* dst = (byte*) _bufferDataPtr + offset;
-				System.Buffer.MemoryCopy(src, dst, size.Value, size.Value);
-
-				if(_data is null) {
-					_data = new T[data.Length + offset / sizeof(T)];
-				}
-
-				if(_data.Length < data.Length + offset / sizeof(T)) {
-					var nData = new T[data.Length + offset / sizeof(T)];
-					Array.Copy(_data, nData, _data.Length);
-					_data = nData;
-				}
-
-				Array.Copy(data, 0, _data, offset / sizeof(T), data.Length);
-			}
-			
-			_logger.Trace("Wrote {Size} bytes of data to buffer at offset={Offset}", size, offset);
-		}
-		*/
 		
 		public void Dispose() {
 			GC.SuppressFinalize(this);

@@ -22,6 +22,24 @@ namespace Cinenic.Renderer.Shader {
 			}
 			
 			Array.Copy(data, 0, Data, index, data.Length);
+			IsDirty = true;
+		}
+
+		public bool Remove(uint index, uint length) {
+			if(Data is null) return false;
+			if(index > Data.Length) throw new IndexOutOfRangeException();
+			if(length == 0) throw new ArgumentException("Length cannot be 0", nameof(length));
+
+			for(int i = 0; i < Data.Length - length; i++) {
+				Data[i] = Data[i + length];
+			}
+
+			unsafe {
+				Size -= (uint) (length * sizeof(T));
+			}
+
+			IsDirty = true;
+			return true;
 		}
 	}
 	

@@ -18,6 +18,8 @@ namespace Cinenic.Renderer.OpenGL {
 		
 		public uint Size { get; set; }
 
+		public bool IsDirty { get; set; }
+
 		private readonly GLPlatform _platform;
 		private T? _data;
 		
