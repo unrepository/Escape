@@ -33,8 +33,8 @@ namespace Cinenic {
 			
 			IsRunning = true;
 			
-			UpdateThread = new Thread(_UpdateLoop);
-			UpdateThread.Start();
+			// UpdateThread = new Thread(_UpdateLoop);
+			// UpdateThread.Start();
 			
 			// render loop in main thread
 			_RenderLoop();
@@ -42,7 +42,7 @@ namespace Cinenic {
 
 		public static void Stop() {
 			IsRunning = false;
-			UpdateThread.Join(); // wait for update thread to finish
+			//UpdateThread.Join(); // wait for update thread to finish
 		}
 
 		private static void _UpdateLoop() {
@@ -78,6 +78,15 @@ namespace Cinenic {
 		}
 
 		private static void _RenderLoop() {
+			_sharedWorldScheduler = new JobScheduler(new JobScheduler.Config {
+				ThreadPrefixName = "Cinenic.WJS",
+				ThreadCount = 0,
+				MaxExpectedConcurrentJobs = 32,
+				StrictAllocationMode = false
+			});
+			
+			World.SharedJobScheduler = _sharedWorldScheduler;
+			
 			_renderStopwatch.Restart();
 			
 			while(IsRunning) {
@@ -85,8 +94,11 @@ namespace Cinenic {
 				var sinceLastRender = currentTime - LastRender;
 
 				RenderDelta = sinceLastRender;
+				UpdateDelta = sinceLastRender;
 				ThreadScheduler.RunSchedules();
 				RenderManager.Render(sinceLastRender);
+				UpdateManager.Update(sinceLastRender);
+				LastUpdate = currentTime;
 				LastRender = currentTime;
 
 				if(RenderPipelineManager.PipelineStates.All(kv => !kv.Value)) {

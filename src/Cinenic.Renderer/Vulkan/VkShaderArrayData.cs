@@ -17,12 +17,17 @@ namespace Cinenic.Renderer.Vulkan {
 		
 		public T[]? Data {
 			get => _data;
-			set => _data = value;
+			set {
+				_dirty = true;
+				_data = value;
+			}
 		}
 		
 		public uint Size {
 			get;
 			set {
+				_dirty = true;
+				
 				if(_bufferSize == 0) {
 					field = value;
 					return;
@@ -32,7 +37,7 @@ namespace Cinenic.Renderer.Vulkan {
 				if(value == 0) return;
 				
 				if(value > _bufferSize) {
-					value = value.CeilIncrement(1024);
+					value = value.CeilIncrement(1024 * 1024);
 				
 					_logger.Trace("Buffer size changed ({OldSize} -> {NewSize}); reallocating", _bufferSize, value);
 
@@ -79,6 +84,8 @@ namespace Cinenic.Renderer.Vulkan {
 		private Buffer _buffer;
 		private DeviceMemory _bufferMemory;
 
+		private bool _dirty = false;
+
 		public VkShaderArrayData(
 			VkPlatform platform,
 			ShaderProgram program,
@@ -121,6 +128,7 @@ namespace Cinenic.Renderer.Vulkan {
 		}
 		
 		public void Push() {
+			if(!_dirty) return;
 			Debug.Assert(_bufferDataPtr is not null);
 
 			if(Data is null || Size == 0 || _data?.Length <= 0) {
@@ -128,7 +136,6 @@ namespace Cinenic.Renderer.Vulkan {
 			}
 
 			fixed(void* dataPtr = _data) {
-				Debug.Assert(_bufferDataPtr is not null);
 				System.Buffer.MemoryCopy(dataPtr, _bufferDataPtr, Size, Size);
 			}
 		}
@@ -136,23 +143,50 @@ namespace Cinenic.Renderer.Vulkan {
 		public void Read() {
 			throw new NotImplementedException();
 		}
-		
-		public void Write(uint offset, T[] data, uint? size = null) {
+
+		public void Write(uint index, T[] data) {
+			if(_data is null) {
+				_data = new T[index + data.Length];
+			}
+
+			if(_data.Length < index + data.Length) {
+				var nData = new T[index + data.Length];
+				Array.Copy(_data, 0, nData, 0, _data.Length);
+				_data = nData;
+			}
+
+			uint memorySize = (uint) (index * sizeof(T) + data.Length * sizeof(T));
+			if(Size < memorySize) {
+				Size = memorySize;
+			}
+			
+			Array.Copy(data, 0, _data, index, data.Length);
+			_dirty = true;
+		}
+
+		/*public void Write(uint offset, T[] data, uint? size = null) {
 			size ??= (uint) (data.Length * sizeof(T));
 
 			fixed(void* src = data) {
 				void* dst = (byte*) _bufferDataPtr + offset;
 				System.Buffer.MemoryCopy(src, dst, size.Value, size.Value);
+
+				if(_data is null) {
+					_data = new T[data.Length + offset / sizeof(T)];
+				}
+
+				if(_data.Length < data.Length + offset / sizeof(T)) {
+					var nData = new T[data.Length + offset / sizeof(T)];
+					Array.Copy(_data, nData, _data.Length);
+					_data = nData;
+				}
+
+				Array.Copy(data, 0, _data, offset / sizeof(T), data.Length);
 			}
 			
-			// VkShaderData<T>.UpdateDescriptorSet(
-			// 	_platform,
-			// 	_descriptorSet,
-			// 	Binding,
-			// 	_bufferSize,
-			// 	_buffer
-			// );
+			_logger.Trace("Wrote {Size} bytes of data to buffer at offset={Offset}", size, offset);
 		}
+		*/
 		
 		public void Dispose() {
 			GC.SuppressFinalize(this);

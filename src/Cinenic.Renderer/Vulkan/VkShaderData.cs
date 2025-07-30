@@ -17,12 +17,17 @@ namespace Cinenic.Renderer.Vulkan {
 		
 		public T? Data {
 			get => _data;
-			set => _data = value;
+			set {
+				_dirty = true;
+				_data = value;
+			}
 		}
 
 		public uint Size {
 			get;
 			set {
+				_dirty = true;
+				
 				if(_bufferSize == 0) {
 					field = value;
 					return;
@@ -32,7 +37,7 @@ namespace Cinenic.Renderer.Vulkan {
 				if(value == 0) return;
 				
 				if(value > _bufferSize) {
-					value = value.CeilIncrement(1024);
+					value = value.CeilIncrement(1024 * 1024);
 				
 					_logger.Trace("Buffer size changed ({OldSize} -> {NewSize}); reallocating", _bufferSize, value);
 
@@ -78,6 +83,8 @@ namespace Cinenic.Renderer.Vulkan {
 
 		private Buffer _buffer;
 		private DeviceMemory _bufferMemory;
+
+		private bool _dirty = false;
 
 		public VkShaderData(
 			VkPlatform platform,
@@ -136,6 +143,7 @@ namespace Cinenic.Renderer.Vulkan {
 		}
 		
 		public void Push() {
+			if(!_dirty) return;
 			Debug.Assert(_bufferDataPtr is not null);
 			
 			if(Data is null || Size == 0) {
@@ -143,7 +151,6 @@ namespace Cinenic.Renderer.Vulkan {
 			}
 
 			fixed(void* dataPtr = &_data) {
-				Debug.Assert(_bufferDataPtr is not null);
 				System.Buffer.MemoryCopy(dataPtr, _bufferDataPtr, Size, Size);
 			}
 		}
@@ -152,12 +159,14 @@ namespace Cinenic.Renderer.Vulkan {
 			throw new NotImplementedException();
 		}
 		
-		public void Write(uint offset, T data, uint? size = null) {
+		/*public void Write(uint offset, T data, uint? size = null) {
 			size ??= (uint) sizeof(T);
 
 			void* dst = (byte*) _bufferDataPtr + offset;
 			System.Buffer.MemoryCopy(&data, dst, size.Value, size.Value);
-		}
+			
+			_logger.Trace("Wrote {Size} bytes of data to buffer at offset={Offset}", size, offset);
+		}*/
 		
 		public void Dispose() {
 			GC.SuppressFinalize(this);

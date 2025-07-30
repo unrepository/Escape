@@ -96,7 +96,7 @@ public static class LightingTest {
 			new Transform3D(position: new Vector3(0, 1, 1), rotation: Quaternion.Identity),
 			new PointLight(new Color(255, 255, 50), Intensity: 1)
 		);
-		lightObject.Get().Scene!.Export(ref world, point);
+		//lightObject.Get().Scene!.Export(ref world, point);
 		
 		var spot = world.Create(
 			new Transform3D(new Vector3(1.8f, 1.5f, 1.1f), Quaternion.Identity, Vector3.One),

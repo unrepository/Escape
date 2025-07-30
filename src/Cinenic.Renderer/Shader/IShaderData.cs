@@ -13,9 +13,7 @@ namespace Cinenic.Renderer.Shader {
 		public uint Size { get; set; }
 
 		public void Push();
-		
 		public void Read();
-		public void Write(uint offset, T data, uint? size = null);
 	}
 
 	public static class IShaderData {

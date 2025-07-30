@@ -51,7 +51,7 @@ namespace Cinenic.Renderer.Vulkan {
 			uint size,
 			ref Buffer buffer, ref DeviceMemory bufferMemory,
 			BufferUsageFlags usageFlags = BufferUsageFlags.VertexBufferBit | BufferUsageFlags.StorageBufferBit,
-			MemoryPropertyFlags memoryFlags = MemoryPropertyFlags.HostVisibleBit | MemoryPropertyFlags.HostCoherentBit
+			MemoryPropertyFlags memoryFlags = MemoryPropertyFlags.HostVisibleBit | MemoryPropertyFlags.HostCoherentBit | MemoryPropertyFlags.HostCachedBit
 		) {
 			var device = platform.PrimaryDevice.Logical;
 			

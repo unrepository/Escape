@@ -3,7 +3,27 @@ using Cinenic.Renderer.Vulkan;
 
 namespace Cinenic.Renderer.Shader {
 
-	public interface IShaderArrayData<T> : IShaderData<T[]>;
+	public interface IShaderArrayData<T> : IShaderData<T[]> {
+		
+		public unsafe void Write(uint index, T[] data) {
+			if(Data is null) {
+				Data = new T[index + data.Length];
+			}
+
+			if(Data.Length < index + data.Length) {
+				var nData = new T[index + data.Length];
+				Array.Copy(Data, 0, nData, 0, Data.Length);
+				Data = nData;
+			}
+
+			uint memorySize = (uint) (index * sizeof(T) + data.Length * sizeof(T));
+			if(Size < memorySize) {
+				Size = memorySize;
+			}
+			
+			Array.Copy(data, 0, Data, index, data.Length);
+		}
+	}
 	
 	public static class IShaderArrayData {
 		
