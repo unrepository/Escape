@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RootNamespace></RootNamespace>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Silk.NET.Input.Glfw" Version="2.22.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Visio.Compute\Visio.Compute.csproj" />
+      <ProjectReference Include="..\..\src\Visio.Extensions.Assimp\Visio.Extensions.Assimp.csproj" />
+      <ProjectReference Include="..\..\src\Visio.Extensions.CSharp\Visio.Extensions.CSharp.csproj" />
+      <ProjectReference Include="..\..\src\Visio.Extensions.Debugging\Visio.Extensions.Debugging.csproj" />
+      <ProjectReference Include="..\..\src\Visio.Extensions.ImGui\Visio.Extensions.ImGui.csproj" />
+      <ProjectReference Include="..\..\src\Visio.Extensions.Scene\Visio.Extensions.Scene.csproj" />
+      <ProjectReference Include="..\..\src\Visio.Renderer.Platform\Visio.Renderer.Platform.csproj" />
+      <ProjectReference Include="..\..\src\Visio.Renderer\Visio.Renderer.csproj" />
+      <ProjectReference Include="..\..\src\Visio.Resources\Visio.Resources.csproj" />
+      <ProjectReference Include="..\..\src\Visio.UnitTypes\Visio.UnitTypes.csproj" />
+      <ProjectReference Include="..\..\src\Visio\Visio.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="nlog.config">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="Resources\**\*"/>
+    </ItemGroup>
+	
+	<!-- asset (sym)linking !-->
+	<Import Project="..\..\src\Visio.Resources\LinkAssets.targets" />
+
+	<ItemGroup>
+		<AssetLinkProject Include="Sandbox.csproj" />
+		<AssetLinkProject Include="..\..\src\Visio.Renderer\Visio.Renderer.csproj" />
+		<AssetLinkProject Include="..\..\src\Visio.Extensions.Debugging\Visio.Extensions.Debugging.csproj" />
+	</ItemGroup>
+	
+</Project>
