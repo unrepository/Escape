@@ -3,6 +3,12 @@
 		"dbec5184-1a1b-4d39-9a55-3f97d55b4a83": {
 			"metadata_path": "/shader_programs/scene.program.meta.json"
 		},
+		"4b558820-ed4c-4db2-9d65-9997d63577cb": {
+			"metadata_path": "/shaders/gl/scene.frag.meta.json"
+		},
+		"095ab862-0371-43db-9570-89e2c14c3c22": {
+			"metadata_path": "/shaders/gl/scene.vert.meta.json"
+		},
 		"acc218ba-15ab-4071-9b8f-93d33c44fa5e": {
 			"metadata_path": "/shaders/vk/scene.frag.meta.json"
 		},

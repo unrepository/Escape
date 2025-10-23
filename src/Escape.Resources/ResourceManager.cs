@@ -23,7 +23,7 @@ namespace Escape.Resources {
 
 		static ResourceManager() {
 			// dispose all remaining resources when process exits, primarily to save them
-			AppDomain.CurrentDomain.ProcessExit += (_, _) => {
+			void OnExit() {
 				foreach(var resourceObject in _loadedResources.Values) {
 					((IDisposable) resourceObject).Dispose();
 				}
@@ -35,7 +35,10 @@ namespace Escape.Resources {
 					_logger.Trace("Saved resource database for {Assembly}", assembly.GetName().Name ?? assembly.GetName().FullName);
 				}
 			#endif
-			};
+			}
+
+			AppDomain.CurrentDomain.ProcessExit += (_, _) => OnExit();
+			AppDomain.CurrentDomain.UnhandledException += (_, _) => OnExit();
 
 			/*AppDomain.CurrentDomain.UnhandledException += (_, _) => {
 				foreach(var resourceObject in _loadedResources.Values) {
@@ -286,8 +289,8 @@ namespace Escape.Resources {
 			var baseDirectory = _GetBaseDirectory(assembly);
 			var dbFilePath = baseDirectory + Path.DirectorySeparatorChar + ResourceDatabase.FILE_NAME;
 			
-			// load exiting database in debug only, as new resources don't get added automatically
-		#if DEBUG
+			// load existing database in debug only, as new resources don't get added automatically
+		/*#if DEBUG
 			if(File.Exists(dbFilePath)) {
 				// if we have the db file, read from it
 				database = ResourceDatabase.Load(dbFilePath);
@@ -301,7 +304,7 @@ namespace Escape.Resources {
 					return null;
 				}
 			} else
-		#endif
+		#endif*/
 			{
 				// otherwise, scan the assets directory for files and create a new database
 				database = new ResourceDatabase();

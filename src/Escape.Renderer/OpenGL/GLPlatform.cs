@@ -35,8 +35,27 @@ namespace Escape.Renderer.OpenGL {
 
 		public unsafe void Initialize() {
 			Debug.Assert(!IsInitialized);
-			Debug.Assert(_sharedApi is not null && _sharedContext is not null, "A Window must be created first"); // TODO
+			Debug.Assert(!CurrentOptions.Headless, "Headless mode not yet supported");
+			
+			if(!CurrentOptions.Headless && (_sharedApi is null || _sharedContext is null)) {
+				// create initial window to get GL api and context
+				// very meh approach, but we already do this in Vulkan too so whatever
+				// and I don't see any other way
 
+				var window = Silk.NET.Windowing.Window.Create(WindowOptions.Default with {
+					WindowState = WindowState.Minimized
+				});
+				
+				window.Load += () => {
+					_sharedApi = window.CreateOpenGL();
+					_sharedContext = window.GLContext;
+					
+					window.Close();
+				};
+
+				window.Initialize();
+			}
+			
 			PlatformThread = Thread.CurrentThread;
 			API = _sharedApi;
 
@@ -63,14 +82,15 @@ namespace Escape.Renderer.OpenGL {
 			GC.SuppressFinalize(this);
 		}
 		
-		private unsafe static void DebugPrint(GLEnum source,
-		                                        GLEnum type,
-		                                        int id,
-		                                        GLEnum severity,
-		                                        int length,
-		                                        nint message,
-		                                        nint param) {
-
+		private unsafe static void DebugPrint(
+			GLEnum source,
+			GLEnum type,
+			int id,
+			GLEnum severity,
+			int length,
+			nint message,
+			nint param
+		) {
 			var msg = new StringBuilder("[OpenGL] ");
 			msg.Append(id);
 			msg.Append('\n');
@@ -159,9 +179,11 @@ namespace Escape.Renderer.OpenGL {
 		public class Options : PlatformOptions {
 
 			public bool Debug { get; set; } = false;
+			public bool Headless { get; set; } = false;
 			
 			public override void ParseCommandLine(string[] args) {
 				if(args.Contains("--debug")) Debug = true;
+				if(args.Contains("--headless")) Headless = true;
 			}
 		}
 	}

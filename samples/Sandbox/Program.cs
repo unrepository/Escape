@@ -1,1 +1,1 @@
-LightingTest.Start(args);
+MultiPlatformTest.Start(args);

@@ -13,6 +13,7 @@ namespace Escape.Renderer {
 		
 		public Vector4D<int> Viewport { get; set; } = Vector4D<int>.Zero;
 		public Vector4D<int> Scissor { get; set; } = Vector4D<int>.Zero;
+		public Color ClearColor { get; set; } = Color.Black;
 		
 		public RenderPipeline? Pipeline { get; internal set; }
 		public Framebuffer? RenderTarget;

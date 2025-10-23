@@ -11,6 +11,7 @@ using Escape.Renderer.Vulkan;
 using Escape.Systems;
 using Schedulers;
 using Escape;
+using Escape.Renderer.OpenGL;
 using Camera3D = Escape.Components.Camera3D;
 
 public static class Shared {
@@ -77,6 +78,20 @@ public static class Shared {
 		renderPipeline = RenderPipelineManager.Create(platform, "main", renderQueue, shaderPipeline);
 
 		DebugInterface = DebugInterface.Setup(platform);
+	}
+
+	public static void SetupOpenGL(
+		out GLPlatform platform,
+		out DefaultSceneShaderPipeline shaderPipeline,
+		out RenderQueue renderQueue,
+		out RenderPipeline renderPipeline
+	) {
+		platform = new GLPlatform();
+		platform.Initialize();
+
+		shaderPipeline = new DefaultSceneShaderPipeline(platform);
+		renderQueue = RenderQueueManager.Create(platform, "main");
+		renderPipeline = RenderPipelineManager.Create(platform, "main", renderQueue, shaderPipeline);
 	}
 
 	public static void CreateWindow(
