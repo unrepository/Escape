@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Escape.Extensions.Scene\Escape.Extensions.Scene.csproj" />
+	  <ProjectReference Include="..\Escape.Renderer\Escape.Renderer.csproj" />
+	  <ProjectReference Include="..\Escape\Escape.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Silk.NET.Assimp" Version="2.22.0" />
+	</ItemGroup>
+
+</Project>

@@ -14,17 +14,17 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Visio.Compute\Visio.Compute.csproj" />
-      <ProjectReference Include="..\..\src\Visio.Extensions.Assimp\Visio.Extensions.Assimp.csproj" />
-      <ProjectReference Include="..\..\src\Visio.Extensions.CSharp\Visio.Extensions.CSharp.csproj" />
-      <ProjectReference Include="..\..\src\Visio.Extensions.Debugging\Visio.Extensions.Debugging.csproj" />
-      <ProjectReference Include="..\..\src\Visio.Extensions.ImGui\Visio.Extensions.ImGui.csproj" />
-      <ProjectReference Include="..\..\src\Visio.Extensions.Scene\Visio.Extensions.Scene.csproj" />
-      <ProjectReference Include="..\..\src\Visio.Renderer.Platform\Visio.Renderer.Platform.csproj" />
-      <ProjectReference Include="..\..\src\Visio.Renderer\Visio.Renderer.csproj" />
-      <ProjectReference Include="..\..\src\Visio.Resources\Visio.Resources.csproj" />
-      <ProjectReference Include="..\..\src\Visio.UnitTypes\Visio.UnitTypes.csproj" />
-      <ProjectReference Include="..\..\src\Visio\Visio.csproj" />
+      <ProjectReference Include="..\..\src\Escape.Compute\Escape.Compute.csproj" />
+      <ProjectReference Include="..\..\src\Escape.Extensions.Assimp\Escape.Extensions.Assimp.csproj" />
+      <ProjectReference Include="..\..\src\Escape.Extensions.CSharp\Escape.Extensions.CSharp.csproj" />
+      <ProjectReference Include="..\..\src\Escape.Extensions.Debugging\Escape.Extensions.Debugging.csproj" />
+      <ProjectReference Include="..\..\src\Escape.Extensions.ImGui\Escape.Extensions.ImGui.csproj" />
+      <ProjectReference Include="..\..\src\Escape.Extensions.Scene\Escape.Extensions.Scene.csproj" />
+      <ProjectReference Include="..\..\src\Escape.Renderer.Platform\Escape.Renderer.Platform.csproj" />
+      <ProjectReference Include="..\..\src\Escape.Renderer\Escape.Renderer.csproj" />
+      <ProjectReference Include="..\..\src\Escape.Resources\Escape.Resources.csproj" />
+      <ProjectReference Include="..\..\src\Escape.UnitTypes\Escape.UnitTypes.csproj" />
+      <ProjectReference Include="..\..\src\Escape\Escape.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -38,12 +38,12 @@
     </ItemGroup>
 	
 	<!-- asset (sym)linking !-->
-	<Import Project="..\..\src\Visio.Resources\LinkAssets.targets" />
+	<Import Project="..\..\src\Escape.Resources\LinkAssets.targets" />
 
 	<ItemGroup>
 		<AssetLinkProject Include="Sandbox.csproj" />
-		<AssetLinkProject Include="..\..\src\Visio.Renderer\Visio.Renderer.csproj" />
-		<AssetLinkProject Include="..\..\src\Visio.Extensions.Debugging\Visio.Extensions.Debugging.csproj" />
+		<AssetLinkProject Include="..\..\src\Escape.Renderer\Escape.Renderer.csproj" />
+		<AssetLinkProject Include="..\..\src\Escape.Extensions.Debugging\Escape.Extensions.Debugging.csproj" />
 	</ItemGroup>
 	
 </Project>

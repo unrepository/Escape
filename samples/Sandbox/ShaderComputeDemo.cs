@@ -2,20 +2,20 @@ using System.Drawing;
 using System.Numerics;
 using System.Reflection;
 using System.Xml;
-using Visio.Renderer;
-using Visio.Compute;
-using Visio.Renderer.OpenGL;
-using Visio.Renderer.Shader;
-using Visio.Extensions.CSharp;
+using Escape.Renderer;
+using Escape.Compute;
+using Escape.Renderer.OpenGL;
+using Escape.Renderer.Shader;
+using Escape.Extensions.CSharp;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Framebuffer = Visio.Renderer.Framebuffer;
+using Framebuffer = Escape.Renderer.Framebuffer;
 using Monitor = Silk.NET.Windowing.Monitor;
-using Shader = Visio.Renderer.Shader.Shader;
-using Window = Visio.Renderer.Window;
+using Shader = Escape.Renderer.Shader.Shader;
+using Window = Escape.Renderer.Window;
 
 public static class ShaderComputeDemoProgram {
 

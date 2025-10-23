@@ -2,18 +2,18 @@ using System.Drawing;
 using System.Numerics;
 using Arch.Core;
 using Arch.Core.Extensions;
-using Visio;
-using Visio.Components;
-using Visio.Extensions.Debugging.Providers;
-using Visio.Renderer;
-using Visio.Renderer.Camera;
-using Visio.Renderer.Resources;
-using Visio.Renderer.Shader.Pipelines;
-using Visio.Renderer.Vulkan;
-using Visio.Resources;
+using Escape;
+using Escape.Components;
+using Escape.Extensions.Debugging.Providers;
+using Escape.Renderer;
+using Escape.Renderer.Camera;
+using Escape.Renderer.Resources;
+using Escape.Renderer.Shader.Pipelines;
+using Escape.Renderer.Vulkan;
+using Escape.Resources;
 using NLog;
 using static Shared;
-using Camera3D = Visio.Components.Camera3D;
+using Camera3D = Escape.Components.Camera3D;
 
 public static class ResourcesTest {
 	
@@ -94,7 +94,7 @@ public static class ResourcesTest {
 		DebugInterface.Providers.Add(new TransformGizmoProvider(world, camera.Get<Camera3D>()));
 		
 		// run loop
-		VISIO.Run();
+		ESCAPE.Run();
 		
 		// test reference counting
 		texture1.Dispose();

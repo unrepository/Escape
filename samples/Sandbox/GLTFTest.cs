@@ -2,16 +2,16 @@ using System.Numerics;
 using System.Reflection;
 using Arch.Core;
 using Arch.Core.Extensions;
-using Visio;
-using Visio.Components;
-using Visio.Extensions.Assimp;
-using Visio.Renderer.Camera;
-using Visio.Resources;
-using Visio.UnitTypes;
+using Escape;
+using Escape.Components;
+using Escape.Extensions.Assimp;
+using Escape.Renderer.Camera;
+using Escape.Resources;
+using Escape.UnitTypes;
 using NLog;
 
 using static Shared;
-using Camera3D = Visio.Components.Camera3D;
+using Camera3D = Escape.Components.Camera3D;
 
 public static class GLTFTest {
 
@@ -37,6 +37,6 @@ public static class GLTFTest {
 		// create camera entity
 		CreateOrbitalCamera(ref world, window, out var camera, out var orbitalCamera);
 		
-		VISIO.Run();
+		ESCAPE.Run();
 	}
 }

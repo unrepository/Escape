@@ -2,13 +2,13 @@ using System.Drawing;
 using System.Numerics;
 using Arch.Core;
 using Arch.Core.Extensions;
-using Visio;
-using Visio.Components;
-using Visio.Renderer;
-using Visio.Renderer.Camera;
-using Visio.UnitTypes;
+using Escape;
+using Escape.Components;
+using Escape.Renderer;
+using Escape.Renderer.Camera;
+using Escape.UnitTypes;
 using static Shared;
-using Camera3D = Visio.Components.Camera3D;
+using Camera3D = Escape.Components.Camera3D;
 
 public static class HierarchyTest {
 
@@ -62,7 +62,7 @@ public static class HierarchyTest {
 			CameraPivot = cameraPivot
 		});
 		
-		VISIO.Run();
+		ESCAPE.Run();
 	}
 	
 	private class TestUpdater : WorldUpdater {

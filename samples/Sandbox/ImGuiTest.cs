@@ -1,9 +1,9 @@
 using System.Numerics;
 using Arch.Core.Extensions;
-using Visio;
-using Visio.Components;
-using Visio.Extensions.ImGui;
-using Visio.Renderer;
+using Escape;
+using Escape.Components;
+using Escape.Extensions.ImGui;
+using Escape.Renderer;
 using Hexa.NET.ImGui;
 using static Shared;
 
@@ -35,6 +35,6 @@ public static class ImGuiTest {
 			new RenderableObject(CubeModel)
 		);
 		
-		VISIO.Run();
+		ESCAPE.Run();
 	}
 }
