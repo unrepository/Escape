@@ -32,13 +32,18 @@ namespace Escape.Renderer.OpenGL {
 			windowOptions.TransparentFramebuffer = true;
 
 			Base = Silk.NET.Windowing.Window.Create(windowOptions);
+		}
+
+		public override void Initialize(RenderQueue queue) {
+			Debug.Assert(!IsInitialized);
+			var glQueue = (GLRenderQueue) queue;
 			
 			Base.Load += () => {
 				if(GLPlatform._sharedApi is null || GLPlatform._sharedContext is null) {
 					GLPlatform._sharedApi = Base.CreateOpenGL();
 					GLPlatform._sharedContext = Base.GLContext;
 				}
-
+				
 				Input = Base.CreateInput();
 			};
 
@@ -47,7 +52,7 @@ namespace Escape.Renderer.OpenGL {
 				_platform.API.Viewport(size);
 			};
 			
-			Base.Render += delta => {
+			/*Base.Render += delta => {
 				FrameDeltaTime = delta;
 
 				if(!Base.IsVisible) return;
@@ -61,13 +66,12 @@ namespace Escape.Renderer.OpenGL {
 						queue(delta);
 					}
 				}
-			};
+			};*/
 			
 			Base.Initialize();
-		}
 
-		public override void Initialize(RenderQueue queue) {
-			Debug.Assert(!IsInitialized);
+			Framebuffer = new GLFramebuffer(_platform, glQueue, (Vector2D<uint>) Base.FramebufferSize);
+			Framebuffer.Create();
 			
 			Base.MakeCurrent();
 			_platform.API.Viewport(0, 0, Width, Height);
@@ -76,7 +80,14 @@ namespace Escape.Renderer.OpenGL {
 			IsInitialized = true;
 		}
 
-		public override double RenderFrame(Action<double>? frameProvider = null) {
+		public override double RenderFrame(Action<double>? frameProvider = null)
+			=> throw new NotImplementedException();
+		
+		public override void ScheduleLater(Action action) {
+			throw new NotImplementedException();
+		}
+
+		/*public override double RenderFrame(Action<double>? frameProvider = null) {
 			Base.DoEvents();
 			if(!Base.IsClosing) Base.DoUpdate();
 			if(Base.IsClosing) return -1;
@@ -96,7 +107,7 @@ namespace Escape.Renderer.OpenGL {
 
 		public override void ScheduleLater(Action action) {
 			_scheduledActions.Add(action);
-		}
+		}*/
 
 		public override void Dispose() {
 			GC.SuppressFinalize(this);

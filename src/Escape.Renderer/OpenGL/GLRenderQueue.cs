@@ -31,6 +31,7 @@ namespace Escape.Renderer.OpenGL {
 		}
 
 		public override bool End() {
+			
 			return true;
 		}
 		

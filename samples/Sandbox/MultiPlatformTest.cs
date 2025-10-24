@@ -8,7 +8,7 @@ using Escape.Renderer.Shader;
 using Escape.Renderer.Shader.Pipelines;
 using Escape.Resources;
 using NLog;
-
+using Silk.NET.Windowing;
 using static Shared;
 
 public static class MultiPlatformTest {
@@ -45,6 +45,12 @@ public static class MultiPlatformTest {
 		
 		// create camera entity
 		CreateOrbitalCamera(ref world, window, out var camera, out var orbitalCamera);
+		
+		RenderManager.Add(renderQueue, "window", (_, _) => {
+			window.Base.MakeCurrent();
+			window.Base.DoEvents();
+			window.Base.DoRender();
+		});
 		
 		ESCAPE.Run();
 	}

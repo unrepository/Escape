@@ -31,11 +31,16 @@ namespace Escape.Renderer.Shader.Pipelines {
 		public DescriptorSet VkTexturesDescriptor { get; }
 		private DescriptorSet _textureDescriptorSet;
 	#endregion
+
+	#region OpenGL
+		public int GLModelMatrixUniform { get; }
+	#endregion
 		
 		public DefaultSceneShaderPipeline(IPlatform platform) {
 			Platform = platform;
 			
 			var vkPlatform = platform as VkPlatform;
+			var glPlatform = platform as GLPlatform;
 
 			Program = ResourceManager.Load<ShaderProgramResource>(platform, "/shader_programs/scene.program")!;
 			
@@ -57,7 +62,15 @@ namespace Escape.Renderer.Shader.Pipelines {
 			}
 		#endregion
 
-			// SSBOs
+		#region OpenGL
+			if(glPlatform is not null) {
+				((GLShaderProgram) Program.Get()).Build(); // TODO this is stupid
+				//((GLShaderProgram) Program.Get()).Bind();
+				GLModelMatrixUniform = glPlatform.API.GetUniformLocation(((GLShaderProgram) Program.Get()).Handle, "model_matrix");
+			}
+		#endregion
+
+			// shader data
 			// TODO *technically* everything should be Ref, as it might get cleaned up by GC in scenario where Program
 			// was would be a local variable, but that seems kinda eh, maybe in the future
 			CameraData = IShaderData.Create<CameraData>(platform, Program.Get(), 0, default);
@@ -77,16 +90,20 @@ namespace Escape.Renderer.Shader.Pipelines {
 
 		public void PushData() {
 			CameraData.Push();
+
+			if(Platform is not GLPlatform) {
+				VertexData.Push();
+				IndexData.Push();
+				MatrixData.Push();
+			}
 			
-			VertexData.Push();
-			IndexData.Push();
-			MaterialData.Push();
-			MatrixData.Push();
+			// TODO
+			/*MaterialData.Push();
 			
 			LightData.Push();
 			DirectionalLightData.Push();
 			PointLightData.Push();
-			SpotLightData.Push();
+			SpotLightData.Push();*/
 		}
 
 		public void Dispose() {

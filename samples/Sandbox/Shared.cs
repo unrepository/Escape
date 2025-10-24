@@ -60,7 +60,7 @@ public static class Shared {
         ]
     };
 
-	public static DebugInterface DebugInterface { get; set; }
+	public static DebugInterface? DebugInterface { get; set; }
 
 	public static void SetupVulkan(
 		out VkPlatform platform,
@@ -122,7 +122,7 @@ public static class Shared {
 
 		_ = new RelationshipTracker(world);
 		
-		DebugInterface.Providers.Add(new HierarchyInfoProvider(world));
+		DebugInterface?.Providers.Add(new HierarchyInfoProvider(world));
 	}
 
 	public static void CreateOrbitalCamera(
@@ -145,6 +145,6 @@ public static class Shared {
 		oc3d = new OrbitCamera3D("oc3d", entity, window);
 		UpdateManager.Add(oc3d);
 		
-		DebugInterface.Providers.Add(new TransformGizmoProvider(world, entity.Get<Camera3D>()));
+		DebugInterface?.Providers.Add(new TransformGizmoProvider(world, entity.Get<Camera3D>()));
 	}
 }

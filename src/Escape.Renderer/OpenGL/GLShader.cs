@@ -29,7 +29,7 @@ namespace Escape.Renderer.OpenGL {
 			}
 
 			Handle = _platform.API.CreateShader(Type switch {
-				Family.Vertex => ShaderType.FragmentShader,
+				Family.Vertex => ShaderType.VertexShader,
 				Family.Fragment => ShaderType.FragmentShader,
 				Family.Compute => ShaderType.ComputeShader,
 				Family.Geometry => ShaderType.GeometryShader,
@@ -45,7 +45,7 @@ namespace Escape.Renderer.OpenGL {
 			_platform.API.CompileShader(Handle);
 
 			if(_platform.API.GetShader(Handle, GLEnum.CompileStatus) == 0) {
-				_logger.Fatal("Exception occurred while compiling shader");
+				_logger.Fatal("Exception occurred while compiling shader: {InfoLog}", _platform.API.GetShaderInfoLog(Handle));
 				_logger.Fatal("=== SHADER CODE BEGIN ===");
 
 				{

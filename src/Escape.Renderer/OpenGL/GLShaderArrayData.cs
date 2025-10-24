@@ -8,16 +8,17 @@ namespace Escape.Renderer.OpenGL {
 	public class GLShaderArrayData<T> : IShaderArrayData<T> {
 		
 		public ulong Handle { get; private set; }
-		
 		public uint Binding { get; init; }
 
 		public T[]? Data {
 			get => _data;
-			set => _data = value;
+			set {
+				IsDirty = true;
+				_data = value;
+			}
 		}
 		
 		public uint Size { get; set; }
-		
 		public bool IsDirty { get; set; }
 
 		private readonly GLPlatform _platform;
@@ -25,11 +26,11 @@ namespace Escape.Renderer.OpenGL {
 		
 		public GLShaderArrayData(GLPlatform platform) {
 			_platform = platform;
+			
+			Handle = _platform.API.CreateBuffer();
 		}
 
 		public unsafe void Push() {
-			if(Handle == 0) Handle = _platform.API.CreateBuffer();
-
 			void* dataPtr = null;
 			
 			if(Data != null && _data?.Length > 0) {
@@ -38,11 +39,17 @@ namespace Escape.Renderer.OpenGL {
 				}
 			}
 			
-			_platform.API.NamedBufferData((uint) Handle, Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
-			_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, Binding, (uint) Handle);
+			_platform.API.BindBuffer(BufferTargetARB.UniformBuffer, (uint) Handle);
+
+			uint realSize = Size > 0 ? Size : (uint) (_data?.Length * sizeof(T));
+			_platform.API.BufferData(BufferTargetARB.UniformBuffer, realSize, dataPtr, BufferUsageARB.StaticDraw);
+			
+			//_platform.API.NamedBufferData((uint) Handle, Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
+			//_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, Binding, (uint) Handle);
 		}
 
 		public unsafe void Read() {
+			throw new NotImplementedException();
 			Debug.Assert(Handle != 0);
 
 			void* ptr = null;
