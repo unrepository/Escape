@@ -1,21 +1,37 @@
 #version 330 core
 
-//layout(location = 0) in vec3 v_position;
-//layout(location = 1) in vec3 v_normal;
-//layout(location = 2) in vec3 v_tangent;
-//layout(location = 3) in vec3 v_bitangent;
-//layout(location = 4) in vec2 v_uv;
-
 //= data
+uniform CameraData {
+	mat4 c_projection;
+	mat4 c_inverseProjection;
+	mat4 c_view;
+	mat4 c_inverseView;
+	vec3 c_position;
+	float c_aspectRatio;
+};
+
 uniform sampler2D albedoTexture;
 uniform sampler2D normalTexture;
 uniform sampler2D metallicTexture;
 uniform sampler2D roughnessTexture;
 uniform sampler2D heightTexture;
 
+uniform mat4 model_matrix;
+
+//
+
+struct Vertex {
+	vec3 position;
+	vec3 normal;
+	vec3 tangent;
+	vec3 bitangent;
+	vec2 uv;
+};
+
+in Vertex v;
 out vec4 fragColor;
 
-//= entry point
 void main() {
-	fragColor = vec4(1.0);
+	fragColor = vec4(1.0, 1.0, 1.0, 1.0);
+	fragColor *= texture(albedoTexture, v.uv);
 }

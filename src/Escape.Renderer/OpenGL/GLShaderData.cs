@@ -9,7 +9,8 @@ namespace Escape.Renderer.OpenGL {
 	public class GLShaderData<T> : IShaderData<T> {
 		
 		public ulong Handle { get; private set; }
-		public uint Binding { get; init; }
+		public string Name { get; }
+		public uint Binding { get; }
 
 		public T? Data {
 			get => _data;
@@ -25,10 +26,19 @@ namespace Escape.Renderer.OpenGL {
 		private readonly GLPlatform _platform;
 		private T? _data;
 		
-		public GLShaderData(GLPlatform platform) {
+		public GLShaderData(GLPlatform platform, ShaderProgram program, string name, uint binding, T? data, uint size) {
 			_platform = platform;
+
+			Name = name;
+			Binding = binding;
+			Data = data;
+			Size = size;
 			
 			Handle = _platform.API.GenBuffer();
+			
+			_platform.API.BindBuffer(BufferTargetARB.UniformBuffer, (uint) Handle);
+			_platform.API.UniformBlockBinding(program.Handle, _platform.API.GetUniformBlockIndex(program.Handle, name), Binding);
+			//_platform.API.BindBufferBase(BufferTargetARB.UniformBuffer, Binding, (uint) Handle);
 		}
 
 		public unsafe void Push() {
@@ -45,9 +55,9 @@ namespace Escape.Renderer.OpenGL {
 
 			uint realSize = Size > 0 ? Size : (uint) sizeof(T);
 			_platform.API.BufferData(BufferTargetARB.UniformBuffer, realSize, dataPtr, BufferUsageARB.StaticDraw);
+			_platform.API.BindBufferBase(BufferTargetARB.UniformBuffer, Binding, (uint) Handle);
 			
 			//_platform.API.NamedBufferData((uint) Handle, Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
-			//_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, Binding, (uint) Handle);
 		}
 
 		public unsafe void Read() {

@@ -43,6 +43,7 @@ namespace Escape {
 		public static void Stop() {
 			IsRunning = false;
 			//UpdateThread.Join(); // wait for update thread to finish
+			_sharedWorldScheduler.Dispose();
 		}
 
 		private static void _UpdateLoop() {

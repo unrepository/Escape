@@ -4,6 +4,7 @@ using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using Monitor = Silk.NET.Windowing.Monitor;
 
 namespace Escape.Renderer.OpenGL {
 	
@@ -23,15 +24,22 @@ namespace Escape.Renderer.OpenGL {
 				Flags = ContextFlags.ForwardCompatible,
 				Profile = ContextProfile.Core,
 				Version = new APIVersion {
-					MajorVersion = 4,
-					MinorVersion = 5
+					MajorVersion = 3,
+					MinorVersion = 3
 				}
 			};
 			windowOptions.SharedContext = GLPlatform._sharedContext;
 			windowOptions.ShouldSwapAutomatically = true;
-			windowOptions.TransparentFramebuffer = true;
+			//windowOptions.TransparentFramebuffer = true;
 
 			Base = Silk.NET.Windowing.Window.Create(windowOptions);
+
+			// center window on main monitor
+			var mainMonitorBounds = Monitor.GetMainMonitor(Base).Bounds;
+			Base.Position = new Vector2D<int>(
+				mainMonitorBounds.Origin.X + mainMonitorBounds.Size.X / 2 - Base.Size.X / 2,
+				mainMonitorBounds.Origin.Y + mainMonitorBounds.Size.Y / 2 - Base.Size.Y / 2
+			);
 		}
 
 		public override void Initialize(RenderQueue queue) {
@@ -70,11 +78,11 @@ namespace Escape.Renderer.OpenGL {
 			
 			Base.Initialize();
 
-			Framebuffer = new GLFramebuffer(_platform, glQueue, (Vector2D<uint>) Base.FramebufferSize);
+			Framebuffer = new WindowFramebuffer(_platform, glQueue, this);
 			Framebuffer.Create();
 			
-			Base.MakeCurrent();
-			_platform.API.Viewport(0, 0, Width, Height);
+			//Base.MakeCurrent();
+			//_platform.API.Viewport(0, 0, Width, Height);
 
 			Base.IsVisible = true;
 			IsInitialized = true;
@@ -111,7 +119,28 @@ namespace Escape.Renderer.OpenGL {
 
 		public override void Dispose() {
 			GC.SuppressFinalize(this);
+			
+			Framebuffer.Dispose();
 			Base.Dispose();
+		}
+
+		public class WindowFramebuffer : GLFramebuffer {
+
+			public GLWindow Window { get; }
+
+			public WindowFramebuffer(GLPlatform platform, RenderQueue queue, GLWindow window)
+				: base(platform, queue, (Vector2D<uint>) window.Size)
+			{
+				Window = window;
+
+				window.Base.FramebufferResize += newSize => {
+					Size = (Vector2D<uint>) newSize;
+					OnResized(newSize);
+				};
+			}
+
+			public override void Resize(Vector2D<int> size)
+				=> throw new NotSupportedException();
 		}
 	}
 }

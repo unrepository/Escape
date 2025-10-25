@@ -4,6 +4,7 @@ using Escape.Renderer;
 using Escape.Renderer.Vulkan;
 using Hexa.NET.ImGui;
 using Escape;
+using Escape.Renderer.OpenGL;
 using HImGui = Hexa.NET.ImGui.ImGui;
 
 namespace Escape.Extensions.ImGui {
@@ -79,6 +80,7 @@ namespace Escape.Extensions.ImGui {
 			try {
 				return platform switch {
 					VkPlatform vkPlatform => new VkImGuiController(id, vkPlatform, queue, window),
+					GLPlatform glPlatform => new GLImGuiController(id, glPlatform, queue, window),
 					_ => throw new NotImplementedException("PlatformImpl")
 				};
 			} catch(InvalidOperationException) { // controller already exists

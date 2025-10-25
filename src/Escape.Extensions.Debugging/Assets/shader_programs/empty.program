@@ -3,6 +3,10 @@
         "vulkan": [
             "../shaders/vk/empty.frag",
             "../shaders/vk/empty.vert"
+        ],
+        "opengl": [
+            "../shaders/gl/empty.frag",
+            "../shaders/gl/empty.vert"
         ]
     }
 }

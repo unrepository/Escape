@@ -8,7 +8,8 @@ namespace Escape.Renderer.OpenGL {
 	public class GLShaderArrayData<T> : IShaderArrayData<T> {
 		
 		public ulong Handle { get; private set; }
-		public uint Binding { get; init; }
+		public string Name { get; }
+		public uint Binding { get; }
 
 		public T[]? Data {
 			get => _data;
@@ -24,10 +25,19 @@ namespace Escape.Renderer.OpenGL {
 		private readonly GLPlatform _platform;
 		private T[]? _data;
 		
-		public GLShaderArrayData(GLPlatform platform) {
+		public GLShaderArrayData(GLPlatform platform, ShaderProgram program, string name, uint binding, T[]? data, uint size) {
 			_platform = platform;
 			
+			Name = name;
+			Binding = binding;
+			Data = data;
+			Size = size;
+			
 			Handle = _platform.API.CreateBuffer();
+			
+			_platform.API.BindBuffer(BufferTargetARB.UniformBuffer, (uint) Handle);
+			_platform.API.UniformBlockBinding(program.Handle, _platform.API.GetUniformBlockIndex(program.Handle, name), Binding);
+			_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, Binding, (uint) Handle);
 		}
 
 		public unsafe void Push() {

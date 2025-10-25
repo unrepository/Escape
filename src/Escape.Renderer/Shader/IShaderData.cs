@@ -7,6 +7,7 @@ namespace Escape.Renderer.Shader {
 	public interface IShaderData<T> : IDisposable {
 		
 		public ulong Handle { get; }
+		public string Name { get; }
 		public uint Binding { get; }
 		
 		public T? Data { get; set; }
@@ -24,25 +25,22 @@ namespace Escape.Renderer.Shader {
 		
 		[Obsolete]
 		public static IShaderData<T> Create<T>(IPlatform platform, uint binding, T? data, uint size) {
-			return platform switch {
+			/*return platform switch {
 				GLPlatform glPlatform => new GLShaderData<T>(glPlatform) {
 					Binding = binding,
 					Data = data,
 					Size = size
 				},
 				_ => throw new NotImplementedException("PlatformImpl")
-			};
+			};*/
+			throw new NotSupportedException();
 		}
 		
-		public unsafe static IShaderData<T> Create<T>(IPlatform platform, ShaderProgram program, uint binding, T? data, uint? size = null) {
+		public unsafe static IShaderData<T> Create<T>(IPlatform platform, ShaderProgram program, string name, uint binding, T? data, uint? size = null) {
 			uint realSize = size ?? (uint) sizeof(T);
 			
 			return platform switch {
-				GLPlatform glPlatform => new GLShaderData<T>(glPlatform) {
-					Binding = binding,
-					Data = data,
-					Size = realSize
-				},
+				GLPlatform glPlatform => new GLShaderData<T>(glPlatform, program, name, binding, data, realSize),
 				VkPlatform vkPlatform => new VkShaderData<T>(vkPlatform, program, binding, data, realSize),
 				_ => throw new NotImplementedException("PlatformImpl")
 			};

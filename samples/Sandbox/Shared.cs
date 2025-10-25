@@ -92,6 +92,8 @@ public static class Shared {
 		shaderPipeline = new DefaultSceneShaderPipeline(platform);
 		renderQueue = RenderQueueManager.Create(platform, "main");
 		renderPipeline = RenderPipelineManager.Create(platform, "main", renderQueue, shaderPipeline);
+		
+		//DebugInterface = DebugInterface.Setup(platform);
 	}
 
 	public static void CreateWindow(

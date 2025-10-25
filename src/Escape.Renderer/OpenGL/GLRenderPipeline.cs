@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using Escape.Renderer.Shader;
+using Silk.NET.OpenGL;
+using Silk.NET.Windowing;
 
 namespace Escape.Renderer.OpenGL {
 	
@@ -21,13 +23,14 @@ namespace Escape.Renderer.OpenGL {
 			Program.Get().Program!.Bind(this);
 			
 			// TODO per pipeline GL states
+			_platform.API.Enable(EnableCap.DepthTest);
+			_platform.API.CullFace(TriangleFace.Back);
 
 			return true;
 		}
 
 		public override bool End() {
-			if(!Queue.End()) return false;
-			return true;
+			return Queue.End();
 		}
 		
 		public override void Dispose() {

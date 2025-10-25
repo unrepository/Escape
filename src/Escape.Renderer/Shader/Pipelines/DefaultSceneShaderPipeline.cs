@@ -64,28 +64,29 @@ namespace Escape.Renderer.Shader.Pipelines {
 
 		#region OpenGL
 			if(glPlatform is not null) {
-				((GLShaderProgram) Program.Get()).Build(); // TODO this is stupid
-				//((GLShaderProgram) Program.Get()).Bind();
-				GLModelMatrixUniform = glPlatform.API.GetUniformLocation(((GLShaderProgram) Program.Get()).Handle, "model_matrix");
+				var glProgram = (GLShaderProgram) Program.Get();
+				glProgram.Build(); // TODO this is stupid
+				
+				GLModelMatrixUniform = glPlatform.API.GetUniformLocation(glProgram.Handle, "model_matrix");
 			}
 		#endregion
 
 			// shader data
 			// TODO *technically* everything should be Ref, as it might get cleaned up by GC in scenario where Program
 			// was would be a local variable, but that seems kinda eh, maybe in the future
-			CameraData = IShaderData.Create<CameraData>(platform, Program.Get(), 0, default);
+			CameraData = IShaderData.Create<CameraData>(platform, Program.Get(), "CameraData", 0, default);
 
 			const int INITIAL_SIZE = 1024 * 1024; // 1 MiB to start
 			
-			VertexData = IShaderArrayData.Create<Vertex>(platform, Program.Get(), 1, null, INITIAL_SIZE);
-			IndexData = IShaderArrayData.Create<uint>(platform, Program.Get(), 2, null, INITIAL_SIZE);
-			MaterialData = IShaderArrayData.Create<Material.Data>(platform, Program.Get(), 3, null, INITIAL_SIZE);
-			MatrixData = IShaderArrayData.Create<Matrix4x4>(platform, Program.Get(), 4, null, INITIAL_SIZE);
+			VertexData = IShaderArrayData.Create<Vertex>(platform, Program.Get(), "VertexData", 1, null, INITIAL_SIZE);
+			IndexData = IShaderArrayData.Create<uint>(platform, Program.Get(), "IndexData", 2, null, INITIAL_SIZE);
+			MaterialData = IShaderArrayData.Create<Material.Data>(platform, Program.Get(), "MaterialData", 3, null, INITIAL_SIZE);
+			MatrixData = IShaderArrayData.Create<Matrix4x4>(platform, Program.Get(), "MatrixData", 4, null, INITIAL_SIZE);
  
-			LightData = IShaderData.Create<LightData>(platform, Program.Get(), 10, default);
-			DirectionalLightData = IShaderArrayData.Create<DirectionalLight>(platform, Program.Get(), 11, null, 64);
-			PointLightData = IShaderArrayData.Create<PointLight>(platform, Program.Get(), 12, null, 64);
-			SpotLightData = IShaderArrayData.Create<SpotLight>(platform, Program.Get(), 13, null, 64);
+			LightData = IShaderData.Create<LightData>(platform, Program.Get(), "LightData", 10, default);
+			DirectionalLightData = IShaderArrayData.Create<DirectionalLight>(platform, Program.Get(), "DirectionalLightData", 11, null, 64);
+			PointLightData = IShaderArrayData.Create<PointLight>(platform, Program.Get(), "PointLightData", 12, null, 64);
+			SpotLightData = IShaderArrayData.Create<SpotLight>(platform, Program.Get(), "SpotLightData", 13, null, 64);
 		}
 
 		public void PushData() {

@@ -3,8 +3,10 @@ using System.Text;
 using Escape.Renderer.Shader;
 using NLog;
 using Silk.NET.Core.Contexts;
+using Silk.NET.GLFW;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using Silk.NET.Windowing.Glfw;
 
 namespace Escape.Renderer.OpenGL {
 	
@@ -41,9 +43,16 @@ namespace Escape.Renderer.OpenGL {
 				// create initial window to get GL api and context
 				// very meh approach, but we already do this in Vulkan too so whatever
 				// and I don't see any other way
-
+				
+			#if DEBUG
+				// force GLFW to use X11 in debug as renderdoc doesn't support wayland
+				//						GLFW_PLATFORM		  GLFW_PLATFORM_X11
+				Glfw.GetApi().InitHint((InitHint) 0x00050003, 0x00060004);
+			#endif
+				
 				var window = Silk.NET.Windowing.Window.Create(WindowOptions.Default with {
-					WindowState = WindowState.Minimized
+					WindowState = WindowState.Minimized,
+					IsVisible = false,
 				});
 				
 				window.Load += () => {

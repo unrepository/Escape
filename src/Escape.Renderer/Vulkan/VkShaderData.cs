@@ -13,6 +13,7 @@ namespace Escape.Renderer.Vulkan {
 	public unsafe class VkShaderData<T> : IShaderData<T> {
 		
 		public ulong Handle { get; private set; }
+		public string Name => throw new NotSupportedException();
 		public uint Binding { get; }
 		
 		public T? Data {

@@ -59,7 +59,7 @@ namespace Escape.Renderer.OpenGL {
 
 				fixed(void* dataPtr = mesh.Indices) {
 					_platform.API.BufferData(
-						BufferTargetARB.ArrayBuffer,
+						BufferTargetARB.ElementArrayBuffer,
 						(nuint) (mesh.Indices.Length * sizeof(uint)),
 						dataPtr,
 						BufferUsageARB.StaticDraw
@@ -90,6 +90,8 @@ namespace Escape.Renderer.OpenGL {
 				// vec2 uv
 				_platform.API.EnableVertexAttribArray(4);
 				_platform.API.VertexAttribPointer(4, 2, type, false, size, 64);
+				
+				_platform.API.BindVertexArray(0);
 			#endregion
 			}
 

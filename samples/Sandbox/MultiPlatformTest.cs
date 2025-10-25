@@ -33,7 +33,7 @@ public static class MultiPlatformTest {
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);
 		
 		// load scene
-		var scene = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/Corset.glb")!;
+		var scene = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/BarramundiFish.glb")!;
 		var sceneRoot = scene.Get().Scene!.Export(ref world, null);
 		
 		var q = new QueryDescription().WithNone<Empty>();
@@ -46,11 +46,11 @@ public static class MultiPlatformTest {
 		// create camera entity
 		CreateOrbitalCamera(ref world, window, out var camera, out var orbitalCamera);
 		
-		RenderManager.Add(renderQueue, "window", (_, _) => {
-			window.Base.MakeCurrent();
-			window.Base.DoEvents();
-			window.Base.DoRender();
-		});
+		// RenderManager.Add(renderQueue, "window", (_, _) => {
+		// 	window.Base.MakeCurrent();
+		// 	window.Base.DoEvents();
+		// 	window.Base.DoRender();
+		// });
 		
 		ESCAPE.Run();
 	}

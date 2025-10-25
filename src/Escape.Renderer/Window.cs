@@ -1,5 +1,6 @@
 using Escape.Renderer.OpenGL;
 using Escape.Renderer.Vulkan;
+using Silk.NET.GLFW;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
