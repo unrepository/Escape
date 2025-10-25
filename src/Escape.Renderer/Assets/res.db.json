@@ -1,13 +1,22 @@
 {
 	"entries": {
 		"dbec5184-1a1b-4d39-9a55-3f97d55b4a83": {
-			"metadata_path": "/shader_programs/scene.program.meta.json"
+			"metadata_path": "/shader_programs/pbr.program.meta.json"
+		},
+		"fa28933a-ea6c-4511-a4d4-11ce12811a79": {
+			"metadata_path": "/shader_programs/unshaded.program.meta.json"
 		},
 		"4b558820-ed4c-4db2-9d65-9997d63577cb": {
-			"metadata_path": "/shaders/gl/scene.frag.meta.json"
+			"metadata_path": "/shaders/gl/pbr.frag.meta.json"
 		},
 		"095ab862-0371-43db-9570-89e2c14c3c22": {
-			"metadata_path": "/shaders/gl/scene.vert.meta.json"
+			"metadata_path": "/shaders/gl/pbr.vert.meta.json"
+		},
+		"cccafd59-df90-4e8f-9087-ed9fc0fc3d77": {
+			"metadata_path": "/shaders/gl/unshaded.frag.meta.json"
+		},
+		"7de3ddc2-f2f8-48d3-bd9c-142503cb27bf": {
+			"metadata_path": "/shaders/gl/unshaded.vert.meta.json"
 		},
 		"acc218ba-15ab-4071-9b8f-93d33c44fa5e": {
 			"metadata_path": "/shaders/vk/scene.frag.meta.json"

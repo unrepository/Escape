@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Numerics;
+using Escape.Renderer.Shader;
 using Escape.Renderer.Shader.Pipelines;
 using NLog;
 using Silk.NET.OpenGL;
@@ -13,7 +14,7 @@ namespace Escape.Renderer.OpenGL {
 		private readonly GLPlatform _platform;
 		private readonly Dictionary<RenderableObject, ObjectDrawData> _objectData = [];
 
-		public GLObjectRenderer(string id, DefaultSceneShaderPipeline shaderPipeline) : base(id, shaderPipeline) {
+		public GLObjectRenderer(string id, IShaderPipeline shaderPipeline) : base(id, shaderPipeline) {
 			_platform = (GLPlatform) shaderPipeline.Platform;
 		}
 

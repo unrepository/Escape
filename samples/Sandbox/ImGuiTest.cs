@@ -4,13 +4,14 @@ using Escape;
 using Escape.Components;
 using Escape.Extensions.ImGui;
 using Escape.Renderer;
+using Escape.Renderer.Shader.Pipelines;
 using Hexa.NET.ImGui;
 using static Shared;
 
 public static class ImGuiTest {
 
 	public unsafe static void Start(string[] args) {
-		SetupPlatform(GetPlatform(args), out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
+		SetupPlatform(GetPlatform(args), out var platform, p => new DefaultPBRShaderPipeline(p), out var shaderPipeline, out var renderQueue, out var renderPipeline);
 		CreateWindow(platform, "ImGui Test", ref renderQueue, out var window);
 
 		ImGuiController.Create(platform, "test", renderQueue, window);

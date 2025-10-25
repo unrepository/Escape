@@ -11,9 +11,9 @@ namespace Escape.Renderer {
 		public string Id { get; }
 		public int Priority { get; init; } = 1000;
 		
-		public DefaultSceneShaderPipeline ShaderPipeline { get; }
+		public IShaderPipeline ShaderPipeline { get; }
 		
-		public ObjectRenderer(string id, DefaultSceneShaderPipeline shaderPipeline) {
+		public ObjectRenderer(string id, IShaderPipeline shaderPipeline) {
 			Id = id;
 			ShaderPipeline = shaderPipeline;
 		}
@@ -25,7 +25,7 @@ namespace Escape.Renderer {
 		public abstract void Render(RenderQueue queue, TimeSpan delta);
 		public abstract void Reset();
 		
-		public static ObjectRenderer Create(IPlatform platform, DefaultSceneShaderPipeline shaderPipeline) {
+		public static ObjectRenderer Create(IPlatform platform, IShaderPipeline shaderPipeline) {
 			return platform switch {
 				VkPlatform vkPlatform => new VkObjectRenderer("main", shaderPipeline),
 				GLPlatform glPlatform => new GLObjectRenderer("main", shaderPipeline),

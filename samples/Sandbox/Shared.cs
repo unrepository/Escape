@@ -12,6 +12,7 @@ using Escape.Systems;
 using Schedulers;
 using Escape;
 using Escape.Renderer.OpenGL;
+using Escape.Renderer.Shader;
 using Camera3D = Escape.Components.Camera3D;
 
 public static class Shared {
@@ -72,13 +73,14 @@ public static class Shared {
 		};
 	}
 	
-	public static void SetupPlatform(
+	public static void SetupPlatform<TShaderPipeline>(
 		Platform platformId,
 		out IPlatform platform,
-		out DefaultSceneShaderPipeline shaderPipeline,
+		Func<IPlatform, TShaderPipeline> createShaderPipeline,
+		out TShaderPipeline shaderPipeline,
 		out RenderQueue renderQueue,
 		out RenderPipeline renderPipeline
-	) {
+	) where TShaderPipeline : IShaderPipeline {
 		platform = platformId switch {
 			Platform.Vulkan => new VkPlatform(),
 			Platform.OpenGL => new GLPlatform(),
@@ -90,8 +92,8 @@ public static class Shared {
 		if(platform is VkPlatform vkPlatform) {
 			vkPlatform.PrimaryDevice = vkPlatform.CreateDevice(0);
 		}
-		
-		shaderPipeline = new DefaultSceneShaderPipeline(platform);
+
+		shaderPipeline = createShaderPipeline(platform);
 		renderQueue = RenderQueueManager.Create(platform, "main");
 		renderPipeline = RenderPipelineManager.Create(platform, "main", renderQueue, shaderPipeline);
 
@@ -101,7 +103,7 @@ public static class Shared {
 	[Obsolete("Use cross-platform SetupPlatform")]
 	public static void SetupVulkan(
 		out VkPlatform platform,
-		out DefaultSceneShaderPipeline shaderPipeline,
+		out DefaultPBRShaderPipeline shaderPipeline,
 		out RenderQueue renderQueue,
 		out RenderPipeline renderPipeline
 	) {
@@ -110,7 +112,7 @@ public static class Shared {
 
 		platform.PrimaryDevice = platform.CreateDevice(0);
 		
-		shaderPipeline = new DefaultSceneShaderPipeline(platform);
+		shaderPipeline = new DefaultPBRShaderPipeline(platform);
 		renderQueue = RenderQueueManager.Create(platform, "main");
 		renderPipeline = RenderPipelineManager.Create(platform, "main", renderQueue, shaderPipeline);
 
@@ -120,14 +122,14 @@ public static class Shared {
 	[Obsolete("Use cross-platform SetupPlatform")]
 	public static void SetupOpenGL(
 		out GLPlatform platform,
-		out DefaultSceneShaderPipeline shaderPipeline,
+		out DefaultPBRShaderPipeline shaderPipeline,
 		out RenderQueue renderQueue,
 		out RenderPipeline renderPipeline
 	) {
 		platform = new GLPlatform();
 		platform.Initialize();
 
-		shaderPipeline = new DefaultSceneShaderPipeline(platform);
+		shaderPipeline = new DefaultPBRShaderPipeline(platform);
 		renderQueue = RenderQueueManager.Create(platform, "main");
 		renderPipeline = RenderPipelineManager.Create(platform, "main", renderQueue, shaderPipeline);
 		
@@ -148,7 +150,7 @@ public static class Shared {
 
 	public static void CreateWorld(
 		IPlatform platform,
-		DefaultSceneShaderPipeline shaderPipeline,
+		IShaderPipeline shaderPipeline,
 		RenderQueue renderQueue,
 		out World world
 	) {

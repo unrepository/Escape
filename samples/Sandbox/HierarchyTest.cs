@@ -6,6 +6,7 @@ using Escape;
 using Escape.Components;
 using Escape.Renderer;
 using Escape.Renderer.Camera;
+using Escape.Renderer.Shader.Pipelines;
 using Escape.UnitTypes;
 using static Shared;
 using Camera3D = Escape.Components.Camera3D;
@@ -13,7 +14,7 @@ using Camera3D = Escape.Components.Camera3D;
 public static class HierarchyTest {
 
 	public static void Start(string[] args) {
-		SetupPlatform(GetPlatform(args), out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
+		SetupPlatform(GetPlatform(args), out var platform, p => new DefaultPBRShaderPipeline(p), out var shaderPipeline, out var renderQueue, out var renderPipeline);
 		
 		CreateWindow(platform, "Hierarchy Test", ref renderQueue, out var window);
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);

@@ -6,6 +6,7 @@ using Escape;
 using Escape.Components;
 using Escape.Extensions.Assimp;
 using Escape.Renderer.Camera;
+using Escape.Renderer.Shader.Pipelines;
 using Escape.Resources;
 using Escape.UnitTypes;
 using NLog;
@@ -18,7 +19,7 @@ public static class GLTFTest {
 	private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 	public static void Start(string[] args) {
-		SetupPlatform(GetPlatform(args), out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
+		SetupPlatform(GetPlatform(args), out var platform, p => new DefaultPBRShaderPipeline(p), out var shaderPipeline, out var renderQueue, out var renderPipeline);
 		
 		CreateWindow(platform, "GLTF Test", ref renderQueue, out var window);
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);

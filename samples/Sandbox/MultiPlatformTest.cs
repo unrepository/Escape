@@ -17,7 +17,7 @@ public static class MultiPlatformTest {
 
 	public static void Start(string[] args) {
 		IPlatform platform = null;
-		DefaultSceneShaderPipeline shaderPipeline = null;
+		DefaultPBRShaderPipeline shaderPipeline = null;
 		RenderQueue renderQueue = null;
 		RenderPipeline renderPipeline = null;
 		

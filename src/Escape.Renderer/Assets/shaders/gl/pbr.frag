@@ -228,7 +228,7 @@ void main() {
 
 	//= textures
 	if(HAS_ALBEDO_TEXTURE) {
-		albedo = pow(texture(albedoTexture, uv).rgb, vec3(gamma));
+		albedo *= pow(texture(albedoTexture, uv).rgb, vec3(gamma));
 	}
 
 	if(HAS_METALLIC_TEXTURE) {

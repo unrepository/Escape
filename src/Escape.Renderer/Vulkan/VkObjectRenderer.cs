@@ -17,7 +17,7 @@ namespace Escape.Renderer.Vulkan {
 		private readonly Dictionary<RenderableObject, ObjectDrawData> _drawData = [];
 		//private readonly List<RenderableObject> _objects = [];
 
-		public VkObjectRenderer(string id, DefaultSceneShaderPipeline shaderPipeline) : base(id, shaderPipeline) { }
+		public VkObjectRenderer(string id, IShaderPipeline shaderPipeline) : base(id, shaderPipeline) { }
 
 		public unsafe override bool AddObject(RenderableObject obj, Matrix4x4? matrix = null) {
 			matrix ??= Matrix4x4.Identity;
