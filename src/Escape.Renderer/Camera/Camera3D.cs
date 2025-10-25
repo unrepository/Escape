@@ -9,7 +9,7 @@ namespace Escape.Renderer.Camera {
 		public static float ZFar { get; set; } = 1_000f;
 
 		public Vector3 Position = Vector3.Zero;
-		public Vector3 Target = new Vector3(0, 0, -1);
+		public Vector3 Target = Vector3.Zero;
 		public Vector3 Up = Vector3.UnitY;
 
 		protected Camera3D(Framebuffer framebuffer) : base(framebuffer) { }

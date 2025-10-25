@@ -31,14 +31,16 @@ namespace Escape.Renderer.OpenGL {
 					RenderTarget.Dispose();
 					RenderTarget = null;
 					
-					window.Dispose();
+					window.IsVisible = false;
+					window.Close();
 					return false;
 				}
 				
 				window.MakeCurrent();
+			} else {
+				_platform.API.BindFramebuffer(FramebufferTarget.DrawFramebuffer, (uint) RenderTarget.Handle);
 			}
 			
-			//_platform.API.BindFramebuffer(FramebufferTarget.DrawFramebuffer, (uint) RenderTarget.Handle);
 			var viewportWidth = Viewport.Z > 0 ? (uint) Viewport.Z : RenderTarget.Size.X;
 			var viewportHeight = Viewport.W > 0 ? (uint) Viewport.W : RenderTarget.Size.Y;
 			

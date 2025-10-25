@@ -55,14 +55,6 @@ namespace Escape.Renderer.Vulkan {
 			Framebuffer.Create();
 		}
 
-		public override double RenderFrame(Action<double>? frameProvider = null) {
-			throw new NotImplementedException();
-		}
-
-		public override void ScheduleLater(Action action) {
-			throw new NotImplementedException();
-		}
-
 		public override void Dispose() {
 			GC.SuppressFinalize(this);
 			

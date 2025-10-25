@@ -43,55 +43,13 @@ namespace Escape.Renderer {
 			{ QueuePriority.Highest, [] }
 		};*/
 
-		protected SortedDictionary<int, List<Action<double>>> RenderQueues { get; } = [];
-		
 		public Window(IPlatform platform, WindowOptions? options = null) {
 			Platform = platform;
 		}
 
 		public abstract void Initialize(RenderQueue queue);
-		public abstract double RenderFrame(Action<double>? frameProvider = null);
-
-		public abstract void ScheduleLater(Action action);
 
 		public void Close() => Base.Close();
-
-		public void AddRenderQueue(int priority, Action<double> action) {
-			if(!RenderQueues.ContainsKey(priority)) {
-				RenderQueues[priority] = new();
-			}
-			
-			RenderQueues[priority].Add(action);
-		}
-
-		public bool RemoveRenderQueue(int priority, int index) {
-			if(!RenderQueues.TryGetValue(priority, out var queues)) return false;
-			if(index >= queues.Count) return false;
-			
-			queues.RemoveAt(index);
-			return true;
-		}
-
-		public bool RemoveRenderQueue(int priority, Action<double> action) {
-			if(!RenderQueues.TryGetValue(priority, out var queues)) return false;
-			return queues.Remove(action);
-		}
-
-		public void ClearRenderQueues() => RenderQueues.Clear();
-		public void ClearRenderQueues(int priority) {
-			if(RenderQueues.TryGetValue(priority, out var queues)) queues.Clear();
-		}
-
-		public int RemoveRenderQueue(Action<double> action) {
-			int removed = 0;
-			
-			foreach(var queues in RenderQueues.Values) {
-				if(queues.Remove(action)) removed++;
-			}
-
-			return removed;
-		}
-		
 		public abstract void Dispose();
 
 		public static Window Create(IPlatform platform, WindowOptions? options = null) {
@@ -100,15 +58,6 @@ namespace Escape.Renderer {
 				VkPlatform vkPlatform => new VkWindow(vkPlatform, options),
 				_ => throw new NotImplementedException("PlatformImpl")
 			};
-		}
-		
-		public enum QueuePriority {
-			
-			Lowest,
-			Low,
-			Normal,
-			High,
-			Highest
 		}
 	}
 }

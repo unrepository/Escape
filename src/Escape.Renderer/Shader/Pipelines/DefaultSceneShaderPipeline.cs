@@ -43,6 +43,7 @@ namespace Escape.Renderer.Shader.Pipelines {
 			var glPlatform = platform as GLPlatform;
 
 			Program = ResourceManager.Load<ShaderProgramResource>(platform, "/shader_programs/scene.program")!;
+			Program.Get().Program.Build();
 			
 		#region Vulkan
 			// material texture units for Vulkan
@@ -64,10 +65,7 @@ namespace Escape.Renderer.Shader.Pipelines {
 
 		#region OpenGL
 			if(glPlatform is not null) {
-				var glProgram = (GLShaderProgram) Program.Get();
-				glProgram.Build(); // TODO this is stupid
-				
-				GLModelMatrixUniform = glPlatform.API.GetUniformLocation(glProgram.Handle, "model_matrix");
+				GLModelMatrixUniform = glPlatform.API.GetUniformLocation(Program.Get().Program.Handle, "model_matrix");
 			}
 		#endregion
 
@@ -92,19 +90,19 @@ namespace Escape.Renderer.Shader.Pipelines {
 		public void PushData() {
 			CameraData.Push();
 
+			// we don't use PVP in OpenGL
 			if(Platform is not GLPlatform) {
 				VertexData.Push();
 				IndexData.Push();
 				MatrixData.Push();
 			}
 			
-			// TODO
-			/*MaterialData.Push();
+			MaterialData.Push();
 			
 			LightData.Push();
 			DirectionalLightData.Push();
 			PointLightData.Push();
-			SpotLightData.Push();*/
+			SpotLightData.Push();
 		}
 
 		public void Dispose() {

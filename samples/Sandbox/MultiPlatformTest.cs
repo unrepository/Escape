@@ -46,12 +46,6 @@ public static class MultiPlatformTest {
 		// create camera entity
 		CreateOrbitalCamera(ref world, window, out var camera, out var orbitalCamera);
 		
-		// RenderManager.Add(renderQueue, "window", (_, _) => {
-		// 	window.Base.MakeCurrent();
-		// 	window.Base.DoEvents();
-		// 	window.Base.DoRender();
-		// });
-		
 		ESCAPE.Run();
 	}
 }

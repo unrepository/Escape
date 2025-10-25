@@ -93,7 +93,7 @@ public static class Shared {
 		renderQueue = RenderQueueManager.Create(platform, "main");
 		renderPipeline = RenderPipelineManager.Create(platform, "main", renderQueue, shaderPipeline);
 		
-		//DebugInterface = DebugInterface.Setup(platform);
+		DebugInterface = DebugInterface.Setup(platform);
 	}
 
 	public static void CreateWindow(

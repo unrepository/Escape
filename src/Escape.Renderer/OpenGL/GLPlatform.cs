@@ -65,6 +65,8 @@ namespace Escape.Renderer.OpenGL {
 				window.Initialize();
 			}
 			
+			Debug.Assert(_sharedApi is not null);
+			
 			PlatformThread = Thread.CurrentThread;
 			API = _sharedApi;
 

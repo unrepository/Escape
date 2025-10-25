@@ -11,7 +11,6 @@ namespace Escape.Renderer.OpenGL {
 	public class GLWindow : Window {
 
 		private readonly GLPlatform _platform;
-		private readonly List<Action> _scheduledActions = [];
 
 		public GLWindow(GLPlatform platform, WindowOptions? options = null)
 			: base(platform, options)
@@ -29,8 +28,8 @@ namespace Escape.Renderer.OpenGL {
 				}
 			};
 			windowOptions.SharedContext = GLPlatform._sharedContext;
-			windowOptions.ShouldSwapAutomatically = true;
-			//windowOptions.TransparentFramebuffer = true;
+			windowOptions.ShouldSwapAutomatically = false;
+			windowOptions.TransparentFramebuffer = true;
 
 			Base = Silk.NET.Windowing.Window.Create(windowOptions);
 
@@ -60,62 +59,14 @@ namespace Escape.Renderer.OpenGL {
 				_platform.API.Viewport(size);
 			};
 			
-			/*Base.Render += delta => {
-				FrameDeltaTime = delta;
-
-				if(!Base.IsVisible) return;
-				Base.MakeCurrent();
-				
-				_platform.API.Clear((uint) (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
-				_platform.API.ClearColor(0, 0, 0, 1);
-
-				foreach(var queues in RenderQueues.Values) {
-					foreach(var queue in queues.ToArray()) {
-						queue(delta);
-					}
-				}
-			};*/
-			
 			Base.Initialize();
 
 			Framebuffer = new WindowFramebuffer(_platform, glQueue, this);
 			Framebuffer.Create();
-			
-			//Base.MakeCurrent();
-			//_platform.API.Viewport(0, 0, Width, Height);
 
 			Base.IsVisible = true;
 			IsInitialized = true;
 		}
-
-		public override double RenderFrame(Action<double>? frameProvider = null)
-			=> throw new NotImplementedException();
-		
-		public override void ScheduleLater(Action action) {
-			throw new NotImplementedException();
-		}
-
-		/*public override double RenderFrame(Action<double>? frameProvider = null) {
-			Base.DoEvents();
-			if(!Base.IsClosing) Base.DoUpdate();
-			if(Base.IsClosing) return -1;
-
-			if(frameProvider is not null) AddRenderQueue(0, frameProvider);
-			Base.DoRender();
-			if(frameProvider is not null) RemoveRenderQueue(0, frameProvider);
-
-			foreach(var action in _scheduledActions) {
-				action();
-			}
-			
-			_scheduledActions.Clear();
-
-			return FrameDeltaTime;
-		}
-
-		public override void ScheduleLater(Action action) {
-			_scheduledActions.Add(action);
-		}*/
 
 		public override void Dispose() {
 			GC.SuppressFinalize(this);

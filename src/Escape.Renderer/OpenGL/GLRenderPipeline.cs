@@ -7,6 +7,10 @@ namespace Escape.Renderer.OpenGL {
 	
 	public class GLRenderPipeline : RenderPipeline {
 
+		public Action<GLRenderPipeline, GLPlatform>? StateSetup { get; set; } = (_, p) => { p.API.CullFace(TriangleFace.Back); };
+		public List<EnableCap> EnableCaps { get; set; } = [ EnableCap.DepthTest ];
+		public List<EnableCap> DisableCaps { get; set; } = [];
+		
 		private readonly GLPlatform _platform;
 
 		public GLRenderPipeline(GLPlatform platform, RenderQueue queue, IShaderPipeline shaderPipeline)
@@ -22,9 +26,16 @@ namespace Escape.Renderer.OpenGL {
 			if(!Queue.Begin()) return false;
 			Program.Get().Program!.Bind(this);
 			
-			// TODO per pipeline GL states
-			_platform.API.Enable(EnableCap.DepthTest);
-			_platform.API.CullFace(TriangleFace.Back);
+			// state setup
+			StateSetup?.Invoke(this, _platform);
+
+			foreach(var cap in EnableCaps) {
+				_platform.API.Enable(cap);
+			}
+			
+			foreach(var cap in DisableCaps) {
+				_platform.API.Disable(cap);
+			}
 
 			return true;
 		}

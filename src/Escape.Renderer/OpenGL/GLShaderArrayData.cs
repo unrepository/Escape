@@ -53,9 +53,6 @@ namespace Escape.Renderer.OpenGL {
 
 			uint realSize = Size > 0 ? Size : (uint) (_data?.Length * sizeof(T));
 			_platform.API.BufferData(BufferTargetARB.UniformBuffer, realSize, dataPtr, BufferUsageARB.StaticDraw);
-			
-			//_platform.API.NamedBufferData((uint) Handle, Size, dataPtr, VertexBufferObjectUsage.DynamicDraw);
-			//_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, Binding, (uint) Handle);
 		}
 
 		public unsafe void Read() {
