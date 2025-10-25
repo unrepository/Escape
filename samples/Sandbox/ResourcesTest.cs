@@ -20,7 +20,7 @@ public static class ResourcesTest {
 	private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 	public static void Start(string[] args) {
-		SetupVulkan(out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
+		SetupPlatform(GetPlatform(args), out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
 
 		// load resources
 		var texture1 = ResourceManager.Load<TextureResource>(platform, "textures/1.png")!;

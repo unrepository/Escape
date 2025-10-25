@@ -13,7 +13,7 @@ using Camera3D = Escape.Components.Camera3D;
 public static class HierarchyTest {
 
 	public static void Start(string[] args) {
-		SetupVulkan(out var platform, out var shaderPipeline, out var renderQueue, out _);
+		SetupPlatform(GetPlatform(args), out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
 		
 		CreateWindow(platform, "Hierarchy Test", ref renderQueue, out var window);
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);

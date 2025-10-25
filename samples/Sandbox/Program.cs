@@ -1,1 +1,1 @@
-MultiPlatformTest.Start(args);
+WorldSandbox.Start(args);

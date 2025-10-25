@@ -17,7 +17,7 @@ using Color = Escape.Renderer.Color;
 public static class LightingTest {
 
 	public static void Start(string[] args) {
-		SetupVulkan(out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
+		SetupPlatform(GetPlatform(args), out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
 		
 		CreateWindow(platform, "Lighting Test", ref renderQueue, out var window);
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);

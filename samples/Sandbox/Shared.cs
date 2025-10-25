@@ -62,6 +62,43 @@ public static class Shared {
 
 	public static DebugInterface? DebugInterface { get; set; }
 
+	public static Platform GetPlatform(string[] args) {
+		if(args.Length <= 0) return Platform.OpenGL;
+
+		return args[0] switch {
+			"vk" => Platform.Vulkan,
+			"gl" => Platform.OpenGL,
+			_ => Platform.OpenGL
+		};
+	}
+	
+	public static void SetupPlatform(
+		Platform platformId,
+		out IPlatform platform,
+		out DefaultSceneShaderPipeline shaderPipeline,
+		out RenderQueue renderQueue,
+		out RenderPipeline renderPipeline
+	) {
+		platform = platformId switch {
+			Platform.Vulkan => new VkPlatform(),
+			Platform.OpenGL => new GLPlatform(),
+			_ => throw new NotImplementedException()
+		};
+		
+		platform.Initialize();
+
+		if(platform is VkPlatform vkPlatform) {
+			vkPlatform.PrimaryDevice = vkPlatform.CreateDevice(0);
+		}
+		
+		shaderPipeline = new DefaultSceneShaderPipeline(platform);
+		renderQueue = RenderQueueManager.Create(platform, "main");
+		renderPipeline = RenderPipelineManager.Create(platform, "main", renderQueue, shaderPipeline);
+
+		DebugInterface = DebugInterface.Setup(platform);
+	}
+	
+	[Obsolete("Use cross-platform SetupPlatform")]
 	public static void SetupVulkan(
 		out VkPlatform platform,
 		out DefaultSceneShaderPipeline shaderPipeline,
@@ -80,6 +117,7 @@ public static class Shared {
 		DebugInterface = DebugInterface.Setup(platform);
 	}
 
+	[Obsolete("Use cross-platform SetupPlatform")]
 	public static void SetupOpenGL(
 		out GLPlatform platform,
 		out DefaultSceneShaderPipeline shaderPipeline,
