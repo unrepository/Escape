@@ -15,5 +15,10 @@ namespace Escape.Renderer.Shader {
 	#region Vulkan
 		public DescriptorSet VkTexturesDescriptor { get; }
 	#endregion
+
+	#region OpenGL
+		public int GLModelMatrixUniform { get; }
+		public int GLAvailableTexturesUniform { get; }
+	#endregion
 	}
 }

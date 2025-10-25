@@ -37,7 +37,7 @@ public static class WorldSandbox {
 	private static bool _cameraLock = false;
 	
 	public static void Start(string[] args) {
-		SetupVulkan(out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
+		SetupPlatform(GetPlatform(args), out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
 		
 		var bricksAlbedo = ResourceManager.Load<TextureResource>(platform, "textures/Bricks059_1K-JPG/Bricks059_1K-JPG_Color.jpg");
 		var bricksNormal = ResourceManager.Load<TextureResource>(platform, "textures/Bricks059_1K-JPG/Bricks059_1K-JPG_NormalGL.jpg");

@@ -38,7 +38,7 @@
 						atk
 						gobject-introspection
 						gdk-pixbuf
-						wayland
+						#wayland
 						glfw
 						vulkan-headers
 						vulkan-loader

@@ -14,10 +14,10 @@ namespace Escape.Renderer {
 		public float Metallic = 0.0f;
 		public float IOR = 1.5f;
 
-		public bool ComplexParallaxMapping = false;
+		public bool ComplexParallaxMapping = true;
 		public uint ParallaxMinLayers = 4;
 		public uint ParallaxMaxLayers = 32;
-		public float ParallaxHeightScale = -0.05f;
+		public float ParallaxHeightScale = 0.05f;
 
 		public Ref<TextureResource>? AlbedoTexture;
 		public Ref<TextureResource>? NormalTexture;

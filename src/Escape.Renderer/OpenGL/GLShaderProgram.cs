@@ -17,8 +17,8 @@ namespace Escape.Renderer.OpenGL {
 		public override void Bind(RenderPipeline pipeline) {
 			if(Handle == 0) Build();
 			
-			if(_emptyVao == 0) _emptyVao = _platform.API.GenVertexArray();
-			_platform.API.BindVertexArray(_emptyVao);
+			//if(_emptyVao == 0) _emptyVao = _platform.API.GenVertexArray();
+			//_platform.API.BindVertexArray(_emptyVao);
 			
 			_platform.API.UseProgram(Handle);
 

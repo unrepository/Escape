@@ -102,7 +102,10 @@ namespace Escape.Renderer.OpenGL {
 		}
 
 		public override void Bind(RenderQueue queue, uint unit) {
-			throw new NotImplementedException();
+			Debug.Assert(Id != 0);
+			
+			_platform.API.ActiveTexture((TextureUnit) ((int) TextureUnit.Texture0 + unit));
+			_platform.API.BindTexture(TextureTarget.Texture2D, Id);
 		}
 
 		public override void Unbind() {

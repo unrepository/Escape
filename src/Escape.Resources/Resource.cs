@@ -97,7 +97,12 @@ namespace Escape.Resources {
 
 		public void Dispose() {
 			GC.SuppressFinalize(this);
-			Dispose(false);
+
+			try {
+				Dispose(false);
+			} catch(Exception e) {
+				_logger.Error("Could not dispose resource {Id} ({Path}): {Exception}", Id, FilePath, e);
+			}
 		}
 		
 		public virtual void Dispose(bool reloading) {

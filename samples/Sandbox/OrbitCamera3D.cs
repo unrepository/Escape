@@ -17,7 +17,7 @@ public class OrbitCamera3D : IUpdater {
 	public string Id { get; }
 	public Entity CameraEntity { get; set; }
 
-	public double Sensitivity { get; set; } = 20.0f;
+	public double Sensitivity { get; set; } = 5.0f;
 
 	public bool AllowZooming { get; set; } = true;
 	public bool AllowPanning { get; set; } = true;

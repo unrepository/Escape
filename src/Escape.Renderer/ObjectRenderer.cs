@@ -1,4 +1,5 @@
 using System.Numerics;
+using Escape.Renderer.OpenGL;
 using Escape.Renderer.Shader.Pipelines;
 using Escape.Renderer.Vulkan;
 using Escape.Renderer.Shader;
@@ -27,6 +28,7 @@ namespace Escape.Renderer {
 		public static ObjectRenderer Create(IPlatform platform, DefaultSceneShaderPipeline shaderPipeline) {
 			return platform switch {
 				VkPlatform vkPlatform => new VkObjectRenderer("main", shaderPipeline),
+				GLPlatform glPlatform => new GLObjectRenderer("main", shaderPipeline),
 				_ => throw new NotImplementedException("PlatformImpl")
 			};
 		}

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Escape.Renderer;
+using Escape.Renderer.OpenGL;
 using Escape.Renderer.Vulkan;
 using Silk.NET.Vulkan;
 using Framebuffer = Escape.Renderer.Framebuffer;
@@ -43,6 +44,13 @@ namespace Escape {
 					vkQueue.Initialize();
 
 					queue = vkQueue;
+					break;
+				case GLPlatform glPlatform:
+					var glQueue = new GLRenderQueue(glPlatform, family, format);
+					glQueue.RenderTarget = renderTarget;
+					glQueue.Initialize();
+					
+					queue = glQueue;
 					break;
 				default:
 					throw new NotImplementedException("PlatformImpl");

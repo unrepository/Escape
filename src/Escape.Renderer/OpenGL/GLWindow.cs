@@ -4,13 +4,13 @@ using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using Monitor = Silk.NET.Windowing.Monitor;
 
 namespace Escape.Renderer.OpenGL {
 	
 	public class GLWindow : Window {
 
 		private readonly GLPlatform _platform;
-		private readonly List<Action> _scheduledActions = [];
 
 		public GLWindow(GLPlatform platform, WindowOptions? options = null)
 			: base(platform, options)
@@ -23,22 +23,34 @@ namespace Escape.Renderer.OpenGL {
 				Flags = ContextFlags.ForwardCompatible,
 				Profile = ContextProfile.Core,
 				Version = new APIVersion {
-					MajorVersion = 4,
-					MinorVersion = 5
+					MajorVersion = 3,
+					MinorVersion = 3
 				}
 			};
 			windowOptions.SharedContext = GLPlatform._sharedContext;
-			windowOptions.ShouldSwapAutomatically = true;
+			windowOptions.ShouldSwapAutomatically = false;
 			windowOptions.TransparentFramebuffer = true;
 
 			Base = Silk.NET.Windowing.Window.Create(windowOptions);
+
+			// center window on main monitor
+			var mainMonitorBounds = Monitor.GetMainMonitor(Base).Bounds;
+			Base.Position = new Vector2D<int>(
+				mainMonitorBounds.Origin.X + mainMonitorBounds.Size.X / 2 - Base.Size.X / 2,
+				mainMonitorBounds.Origin.Y + mainMonitorBounds.Size.Y / 2 - Base.Size.Y / 2
+			);
+		}
+
+		public override void Initialize(RenderQueue queue) {
+			Debug.Assert(!IsInitialized);
+			var glQueue = (GLRenderQueue) queue;
 			
 			Base.Load += () => {
 				if(GLPlatform._sharedApi is null || GLPlatform._sharedContext is null) {
 					GLPlatform._sharedApi = Base.CreateOpenGL();
 					GLPlatform._sharedContext = Base.GLContext;
 				}
-
+				
 				Input = Base.CreateInput();
 			};
 
@@ -47,60 +59,39 @@ namespace Escape.Renderer.OpenGL {
 				_platform.API.Viewport(size);
 			};
 			
-			Base.Render += delta => {
-				FrameDeltaTime = delta;
-
-				if(!Base.IsVisible) return;
-				Base.MakeCurrent();
-				
-				_platform.API.Clear((uint) (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit));
-				_platform.API.ClearColor(0, 0, 0, 1);
-
-				foreach(var queues in RenderQueues.Values) {
-					foreach(var queue in queues.ToArray()) {
-						queue(delta);
-					}
-				}
-			};
-			
 			Base.Initialize();
-		}
 
-		public override void Initialize(RenderQueue queue) {
-			Debug.Assert(!IsInitialized);
-			
-			Base.MakeCurrent();
-			_platform.API.Viewport(0, 0, Width, Height);
+			Framebuffer = new WindowFramebuffer(_platform, glQueue, this);
+			Framebuffer.Create();
 
 			Base.IsVisible = true;
 			IsInitialized = true;
 		}
 
-		public override double RenderFrame(Action<double>? frameProvider = null) {
-			Base.DoEvents();
-			if(!Base.IsClosing) Base.DoUpdate();
-			if(Base.IsClosing) return -1;
-
-			if(frameProvider is not null) AddRenderQueue(0, frameProvider);
-			Base.DoRender();
-			if(frameProvider is not null) RemoveRenderQueue(0, frameProvider);
-
-			foreach(var action in _scheduledActions) {
-				action();
-			}
-			
-			_scheduledActions.Clear();
-
-			return FrameDeltaTime;
-		}
-
-		public override void ScheduleLater(Action action) {
-			_scheduledActions.Add(action);
-		}
-
 		public override void Dispose() {
 			GC.SuppressFinalize(this);
+			
+			Framebuffer.Dispose();
 			Base.Dispose();
+		}
+
+		public class WindowFramebuffer : GLFramebuffer {
+
+			public GLWindow Window { get; }
+
+			public WindowFramebuffer(GLPlatform platform, RenderQueue queue, GLWindow window)
+				: base(platform, queue, (Vector2D<uint>) window.Size)
+			{
+				Window = window;
+
+				window.Base.FramebufferResize += newSize => {
+					Size = (Vector2D<uint>) newSize;
+					OnResized(newSize);
+				};
+			}
+
+			public override void Resize(Vector2D<int> size)
+				=> throw new NotSupportedException();
 		}
 	}
 }

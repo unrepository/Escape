@@ -31,13 +31,20 @@ namespace Escape.Renderer.Shader.Pipelines {
 		public DescriptorSet VkTexturesDescriptor { get; }
 		private DescriptorSet _textureDescriptorSet;
 	#endregion
+
+	#region OpenGL
+		public int GLModelMatrixUniform { get; }
+		public int GLAvailableTexturesUniform { get; }
+	#endregion
 		
 		public DefaultSceneShaderPipeline(IPlatform platform) {
 			Platform = platform;
 			
 			var vkPlatform = platform as VkPlatform;
+			var glPlatform = platform as GLPlatform;
 
 			Program = ResourceManager.Load<ShaderProgramResource>(platform, "/shader_programs/scene.program")!;
+			Program.Get().Program.Build();
 			
 		#region Vulkan
 			// material texture units for Vulkan
@@ -57,31 +64,45 @@ namespace Escape.Renderer.Shader.Pipelines {
 			}
 		#endregion
 
-			// SSBOs
+		#region OpenGL
+			if(glPlatform is not null) {
+				var pHandle = Program.Get().Program.Handle;
+				
+				GLModelMatrixUniform = glPlatform.API.GetUniformLocation(pHandle, "modelMatrix");
+				GLAvailableTexturesUniform = glPlatform.API.GetUniformLocation(pHandle, "availableTextures");
+			}
+		#endregion
+
+			// shader data
 			// TODO *technically* everything should be Ref, as it might get cleaned up by GC in scenario where Program
 			// was would be a local variable, but that seems kinda eh, maybe in the future
-			CameraData = IShaderData.Create<CameraData>(platform, Program.Get(), 0, default);
+			CameraData = IShaderData.Create<CameraData>(platform, Program.Get(), "CameraData", 0, default);
 
 			const int INITIAL_SIZE = 1024 * 1024; // 1 MiB to start
-			
-			VertexData = IShaderArrayData.Create<Vertex>(platform, Program.Get(), 1, null, INITIAL_SIZE);
-			IndexData = IShaderArrayData.Create<uint>(platform, Program.Get(), 2, null, INITIAL_SIZE);
-			MaterialData = IShaderArrayData.Create<Material.Data>(platform, Program.Get(), 3, null, INITIAL_SIZE);
-			MatrixData = IShaderArrayData.Create<Matrix4x4>(platform, Program.Get(), 4, null, INITIAL_SIZE);
+
+			// we don't use PVP in OpenGL
+			if(Platform is not GLPlatform) {
+				VertexData = IShaderArrayData.Create<Vertex>(platform, Program.Get(), "VertexData", 1, null, INITIAL_SIZE);
+				IndexData = IShaderArrayData.Create<uint>(platform, Program.Get(), "IndexData", 2, null, INITIAL_SIZE);
+				MatrixData = IShaderArrayData.Create<Matrix4x4>(platform, Program.Get(), "MatrixData", 4, null, INITIAL_SIZE);
+			}
  
-			LightData = IShaderData.Create<LightData>(platform, Program.Get(), 10, default);
-			DirectionalLightData = IShaderArrayData.Create<DirectionalLight>(platform, Program.Get(), 11, null, 64);
-			PointLightData = IShaderArrayData.Create<PointLight>(platform, Program.Get(), 12, null, 64);
-			SpotLightData = IShaderArrayData.Create<SpotLight>(platform, Program.Get(), 13, null, 64);
+			MaterialData = IShaderArrayData.Create<Material.Data>(platform, Program.Get(), "MaterialData", 3, null, INITIAL_SIZE);
+			
+			LightData = IShaderData.Create<LightData>(platform, Program.Get(), "LightData", 10, default);
+			DirectionalLightData = IShaderArrayData.Create<DirectionalLight>(platform, Program.Get(), "DirectionalLightData", 11, null, 64);
+			PointLightData = IShaderArrayData.Create<PointLight>(platform, Program.Get(), "PointLightData", 12, null, 64);
+			SpotLightData = IShaderArrayData.Create<SpotLight>(platform, Program.Get(), "SpotLightData", 13, null, 64);
 		}
 
 		public void PushData() {
 			CameraData.Push();
-			
+
 			VertexData.Push();
 			IndexData.Push();
-			MaterialData.Push();
 			MatrixData.Push();
+			
+			MaterialData.Push();
 			
 			LightData.Push();
 			DirectionalLightData.Push();

@@ -11,6 +11,7 @@ using Escape.Renderer.Vulkan;
 using Escape.Systems;
 using Schedulers;
 using Escape;
+using Escape.Renderer.OpenGL;
 using Camera3D = Escape.Components.Camera3D;
 
 public static class Shared {
@@ -59,8 +60,45 @@ public static class Shared {
         ]
     };
 
-	public static DebugInterface DebugInterface { get; set; }
+	public static DebugInterface? DebugInterface { get; set; }
 
+	public static Platform GetPlatform(string[] args) {
+		if(args.Length <= 0) return Platform.OpenGL;
+
+		return args[0] switch {
+			"vk" => Platform.Vulkan,
+			"gl" => Platform.OpenGL,
+			_ => Platform.OpenGL
+		};
+	}
+	
+	public static void SetupPlatform(
+		Platform platformId,
+		out IPlatform platform,
+		out DefaultSceneShaderPipeline shaderPipeline,
+		out RenderQueue renderQueue,
+		out RenderPipeline renderPipeline
+	) {
+		platform = platformId switch {
+			Platform.Vulkan => new VkPlatform(),
+			Platform.OpenGL => new GLPlatform(),
+			_ => throw new NotImplementedException()
+		};
+		
+		platform.Initialize();
+
+		if(platform is VkPlatform vkPlatform) {
+			vkPlatform.PrimaryDevice = vkPlatform.CreateDevice(0);
+		}
+		
+		shaderPipeline = new DefaultSceneShaderPipeline(platform);
+		renderQueue = RenderQueueManager.Create(platform, "main");
+		renderPipeline = RenderPipelineManager.Create(platform, "main", renderQueue, shaderPipeline);
+
+		DebugInterface = DebugInterface.Setup(platform);
+	}
+	
+	[Obsolete("Use cross-platform SetupPlatform")]
 	public static void SetupVulkan(
 		out VkPlatform platform,
 		out DefaultSceneShaderPipeline shaderPipeline,
@@ -76,6 +114,23 @@ public static class Shared {
 		renderQueue = RenderQueueManager.Create(platform, "main");
 		renderPipeline = RenderPipelineManager.Create(platform, "main", renderQueue, shaderPipeline);
 
+		DebugInterface = DebugInterface.Setup(platform);
+	}
+
+	[Obsolete("Use cross-platform SetupPlatform")]
+	public static void SetupOpenGL(
+		out GLPlatform platform,
+		out DefaultSceneShaderPipeline shaderPipeline,
+		out RenderQueue renderQueue,
+		out RenderPipeline renderPipeline
+	) {
+		platform = new GLPlatform();
+		platform.Initialize();
+
+		shaderPipeline = new DefaultSceneShaderPipeline(platform);
+		renderQueue = RenderQueueManager.Create(platform, "main");
+		renderPipeline = RenderPipelineManager.Create(platform, "main", renderQueue, shaderPipeline);
+		
 		DebugInterface = DebugInterface.Setup(platform);
 	}
 
@@ -107,7 +162,7 @@ public static class Shared {
 
 		_ = new RelationshipTracker(world);
 		
-		DebugInterface.Providers.Add(new HierarchyInfoProvider(world));
+		DebugInterface?.Providers.Add(new HierarchyInfoProvider(world));
 	}
 
 	public static void CreateOrbitalCamera(
@@ -130,6 +185,6 @@ public static class Shared {
 		oc3d = new OrbitCamera3D("oc3d", entity, window);
 		UpdateManager.Add(oc3d);
 		
-		DebugInterface.Providers.Add(new TransformGizmoProvider(world, entity.Get<Camera3D>()));
+		DebugInterface?.Providers.Add(new TransformGizmoProvider(world, entity.Get<Camera3D>()));
 	}
 }

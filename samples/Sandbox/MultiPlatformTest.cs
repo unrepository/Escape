@@ -1,30 +1,39 @@
-using System.Numerics;
-using System.Reflection;
 using Arch.Core;
 using Arch.Core.Extensions;
 using Escape;
 using Escape.Components;
 using Escape.Extensions.Assimp;
-using Escape.Renderer.Camera;
+using Escape.Renderer;
+using Escape.Renderer.Shader;
+using Escape.Renderer.Shader.Pipelines;
 using Escape.Resources;
-using Escape.UnitTypes;
 using NLog;
-
+using Silk.NET.Windowing;
 using static Shared;
-using Camera3D = Escape.Components.Camera3D;
 
-public static class GLTFTest {
-
+public static class MultiPlatformTest {
+	
 	private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 	public static void Start(string[] args) {
-		SetupPlatform(GetPlatform(args), out var platform, out var shaderPipeline, out var renderQueue, out var renderPipeline);
+		IPlatform platform = null;
+		DefaultSceneShaderPipeline shaderPipeline = null;
+		RenderQueue renderQueue = null;
+		RenderPipeline renderPipeline = null;
+		
+		if(args[0] == "gl") {
+			SetupOpenGL(out var glPlatform, out shaderPipeline, out renderQueue, out renderPipeline);
+			platform = glPlatform;
+		} else {
+			SetupVulkan(out var vkPlatform, out shaderPipeline, out renderQueue, out renderPipeline);
+			platform = vkPlatform;
+		}
 		
 		CreateWindow(platform, "GLTF Test", ref renderQueue, out var window);
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);
 		
 		// load scene
-		var scene = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/Corset.glb")!;
+		var scene = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/BarramundiFish.glb")!;
 		var sceneRoot = scene.Get().Scene!.Export(ref world, null);
 		
 		var q = new QueryDescription().WithNone<Empty>();
