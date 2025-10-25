@@ -34,6 +34,7 @@ namespace Escape.Renderer.Shader.Pipelines {
 
 	#region OpenGL
 		public int GLModelMatrixUniform { get; }
+		public int GLAvailableTexturesUniform { get; }
 	#endregion
 		
 		public DefaultSceneShaderPipeline(IPlatform platform) {
@@ -65,7 +66,10 @@ namespace Escape.Renderer.Shader.Pipelines {
 
 		#region OpenGL
 			if(glPlatform is not null) {
-				GLModelMatrixUniform = glPlatform.API.GetUniformLocation(Program.Get().Program.Handle, "model_matrix");
+				var pHandle = Program.Get().Program.Handle;
+				
+				GLModelMatrixUniform = glPlatform.API.GetUniformLocation(pHandle, "modelMatrix");
+				GLAvailableTexturesUniform = glPlatform.API.GetUniformLocation(pHandle, "availableTextures");
 			}
 		#endregion
 
@@ -75,12 +79,16 @@ namespace Escape.Renderer.Shader.Pipelines {
 			CameraData = IShaderData.Create<CameraData>(platform, Program.Get(), "CameraData", 0, default);
 
 			const int INITIAL_SIZE = 1024 * 1024; // 1 MiB to start
-			
-			VertexData = IShaderArrayData.Create<Vertex>(platform, Program.Get(), "VertexData", 1, null, INITIAL_SIZE);
-			IndexData = IShaderArrayData.Create<uint>(platform, Program.Get(), "IndexData", 2, null, INITIAL_SIZE);
-			MaterialData = IShaderArrayData.Create<Material.Data>(platform, Program.Get(), "MaterialData", 3, null, INITIAL_SIZE);
-			MatrixData = IShaderArrayData.Create<Matrix4x4>(platform, Program.Get(), "MatrixData", 4, null, INITIAL_SIZE);
+
+			// we don't use PVP in OpenGL
+			if(Platform is not GLPlatform) {
+				VertexData = IShaderArrayData.Create<Vertex>(platform, Program.Get(), "VertexData", 1, null, INITIAL_SIZE);
+				IndexData = IShaderArrayData.Create<uint>(platform, Program.Get(), "IndexData", 2, null, INITIAL_SIZE);
+				MatrixData = IShaderArrayData.Create<Matrix4x4>(platform, Program.Get(), "MatrixData", 4, null, INITIAL_SIZE);
+			}
  
+			MaterialData = IShaderArrayData.Create<Material.Data>(platform, Program.Get(), "MaterialData", 3, null, INITIAL_SIZE);
+			
 			LightData = IShaderData.Create<LightData>(platform, Program.Get(), "LightData", 10, default);
 			DirectionalLightData = IShaderArrayData.Create<DirectionalLight>(platform, Program.Get(), "DirectionalLightData", 11, null, 64);
 			PointLightData = IShaderArrayData.Create<PointLight>(platform, Program.Get(), "PointLightData", 12, null, 64);
@@ -90,12 +98,9 @@ namespace Escape.Renderer.Shader.Pipelines {
 		public void PushData() {
 			CameraData.Push();
 
-			// we don't use PVP in OpenGL
-			if(Platform is not GLPlatform) {
-				VertexData.Push();
-				IndexData.Push();
-				MatrixData.Push();
-			}
+			VertexData.Push();
+			IndexData.Push();
+			MatrixData.Push();
 			
 			MaterialData.Push();
 			

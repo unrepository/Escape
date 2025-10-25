@@ -119,18 +119,45 @@ namespace Escape.Renderer.OpenGL {
 		
 		// can't do programmable vertex pulling if we want OpenGL <4.3 support (PVP requires SSBOs)
 		public unsafe override void Render(RenderQueue queue, TimeSpan delta) {
-			ShaderPipeline.PushData();
+			ShaderPipeline.CameraData.Push();
+			
+			ShaderPipeline.LightData.Push();
+			ShaderPipeline.DirectionalLightData.Push();
+			ShaderPipeline.PointLightData.Push();
+			ShaderPipeline.SpotLightData.Push();
 
 			foreach(var (obj, data) in _objectData) {
 				for(int i = 0; i < obj.Model.Meshes.Count; i++) {
 					var mesh = obj.Model.Meshes[i];
 					
-					mesh.Material.AlbedoTexture?.Get().Texture?.Bind(queue, 0);
-					mesh.Material.NormalTexture?.Get().Texture?.Bind(queue, 1);
-					mesh.Material.MetallicTexture?.Get().Texture?.Bind(queue, 2);
-					mesh.Material.RoughnessTexture?.Get().Texture?.Bind(queue, 3);
-					mesh.Material.HeightTexture?.Get().Texture?.Bind(queue, 4);
+					// bind textures
+					var albedoTexture = mesh.Material.AlbedoTexture?.Get().Texture;
+					var normalTexture = mesh.Material.NormalTexture?.Get().Texture;
+					var metallicTexture = mesh.Material.MetallicTexture?.Get().Texture;
+					var roughnessTexture = mesh.Material.RoughnessTexture?.Get().Texture;
+					var heightTexture = mesh.Material.HeightTexture?.Get().Texture;
+					
+					albedoTexture?.Bind(queue, 0);
+					normalTexture?.Bind(queue, 1);
+					metallicTexture?.Bind(queue, 2);
+					roughnessTexture?.Bind(queue, 3);
+					heightTexture?.Bind(queue, 4);
 
+					uint availableTextures = 0;
+
+					if(albedoTexture is not null) availableTextures |= (1 << 0);
+					if(normalTexture is not null) availableTextures |= (1 << 1);
+					if(metallicTexture is not null) availableTextures |= (1 << 2);
+					if(roughnessTexture is not null) availableTextures |= (1 << 3);
+					if(heightTexture is not null) availableTextures |= (1 << 4);
+					
+					_platform.API.Uniform1(ShaderPipeline.GLAvailableTexturesUniform, availableTextures);
+
+					// update & push material data
+					ShaderPipeline.MaterialData.Data = [ mesh.Material.CreateData() ];
+					ShaderPipeline.MaterialData.Size = (uint) sizeof(Material.Data);
+					ShaderPipeline.MaterialData.Push();
+					
 					// set model matrix uniform
 					var matrix = data.Matrix;
 					_platform.API.UniformMatrix4(ShaderPipeline.GLModelMatrixUniform, 1, false, (float*) &matrix);

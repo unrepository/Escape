@@ -12,7 +12,9 @@ namespace Escape.Extensions.Debugging {
 		public Ref<ShaderProgramResource> Program { get; }
 		
 		public DescriptorSet VkTexturesDescriptor { get; }
+		
 		public int GLModelMatrixUniform { get; }
+		public int GLAvailableTexturesUniform { get; }
 
 		public EmptyShaderPipeline(IPlatform platform) {
 			Platform = platform;

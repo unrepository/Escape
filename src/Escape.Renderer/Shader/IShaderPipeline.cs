@@ -18,6 +18,7 @@ namespace Escape.Renderer.Shader {
 
 	#region OpenGL
 		public int GLModelMatrixUniform { get; }
+		public int GLAvailableTexturesUniform { get; }
 	#endregion
 	}
 }

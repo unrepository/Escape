@@ -37,7 +37,6 @@ namespace Escape.Renderer.OpenGL {
 			
 			_platform.API.BindBuffer(BufferTargetARB.UniformBuffer, (uint) Handle);
 			_platform.API.UniformBlockBinding(program.Handle, _platform.API.GetUniformBlockIndex(program.Handle, name), Binding);
-			_platform.API.BindBufferBase(BufferTargetARB.ShaderStorageBuffer, Binding, (uint) Handle);
 		}
 
 		public unsafe void Push() {
@@ -47,12 +46,15 @@ namespace Escape.Renderer.OpenGL {
 				fixed(void* ptr = &_data[0]) {
 					dataPtr = ptr;
 				}
+			} else {
+				return;
 			}
 			
 			_platform.API.BindBuffer(BufferTargetARB.UniformBuffer, (uint) Handle);
 
 			uint realSize = Size > 0 ? Size : (uint) (_data?.Length * sizeof(T));
 			_platform.API.BufferData(BufferTargetARB.UniformBuffer, realSize, dataPtr, BufferUsageARB.StaticDraw);
+			_platform.API.BindBufferBase(BufferTargetARB.UniformBuffer, Binding, (uint) Handle);
 		}
 
 		public unsafe void Read() {

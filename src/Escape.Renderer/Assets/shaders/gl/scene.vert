@@ -1,5 +1,6 @@
 #version 330 core
 
+//= data
 layout (location = 0) in vec3 v_position;
 layout (location = 1) in vec3 v_normal;
 layout (location = 2) in vec3 v_tangent;
@@ -15,7 +16,8 @@ uniform CameraData {
 	float c_aspectRatio;
 };
 
-uniform mat4 model_matrix;
+uniform mat4 modelMatrix;
+//
 
 struct Vertex {
 	vec3 position;
@@ -25,25 +27,34 @@ struct Vertex {
 	vec2 uv;
 };
 
-vec2 positions[6] = vec2[](
-vec2(-1.0f,  1.0f), // Top-left
-vec2( 1.0f,  1.0f), // Top-right vertex
-vec2( 1.0f, -1.0f),  // Bottom-right vertex
-vec2( 1.0f, -1.0f),  // Bottom-right vertex
-vec2(-1.0f, -1.0f), // Bottom-left vertex
-vec2(-1.0f,  1.0f) // Top-left
-);
-
-out Vertex v;
+//= i/o
+out Vertex vertex;
+out vec3 fragPos;
+out vec3 viewPos;
+out vec3 normal;
+out mat3 TBN;
+out vec3 V;
+//
 
 void main() {
-	vec4 position = c_projection * c_view * model_matrix * vec4(v_position, 1.0);
+	vec4 position = c_projection * c_view * modelMatrix * vec4(v_position, 1.0);
 	gl_Position = position;
 	
-	v.position = v_position;
-	v.normal = v_normal;
-	v.tangent = v_tangent;
-	v.bitangent = v_bitangent;
-	v.uv = v_uv;
-	//gl_Position = vec4(positions[gl_VertexID], 0.0, 1.0);
+	vertex.position = v_position;
+	vertex.normal = v_normal;
+	vertex.tangent = v_tangent;
+	vertex.bitangent = v_bitangent;
+	vertex.uv = v_uv;
+
+	vec3 T = normalize(vec3(modelMatrix * vec4(v_tangent, 0.0)));
+	vec3 N = normalize(vec3(modelMatrix * vec4(v_normal, 0.0)));
+	T = normalize(T - dot(T, N) * N);
+	vec3 B = cross(N, T);
+	TBN = transpose(mat3(T, B, N));
+
+	fragPos = TBN * vec3(modelMatrix * vec4(v_position, 1.0));
+	viewPos = TBN * c_position;
+	normal = v_normal * transpose(inverse(mat3(modelMatrix)));
+
+	V = TBN * normalize(c_position - fragPos);
 }

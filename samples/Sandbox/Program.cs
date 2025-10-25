@@ -1,1 +1,1 @@
-WorldSandbox.Start(args);
+LightingTest.Start(args);
