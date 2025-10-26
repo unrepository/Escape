@@ -8,7 +8,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Escape.Extensions.Scene\Escape.Extensions.Scene.csproj" />
 	  <ProjectReference Include="..\Escape.Renderer\Escape.Renderer.csproj" />
 	  <ProjectReference Include="..\Escape\Escape.csproj" />
 	</ItemGroup>

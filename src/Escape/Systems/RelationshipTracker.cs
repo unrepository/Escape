@@ -5,16 +5,11 @@ using Escape.Components;
 
 namespace Escape.Systems {
 	
-	public class RelationshipTracker {
-
-		public World World { get; }
-		public bool Active { get; internal set; } = true;
+	public class RelationshipTracker : TrackerSystem {
 
 		private readonly Dictionary<Entity, Child> _childEntities = [];
 		
-		public RelationshipTracker(World world) {
-			World = world;
-
+		public RelationshipTracker(World world) : base(world) {
 		#region Parent-Child
 			world.SubscribeComponentAdded((in Entity e, ref Child c) => {
 				if(!Active) return;

@@ -34,7 +34,7 @@ public static class MultiPlatformTest {
 		
 		// load scene
 		var scene = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/BarramundiFish.glb")!;
-		var sceneRoot = scene.Get().Scene!.Export(ref world, null);
+		var sceneRoot = world.Instantiate(scene.Get().Scene!.World);
 		
 		var q = new QueryDescription().WithNone<Empty>();
 		world

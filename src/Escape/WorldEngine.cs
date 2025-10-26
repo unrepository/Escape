@@ -36,7 +36,7 @@ namespace Escape {
 			}
 		}
 
-		public static JobScheduler SharedJobScheduler;
+		public static JobScheduler SharedJobScheduler { get; }
 
 		private static RenderQueue? _renderQueue;
 		

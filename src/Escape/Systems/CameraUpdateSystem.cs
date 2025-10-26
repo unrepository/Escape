@@ -8,9 +8,9 @@ using Escape.Scripting.Components;
 
 namespace Escape.Systems {
 	
-	public partial class WorldUpdateSystem : BaseSystem<World, TimeSpan> {
+	public partial class CameraUpdateSystem : BaseSystem<World, TimeSpan> {
 
-		public WorldUpdateSystem(World world) : base(world) { }
+		public CameraUpdateSystem(World world) : base(world) { }
 		
 		[Query]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

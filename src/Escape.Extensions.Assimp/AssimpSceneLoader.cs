@@ -54,17 +54,17 @@ namespace Escape.Extensions.Assimp {
 				throw new PlatformException($"Could not load scene: {_ai.GetErrorStringS()}");
 			}
 
-			var scene = new AssimpScene();
+			var nodes = new List<AssimpScene.Node>();
 
-			_ProcessNode(platform, ref scene, null, aiScene->MRootNode, aiScene, baseDirectory);
+			_ProcessNode(platform, ref nodes, null, aiScene->MRootNode, aiScene, baseDirectory);
 			_ai.ReleaseImport(aiScene);
 
-			return scene;
+			return new AssimpScene("", nodes, null);
 		}
 
 		private static void _ProcessNode(
 			IPlatform platform,
-			ref AssimpScene scene,
+			ref List<AssimpScene.Node> nodes,
 			AssimpScene.Node? parent,
 			AiNode* aiNode,
 			AiScene* aiScene,
@@ -260,13 +260,13 @@ namespace Escape.Extensions.Assimp {
 			}
 			
 			if(parent is null) {
-				scene.Nodes.Add(node);
+				nodes.Add(node);
 			} else {
 				parent.Children.Add(node);
 			}
 
 			for(int i = 0; i < aiNode->MNumChildren; i++) {
-				_ProcessNode(platform, ref scene, node, aiNode->MChildren[i], aiScene, baseDirectory);
+				_ProcessNode(platform, ref nodes, node, aiNode->MChildren[i], aiScene, baseDirectory);
 			}
 		}
 	}

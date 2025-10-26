@@ -20,7 +20,6 @@
       <ProjectReference Include="..\..\src\Escape.Extensions.CSharp\Escape.Extensions.CSharp.csproj" />
       <ProjectReference Include="..\..\src\Escape.Extensions.Debugging\Escape.Extensions.Debugging.csproj" />
       <ProjectReference Include="..\..\src\Escape.Extensions.ImGui\Escape.Extensions.ImGui.csproj" />
-      <ProjectReference Include="..\..\src\Escape.Extensions.Scene\Escape.Extensions.Scene.csproj" />
       <ProjectReference Include="..\..\src\Escape.Renderer.Platform\Escape.Renderer.Platform.csproj" />
       <ProjectReference Include="..\..\src\Escape.Renderer\Escape.Renderer.csproj" />
       <ProjectReference Include="..\..\src\Escape.Resources\Escape.Resources.csproj" />
