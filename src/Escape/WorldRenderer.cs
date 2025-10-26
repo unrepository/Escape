@@ -16,14 +16,12 @@ using PointLight = Escape.Renderer.Lights.PointLight;
 using SpotLight = Escape.Renderer.Lights.SpotLight;
 
 namespace Escape {
-	using Camera3D = Components.Camera3D;
 
-	public class WorldRenderer : IRenderer {
+	public class WorldRenderer : TrackerSystem, IRenderer {
 
 		public string Id { get; }
 		public int Priority { get; init; }
 		
-		public World World { get; }
 		public ObjectRenderer ObjectRenderer { get; }
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -35,26 +33,29 @@ namespace Escape {
 		private readonly QueryDescription _pointLightQuery = new QueryDescription().WithAll<Transform3D, Components.PointLight>();
 		private readonly QueryDescription _spotLightQuery = new QueryDescription().WithAll<Transform3D, Components.SpotLight>();
 		
-		private readonly List<Escape.Renderer.Lights.DirectionalLight> _directionalLights = [];
-		private readonly List<Escape.Renderer.Lights.PointLight> _pointLights = [];
-		private readonly List<Escape.Renderer.Lights.SpotLight> _spotLights = [];
+		private readonly List<DirectionalLight> _directionalLights = [];
+		private readonly List<PointLight> _pointLights = [];
+		private readonly List<SpotLight> _spotLights = [];
 		
 		private readonly RenderUpdateSystem _primarySystem;
 		
-		public WorldRenderer(string id, World world, ObjectRenderer objectRenderer) {
+		public WorldRenderer(string id, World world, ObjectRenderer objectRenderer) : base(world) {
 			Id = id;
-			World = world;
 			ObjectRenderer = objectRenderer;
 			
 			_primarySystem = new RenderUpdateSystem(world, objectRenderer);
 			
 			World.SubscribeComponentAdded((in Entity e, ref RenderableObject obj) => {
+				if(!Active) return;
+
 				_logger.Trace("(ecs observer) RenderableObject/Add");
 				_entityRenderableMap[e] = obj;
 				ObjectRenderer.AddObject(obj);
 			});
 			
 			World.SubscribeComponentSet((in Entity e, ref RenderableObject obj) => {
+				if(!Active) return;
+
 				_logger.Trace("(ecs observer) RenderableObject/Set");
 				
 				if(_entityRenderableMap.TryGetValue(e, out var prevRenderable)) {
@@ -69,6 +70,8 @@ namespace Escape {
 			});
 			
 			World.SubscribeComponentRemoved((in Entity e, ref RenderableObject obj) => {
+				if(!Active) return;
+
 				_logger.Trace("(ecs observer) RenderableObject/Remove");
 				
 				_entityRenderableMap.Remove(e);

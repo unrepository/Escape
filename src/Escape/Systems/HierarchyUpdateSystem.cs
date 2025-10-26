@@ -28,7 +28,7 @@ namespace Escape.Systems {
 						Console.Write(' ');
 						Console.Write(t3d.ToString());
 					} else {
-						Console.Write(" [No Transform3D]");
+						Console.Write(" +");
 					}
 				
 					Console.WriteLine();
@@ -61,6 +61,12 @@ namespace Escape.Systems {
 					ProcessEntity(entity, child, isDirty, depth + 1);
 				}
 			}
+			
+		#if DEBUG
+			if(DebugPrintHierarchy) {
+				Console.WriteLine("==========");
+			}
+		#endif
 
 			ProcessEntity(default, Root, false, 0);
 		}

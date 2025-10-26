@@ -4,7 +4,6 @@ using Arch.Core.Extensions;
 using Escape;
 using Escape.Components;
 using Escape.Extensions.Assimp;
-using Escape.Extensions.Scene;
 using Escape.Renderer;
 using Escape.Renderer.Camera;
 using Escape.Renderer.Resources;
@@ -33,17 +32,17 @@ public static class LightingTest {
 		// e00.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.DisplacementTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Rocks019_4K-JPG_Displacement.jpg");
 		
 		var m01 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/brick_cube.glb")!;
-		var e01 = m01.Get().Scene!.Export(ref world, null);
+		var e01 = world.Instantiate(m01.Get().Scene!.World);
 		e01.Add(new Transform3D(new Vector3(0, 0.7f, 0.1f), Quaternion.Identity, new Vector3(0.2f)));
 		e01.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.HeightTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Bricks059_1K-JPG/Bricks059_1K-JPG_Displacement.jpg");
 		
 		var m02 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/concrete_cube.glb")!;
-		var e02 = m02.Get().Scene!.Export(ref world, null);
+		var e02 = world.Instantiate(m02.Get().Scene!.World);
 		e02.Add(new Transform3D(new Vector3(-0.5f, 0.7f, 0.1f), Quaternion.Identity, new Vector3(0.2f)));
 		e02.GetChild(index: 0).Get<RenderableObject>().Model.Meshes[0].Material.HeightTexture = ResourceManager.Load<TextureResource>(platform, "/textures/Concrete041B_1K-JPG_Displacement.jpg");
 		
 		var m03 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/onyx_cube.glb")!;
-		var e03 = m03.Get().Scene!.Export(ref world, null);
+		var e03 = world.Instantiate(m03.Get().Scene!.World);
 		e03.Add(new Transform3D(new Vector3(0.5f, 0.7f, 0.1f), Quaternion.Identity, new Vector3(0.2f)));
 		
 		// var m4 = ResourceManager.Load<AssimpSceneResource>(platform, "/models/metal_sphere.glb")!;
@@ -55,27 +54,27 @@ public static class LightingTest {
 		// e5.Add(new Transform3D(new Vector3(-2, -2, 0), Quaternion.Identity, new Vector3(0.5f)));
 		
 		var m1 = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/models/sofa_03_2k.gltf/sofa_03_2k.gltf")!;
-		var e1 = m1.Get().Scene!.Export(ref world, null);
+		var e1 = world.Instantiate(m1.Get().Scene!.World);
 		e1.Add(new Transform3D(new Vector3(0, 0, 0), rotation: Quaternion.Identity));
 		
 		var m2 = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/models/cardboard_box_01_2k.gltf/cardboard_box_01_2k.gltf")!;
-		var e2 = m2.Get().Scene!.Export(ref world, null);
+		var e2 = world.Instantiate(m2.Get().Scene!.World);
 		e2.Add(new Transform3D(new Vector3(-1.2f, 0, 0.85f), yaw: Rotation<float>.FromDegrees(37)));
 		
 		var m3 = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/models/Television_01_2k.gltf/Television_01_2k.gltf")!;
-		var e3 = m3.Get().Scene!.Export(ref world, null);
+		var e3 = world.Instantiate(m3.Get().Scene!.World);
 		e3.Add(new Transform3D(new Vector3(0.35f, 0.523f, 1.25f), yaw: Rotation<float>.FromDegrees(-72), scale: new Vector3(0.75f)));
 		
 		var m4 = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/models/CoffeeTable_01_2k.gltf/CoffeeTable_01_2k.gltf")!;
-		var e4 = m4.Get().Scene!.Export(ref world, null);
+		var e4 = world.Instantiate(m4.Get().Scene!.World);
 		e4.Add(new Transform3D(new Vector3(0, 0, 1.23f), yaw: Rotation<float>.FromDegrees(3)));
 		
 		var m5 = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/models/brass_goblets_2k.gltf/brass_goblets_2k.gltf")!;
-		var e5 = m5.Get().Scene!.Export(ref world, null);
+		var e5 = world.Instantiate(m5.Get().Scene!.World);
 		e5.Add(new Transform3D(new Vector3(-0.3f, 0.523f, 1.23f), yaw: Rotation<float>.FromDegrees(0)));
 
 		var m6 = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/models/mid_century_lounge_chair_2k.gltf/mid_century_lounge_chair_2k.gltf")!;
-		var e6 = m6.Get().Scene!.Export(ref world, null);
+		var e6 = world.Instantiate(m6.Get().Scene!.World);
 		e6.Add(new Transform3D(new Vector3(1.8f, 0, 1.1f), yaw: Rotation<float>.FromDegrees(-60)));
 		
 		var lightObject = ResourceManager.Load<AssimpSceneResource>(platform, "/models/alpha_sphere.glb")!;

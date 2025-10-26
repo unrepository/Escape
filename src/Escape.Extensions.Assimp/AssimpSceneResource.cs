@@ -1,5 +1,4 @@
 using System.Reflection;
-using Escape.Extensions.Scene;
 using Escape.Renderer;
 using Escape.Resources;
 

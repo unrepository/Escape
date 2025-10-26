@@ -19,14 +19,15 @@ public static class GLTFTest {
 	private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 	public static void Start(string[] args) {
-		SetupPlatform(GetPlatform(args), out var platform, p => new DefaultPBRShaderPipeline(p), out var shaderPipeline, out var renderQueue, out var renderPipeline);
+		SetupPlatform(GetPlatform(args), out var platform, p => new DefaultUnshadedShaderPipeline(p), out var shaderPipeline, out var renderQueue, out var renderPipeline);
 		
 		CreateWindow(platform, "GLTF Test", ref renderQueue, out var window);
 		CreateWorld(platform, shaderPipeline, renderQueue, out var world);
 		
 		// load scene
 		var scene = ResourceManager.Load<AssimpSceneResource>(platform, "/test_models/Corset.glb")!;
-		var sceneRoot = scene.Get().Scene!.Export(ref world, null);
+		//var sceneRoot = scene.Get().Scene!.Export(ref world, null);
+		world.Instantiate(scene.Get().Scene!.World);
 		
 		var q = new QueryDescription().WithNone<Empty>();
 		world

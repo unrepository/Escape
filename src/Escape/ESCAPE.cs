@@ -25,6 +25,9 @@ namespace Escape {
 		private static Stopwatch _updateStopwatch = new();
 		private static Stopwatch _renderStopwatch = new();
 		
+		public delegate void CleanupEventHandler();
+		public static event CleanupEventHandler OnCleanup;
+		
 		public static void Run() {
 			ComponentRegistry.AddAssembly(Assembly.GetExecutingAssembly());
 			ComponentRegistry.RegisterComponents();
@@ -42,6 +45,8 @@ namespace Escape {
 			IsRunning = false;
 			//UpdateThread.Join(); // wait for update thread to finish
 			WorldEngine.SharedJobScheduler.Dispose();
+			
+			OnCleanup.Invoke();
 		}
 
 		private static void _UpdateLoop() {

@@ -8,22 +8,25 @@ namespace Escape {
 		public string Id { get; }
 		public World World { get; }
 
-		private WorldUpdateSystem _primarySystem;
-		private HierarchyUpdateSystem _hierarchySystem;
+		public CameraUpdateSystem CameraSystem { get; }
+		public HierarchyUpdateSystem HierarchySystem { get; }
+		public RelationshipTracker RelationshipTracker { get; }
 		
 		public WorldUpdater(string id, World world) {
 			Id = id;
 			World = world;
 
-			_primarySystem = new WorldUpdateSystem(world);
-			_hierarchySystem = new HierarchyUpdateSystem(world) {
+			CameraSystem = new CameraUpdateSystem(world);
+			HierarchySystem = new HierarchyUpdateSystem(world) {
 				DebugPrintHierarchy = false
 			};
+
+			RelationshipTracker = new RelationshipTracker(world);
 		}
 		
 		public virtual void Update(TimeSpan delta) {
-			_primarySystem.Update(delta);
-			_hierarchySystem.Update(delta);
+			CameraSystem.Update(delta);
+			HierarchySystem.Update(delta);
 		}
 	}
 }

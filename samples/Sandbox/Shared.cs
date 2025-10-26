@@ -165,8 +165,6 @@ public static class Shared {
 		WorldEngine.World = world;
 		WorldEngine.Configure(platform, renderQueue);
 		
-		_ = new RelationshipTracker(world);
-		
 		DebugInterface?.Providers.Add(new HierarchyInfoProvider(world));
 	}
 
