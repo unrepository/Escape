@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\Escape.Primitives\Escape.Primitives.csproj" />
       <ProjectReference Include="..\..\src\Escape.Compute\Escape.Compute.csproj" />
       <ProjectReference Include="..\..\src\Escape.Extensions.Assimp\Escape.Extensions.Assimp.csproj" />
       <ProjectReference Include="..\..\src\Escape.Extensions.CSharp\Escape.Extensions.CSharp.csproj" />

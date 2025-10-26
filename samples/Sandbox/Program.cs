@@ -1,1 +1,1 @@
-LightingTest.Start(args);
+PrimitivesTest.Start(args);
