@@ -7,7 +7,7 @@ namespace Escape.Scripting.Resources {
 
 		[ModuleInitializer]
 		public static void Register() {
-			ResourceRegistry.RegisterFormat<JSScript, JSScriptResource, JSScriptResource.Import>();
+			ResourceRegistry.RegisterFormat<IScript, ScriptResource, ScriptResource.Import>();
 		}
 	}
 }

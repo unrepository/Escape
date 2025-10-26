@@ -4,6 +4,7 @@ using Arch.Core;
 using Arch.System;
 using Escape.Components;
 using Escape.Renderer;
+using Escape.Scripting;
 using Escape.Scripting.Components;
 
 namespace Escape.Systems {
@@ -24,7 +25,7 @@ namespace Escape.Systems {
 		
 		[Query]
 		public void Scripted_Render(ref Scripted scripted) {
-			scripted.Script.Get().Value.Call(scripted.EntryPoint ?? "render", [ _objectRenderer ]);
+			scripted.Script.Call(IScript.FunctionCall.OnRender, [ ESCAPE.RenderDelta, _objectRenderer ]);
 		}
 	}
 }

@@ -28,7 +28,7 @@ namespace Escape.Systems {
 
 		[Query]
 		public static void Scripted_Update(ref Scripted scripted) {
-			scripted.Script.Get().Value.Call(scripted.EntryPoint ?? "update", []);
+			scripted.Script.Call(IScript.FunctionCall.OnUpdate, [ ESCAPE.UpdateDelta ]);
 		}
 	}
 }

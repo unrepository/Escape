@@ -10,10 +10,12 @@ using NLog;
 
 namespace Escape.Scripting {
 	
-	public class JSScript : IScript, IDisposable {
+	public class JavaScriptScript : IScript, IDisposable {
 		
 		public string Name { get; }
 		public string Source { get; }
+
+		public IScript.Language Type => IScript.Language.JavaScript;
 
 		public Prepared<Script>? Script { get; private set; }
 		public ObjectInstance Module { get; private set; }
@@ -23,7 +25,7 @@ namespace Escape.Scripting {
 		private Engine? _engine;
 		private Thread? _engineThread;
 		
-		public JSScript(string name, string source) {
+		public JavaScriptScript(string name, string source) {
 			Name = name;
 			Source = source;
 			
@@ -45,10 +47,22 @@ namespace Escape.Scripting {
 			
 			_CreateEngine();
 		}
-		
+
+		public object? Call(IScript.FunctionCall call, object?[] arguments) {
+			var function = call switch {
+				IScript.FunctionCall.OnInitialize => "init",
+				IScript.FunctionCall.OnDeinitialize => "deinit",
+				IScript.FunctionCall.OnUpdate => "update",
+				IScript.FunctionCall.OnRender => "render",
+				_ => throw new NotImplementedException()
+			};
+
+			return Call(function, arguments);
+		}
+
 		public object? Call(string function, object?[] arguments) {
 			_CreateEngine();
-
+			
 			try {
 				return Module.Get(function);
 				//return _engine!.Invoke(function, null, arguments);
