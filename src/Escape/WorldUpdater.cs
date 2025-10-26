@@ -1,4 +1,5 @@
 using Arch.Core;
+using Escape.Scripting.Systems;
 using Escape.Systems;
 
 namespace Escape {
@@ -11,6 +12,7 @@ namespace Escape {
 		public CameraUpdateSystem CameraSystem { get; }
 		public HierarchyUpdateSystem HierarchySystem { get; }
 		public RelationshipTracker RelationshipTracker { get; }
+		public ScriptTracker ScriptTracker { get; }
 		
 		public WorldUpdater(string id, World world) {
 			Id = id;
@@ -22,6 +24,7 @@ namespace Escape {
 			};
 
 			RelationshipTracker = new RelationshipTracker(world);
+			ScriptTracker = new ScriptTracker(world);
 		}
 		
 		public virtual void Update(TimeSpan delta) {

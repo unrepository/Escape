@@ -1,14 +1,12 @@
 using Arch.Core;
 using Escape.Scripting.Components;
+using Escape.Systems;
 
 namespace Escape.Scripting.Systems {
 	
-	public class ScriptTracker {
-		
-		public World World { get; }
-		public bool Active { get; internal set; } = true;
+	public class ScriptTracker : TrackerSystem {
 
-		public ScriptTracker(World world) {
+		public ScriptTracker(World world) : base(world) {
 			world.SubscribeComponentAdded((in Entity e, ref Scripted s) => {
 				if(!Active) return;
 				s.Script.Call(IScript.FunctionCall.OnInitialize, [ e ]);
