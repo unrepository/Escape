@@ -38,6 +38,9 @@ public static class PrimitivesTest {
 
 		world.Create3DLine(Color.White, new Vector3(0, -2, 1), new Vector3(7, 4, 7));
 		world.Create3DIcosphere(Color.White, Vector3.Zero, new Vector3(2), 3);
+		world.Create3DCube(Color.White, new Vector3(2, 2, 2), new Vector3(-1, 1, 2));
+		world.Create3DCube(Color.White, new Vector3(0, -2, 0), 4, 0.5f, 3);
+		world.Create3DQuad(Color.White, Vector3.One, new Vector3(-5, -5, -5));
 		
 		ESCAPE.Run();
 	}
