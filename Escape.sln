@@ -33,7 +33,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escape.Extensions.ImGui", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escape.Extensions.Debugging", "src\Escape.Extensions.Debugging\Escape.Extensions.Debugging.csproj", "{BEADB612-378C-4EDB-9075-0E78CCED2E81}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escape.Primitives", "Escape.Primitives\Escape.Primitives.csproj", "{D338E678-CF72-48D9-82EA-919503AEADD0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escape.Primitives", "src\Escape.Primitives\Escape.Primitives.csproj", "{D338E678-CF72-48D9-82EA-919503AEADD0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

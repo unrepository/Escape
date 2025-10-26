@@ -1,14 +1,16 @@
 using System.Numerics;
+using Arch.Core;
+using Escape.Components;
 using Escape.Renderer;
 
 namespace Escape.Primitives {
 	
-	public class Icosphere3D : Primitive {
-
-		private const float PHI = 1.618033988749f;
+	public static partial class Primitives3D {
 		
-		public Icosphere3D(Vector3 position, float radius, int subdivisions) : base(position) {
-			var vertices = new Vector3[] {
+		private const float PHI = 1.618033988749f;
+
+		public static Entity Create3DIcosphere(this World world, Material material, Vector3 position, Vector3 scale, int subdivisions = 2) {
+			var positions = new Vector3[] {
 				Vector3.Normalize(new(-1f,  PHI,   0f)),
 				Vector3.Normalize(new( 1f,  PHI,   0f)),
 				Vector3.Normalize(new(-1f, -PHI,   0f)),
@@ -30,25 +32,30 @@ namespace Escape.Primitives {
 				4, 9, 5, 2, 4, 11, 6, 2, 10, 8, 6, 7, 9, 8, 1
 			};
 			
-			var (subdividedVertices, subdividedIndices) = Subdivide(vertices, indices, subdivisions);
+			var (subdividedVertices, subdividedIndices) = Subdivide(positions, indices, subdivisions);
 
 			// project vertices onto sphere
 			var sphereVertices = new Vector3[subdividedVertices.Length];
 			
 			for(int i = 0; i < subdividedVertices.Length; i++) {
-				sphereVertices[i] = Vector3.Normalize(subdividedVertices[i]) * radius;
+				sphereVertices[i] = Vector3.Normalize(subdividedVertices[i]);
 			}
 
 			// apply vertices and indices to instance
-			Vertices = new Vertex[subdividedVertices.Length];
+			var vertices = new Vertex[subdividedVertices.Length];
 
-			for(int i = 0; i < Vertices.Length; i++) {
-				Vertices[i] = new Vertex {
+			for(int i = 0; i < vertices.Length; i++) {
+				vertices[i] = new Vertex {
 					Position = subdividedVertices[i]
 				};
 			}
 
-			Indices = subdividedIndices;
+			return world.Create3DPrimitive(
+				material,
+				vertices,
+				subdividedIndices,
+				new Transform3D(position, null, scale)
+			);
 		}
 		
 		private static (Vector3[] vertices, uint[] indices) Subdivide(Vector3[] vertices, uint[] indices, int subdivisions) {

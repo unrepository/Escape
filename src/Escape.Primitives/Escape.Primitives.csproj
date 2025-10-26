@@ -7,9 +7,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\src\Escape.Renderer\Escape.Renderer.csproj" />
-	  <ProjectReference Include="..\src\Escape.UnitTypes\Escape.UnitTypes.csproj" />
-	  <ProjectReference Include="..\src\Escape\Escape.csproj" />
+	  <ProjectReference Include="..\Escape.Renderer\Escape.Renderer.csproj" />
+	  <ProjectReference Include="..\Escape.UnitTypes\Escape.UnitTypes.csproj" />
+	  <ProjectReference Include="..\Escape\Escape.csproj" />
 	</ItemGroup>
 
 </Project>

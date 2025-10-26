@@ -6,6 +6,7 @@ using Escape;
 using Escape.Components;
 using Escape.Extensions.Assimp;
 using Escape.Primitives;
+using Escape.Renderer;
 using Escape.Renderer.Camera;
 using Escape.Renderer.OpenGL;
 using Escape.Renderer.Shader.Pipelines;
@@ -35,9 +36,8 @@ public static class PrimitivesTest {
 		// create camera entity
 		CreateOrbitalCamera(ref world, window, out var camera, out var orbitalCamera);
 
-		var pm1 = new PrimitiveManager(world);
-		pm1.Add(new Line3D(new Vector3(0, -2, 1), new Vector3(7, 4, 7)));
-		pm1.Add(new Icosphere3D(Vector3.Zero, 2, 3));
+		world.Create3DLine(Color.White, new Vector3(0, -2, 1), new Vector3(7, 4, 7));
+		world.Create3DIcosphere(Color.White, Vector3.Zero, new Vector3(2), 3);
 		
 		ESCAPE.Run();
 	}
