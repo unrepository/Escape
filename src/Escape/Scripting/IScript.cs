@@ -8,7 +8,7 @@ namespace Escape.Scripting {
 		public Language Type { get; }
 
 		public object? Call(string function, object?[] arguments);
-		public object? Call(FunctionCall function, object?[] arguments);
+		public object? Call(FunctionCall call, object?[] arguments);
 
 		public enum Language {
 			

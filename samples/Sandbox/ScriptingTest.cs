@@ -33,11 +33,13 @@ public static class ScriptingTest {
 		// create camera entity
 		CreateOrbitalCamera(ref world, window, out var camera, out var orbitalCamera);
 		
-		//var script = ResourceManager.Load<ScriptResource>(platform, "scripts/test.js")!;
+		var script = ResourceManager.Load<ScriptResource>(platform, "scripts/test.cs")!;
 		
 		var cube = world.Create3DCube(Color.White, Vector3.Zero, 1, 1, 1);
-		//cube.Add(new Scripted(script, null));
 		cube.Add(new Scripted(new InternalCSharpScript()));
+		
+		var cube1 = world.Create3DCube(new Color(255, 0, 0), Vector3.Zero, 0.5f, 0.5f, 0.5f);
+		cube1.Add(new Scripted(script));
 		
 		ESCAPE.Run();
 	}

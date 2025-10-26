@@ -32,6 +32,8 @@
       <None Update="nlog.config">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <Compile Remove="Assets\scripts\test.cs" />
+      <None Include="Assets\scripts\test.cs" />
     </ItemGroup>
 
     <ItemGroup>
