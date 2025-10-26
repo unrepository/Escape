@@ -4,19 +4,18 @@ using Escape.Resources;
 
 namespace Escape.Renderer.Resources {
 	
-	public class TextureResource : Resource<TextureResource.Import> {
+	public class TextureResource : Resource<Texture, TextureResource.Import> {
 
 		public override Type MetadataType => typeof(Import);
 		public override string[] FileExtensions => [ ".png", ".jpg", ".bmp", ".jpeg", ".tiff", ".tga", ".webp", ".pbm", ".qoi" ];
 
 		public Texture? Texture { get; private set; }
-
-		public void Create(Texture texture) {
-			Platform = texture.Platform;
-			Settings = new Import();
-			Id = Settings.Id;
-			
-			Texture = texture;
+		
+		public TextureResource() { }
+		public TextureResource(IPlatform platform, string? filePath, Texture value, Import? settings = null) : base(platform, filePath, value, settings) { }
+		
+		public override void SaveNew() {
+			throw new NotImplementedException();
 		}
 		
 		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings) {

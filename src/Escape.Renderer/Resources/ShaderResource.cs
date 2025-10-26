@@ -3,21 +3,20 @@ using Escape.Resources;
 
 namespace Escape.Renderer.Resources {
 	
-	public class ShaderResource : Resource<ShaderResource.Import> {
+	public class ShaderResource : Resource<Shader.Shader, ShaderResource.Import> {
 		
 		public override Type MetadataType => typeof(Import);
 		public override string[] FileExtensions => [ ".frag", ".vert", ".tesc", ".tese", ".geom", ".comp", ".glsl", ".shader" ];
 
 		public Shader.Shader? Shader { get; private set; }
 
-		public void Create(Shader.Shader shader) {
-			Platform = shader.Platform;
-			Settings = new Import();
-			Id = Settings.Id;
-			
-			Shader = shader;
-		}
+		public ShaderResource() { }
+		public ShaderResource(IPlatform platform, string? filePath, Shader.Shader value, Import? settings = null) : base(platform, filePath, value, settings) { }
 		
+		public override void SaveNew() {
+			throw new NotImplementedException();
+		}
+
 		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings) {
 			base.Load(platform, filePath, stream, resourceAssembly, settings);
 			

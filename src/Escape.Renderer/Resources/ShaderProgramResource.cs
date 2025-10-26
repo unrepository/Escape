@@ -7,7 +7,7 @@ using NLog;
 
 namespace Escape.Renderer.Resources {
 	
-	public class ShaderProgramResource : Resource<ShaderProgramResource.Import> {
+	public class ShaderProgramResource : Resource<ShaderProgram, ShaderProgramResource.Import> {
 		
 		public override Type MetadataType => typeof(Import);
 		public override string[] FileExtensions => [ ".program" ];
@@ -16,15 +16,14 @@ namespace Escape.Renderer.Resources {
 		public ShaderProgram? Program { get; private set; }
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-		
-		public void Create(ShaderProgram program) {
-			Platform = program.Platform;
-			Settings = new Import();
-			Id = Settings.Id;
 
-			Program = program;
-		}
+		public ShaderProgramResource() { }
+		public ShaderProgramResource(IPlatform platform, string? filePath, ShaderProgram value, Import? settings = null) : base(platform, filePath, value, settings) { }
 		
+		public override void SaveNew() {
+			throw new NotImplementedException();
+		}
+
 		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings) {
 			base.Load(platform, filePath, stream, resourceAssembly, settings);
 

@@ -1,5 +1,6 @@
 using Arch.Core;
 using Escape.Renderer;
+using Escape.Systems;
 using Schedulers;
 
 namespace Escape {
@@ -9,7 +10,11 @@ namespace Escape {
 		public static World? World {
 			get => field;
 			set {
-				if(_worldUpdater is not null) UpdateManager.Remove(_worldUpdater.Id);
+				if(_worldUpdater is not null) {
+					_worldUpdater.Dispose();
+					UpdateManager.Remove(_worldUpdater.Id);
+				}
+				
 				if(_worldRenderer is not null && _renderQueue is not null) RenderManager.Remove(_renderQueue, _worldRenderer);
 
 				if(value is not null) {

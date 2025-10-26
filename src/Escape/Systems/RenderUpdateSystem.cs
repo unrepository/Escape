@@ -4,6 +4,7 @@ using Arch.Core;
 using Arch.System;
 using Escape.Components;
 using Escape.Renderer;
+using Escape.Scripting.Components;
 
 namespace Escape.Systems {
 	
@@ -19,6 +20,11 @@ namespace Escape.Systems {
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Transform3D_Update(ref RenderableObject obj, ref Transform3D t3d) {
 			_objectRenderer.SetMatrix(obj, t3d.GlobalMatrix);
+		}
+		
+		[Query]
+		public void Scripted_Render(ref Scripted scripted) {
+			scripted.Script.Get().Value.Call(scripted.EntryPoint ?? "render", [ _objectRenderer ]);
 		}
 	}
 }

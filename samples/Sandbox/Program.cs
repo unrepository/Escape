@@ -1,1 +1,1 @@
-PrimitivesTest.Start(args);
+ScriptingTest.Start(args);

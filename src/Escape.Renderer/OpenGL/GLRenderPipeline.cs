@@ -7,7 +7,7 @@ namespace Escape.Renderer.OpenGL {
 	
 	public class GLRenderPipeline : RenderPipeline {
 
-		public Action<GLRenderPipeline, GLPlatform>? StateSetup { get; set; } = (_, p) => { p.API.CullFace(TriangleFace.Back); };
+		public Action<GLRenderPipeline, GLPlatform>? StateSetup { get; set; } /*= (_, p) => { p.API.CullFace(TriangleFace.Back); };*/
 		public List<EnableCap> EnableCaps { get; set; } = [ EnableCap.DepthTest ];
 		public List<EnableCap> DisableCaps { get; set; } = [];
 		
