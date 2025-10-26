@@ -27,6 +27,10 @@ namespace Escape {
 			}
 		}
 
+		public static bool Remove(RenderQueue queue, IRenderer renderer) {
+			return queue.Dequeue(renderer);
+		}
+
 		public static void ChangeQueue(RenderQueue from, RenderQueue to) {
 			foreach(var renderers in from.GetQueue().Values) {
 				foreach(var renderer in renderers) {

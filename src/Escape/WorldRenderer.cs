@@ -23,7 +23,7 @@ namespace Escape {
 		public string Id { get; }
 		public int Priority { get; init; }
 		
-		public World World { get; set; }
+		public World World { get; }
 		public ObjectRenderer ObjectRenderer { get; }
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -153,6 +153,8 @@ namespace Escape {
 			}
 			
 			_primarySystem.Update(delta);
+			
+			ObjectRenderer.Render(queue, delta);
 		}
 	}
 }

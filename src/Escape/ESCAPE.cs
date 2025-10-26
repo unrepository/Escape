@@ -24,12 +24,10 @@ namespace Escape {
 
 		private static Stopwatch _updateStopwatch = new();
 		private static Stopwatch _renderStopwatch = new();
-
-		private static JobScheduler _sharedWorldScheduler;
 		
 		public static void Run() {
-			Components.ComponentRegistry.AddAssembly(Assembly.GetExecutingAssembly());
-			Components.ComponentRegistry.RegisterComponents();
+			ComponentRegistry.AddAssembly(Assembly.GetExecutingAssembly());
+			ComponentRegistry.RegisterComponents();
 			
 			IsRunning = true;
 			
@@ -43,19 +41,10 @@ namespace Escape {
 		public static void Stop() {
 			IsRunning = false;
 			//UpdateThread.Join(); // wait for update thread to finish
-			_sharedWorldScheduler.Dispose();
+			WorldEngine.SharedJobScheduler.Dispose();
 		}
 
 		private static void _UpdateLoop() {
-			_sharedWorldScheduler = new JobScheduler(new JobScheduler.Config {
-				ThreadPrefixName = "Escape.WJS",
-				ThreadCount = 0,
-				MaxExpectedConcurrentJobs = 32,
-				StrictAllocationMode = false
-			});
-			
-			World.SharedJobScheduler = _sharedWorldScheduler;
-			
 			_updateStopwatch.Restart();
 			
 			while(IsRunning) {
@@ -74,20 +63,9 @@ namespace Escape {
 					Thread.Sleep(1); // not completely accurate but CPU-friendly
 				}
 			}
-			
-			_sharedWorldScheduler.Dispose();
 		}
 
 		private static void _RenderLoop() {
-			_sharedWorldScheduler = new JobScheduler(new JobScheduler.Config {
-				ThreadPrefixName = "Escape.WJS",
-				ThreadCount = 0,
-				MaxExpectedConcurrentJobs = 32,
-				StrictAllocationMode = false
-			});
-			
-			World.SharedJobScheduler = _sharedWorldScheduler;
-			
 			_renderStopwatch.Restart();
 			
 			while(IsRunning) {

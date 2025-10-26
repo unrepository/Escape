@@ -156,12 +156,15 @@ public static class Shared {
 	) {
 		world = World.Create();
 		
-		UpdateManager.Add(new WorldUpdater("world", world));
+		/*UpdateManager.Add(new WorldUpdater("world", world));
 
 		var objectRenderer = ObjectRenderer.Create(platform, shaderPipeline);
 		RenderManager.Add(new WorldRenderer("world", world, objectRenderer), renderQueue);
-		RenderManager.Add(objectRenderer, renderQueue);
+		RenderManager.Add(objectRenderer, renderQueue);*/
 
+		WorldEngine.World = world;
+		WorldEngine.Configure(platform, renderQueue);
+		
 		_ = new RelationshipTracker(world);
 		
 		DebugInterface?.Providers.Add(new HierarchyInfoProvider(world));

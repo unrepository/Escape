@@ -31,6 +31,10 @@ namespace Escape {
 
 			return null;
 		}
+
+		public static bool Remove(string id) {
+			return Updateables.Remove(id) || UpdateableStates.Remove(id);
+		}
 		
 		public static bool IsEnabled(IUpdater updateable) => UpdateableStates[updateable.Id];
 		public static void SetEnabled(IUpdater updateable, bool enabled) => UpdateableStates[updateable.Id] = enabled;

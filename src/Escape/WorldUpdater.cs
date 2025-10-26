@@ -6,7 +6,7 @@ namespace Escape {
 	public class WorldUpdater : IUpdater {
 
 		public string Id { get; }
-		public World World { get; set; }
+		public World World { get; }
 
 		private WorldUpdateSystem _primarySystem;
 		private HierarchyUpdateSystem _hierarchySystem;
