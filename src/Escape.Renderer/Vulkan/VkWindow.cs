@@ -35,6 +35,7 @@ namespace Escape.Renderer.Vulkan {
 			windowOptions.API = GraphicsAPI.DefaultVulkan;
 
 			Base = Silk.NET.Windowing.Window.Create(windowOptions);
+			Base.FocusChanged += focus => HasFocus = focus;
 		}
 
 		public override void Initialize(RenderQueue queue) {

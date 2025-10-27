@@ -1,0 +1,52 @@
+{
+	"a": [
+		{
+			"keys": [
+				"w"
+			],
+			"strict": false
+		}
+	],
+	"b": [
+		{
+			"keys": [
+				"control_left",
+				"shift_left",
+				"b"
+			],
+			"strict": true
+		}
+	],
+	"c": [
+		{
+			"keys": [
+				"control_left",
+				"b"
+			],
+			"strict": true
+		}
+	],
+	"d": [
+		{
+			"mouse_buttons": [
+				"left"
+			],
+			"strict": false
+		}
+	],
+	"e": [
+		{
+			"keys": [
+				"w",
+				"e"
+			],
+			"strict": true
+		}
+	],
+	"f": [
+		{
+			"mouse_scroll_wheel": "up",
+			"strict": false
+		}
+	]
+}

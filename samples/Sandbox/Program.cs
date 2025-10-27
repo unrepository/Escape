@@ -1,1 +1,1 @@
-ScriptingTest.Start(args);
+InputTest.Start(args);

@@ -3,7 +3,7 @@ using Escape.Resources;
 
 namespace Escape.Scripting.Resources {
 	
-	public static class ResourceRegistrar {
+	public static class Registrar {
 
 		[ModuleInitializer]
 		public static void Register() {

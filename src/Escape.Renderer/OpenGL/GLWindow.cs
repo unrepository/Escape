@@ -32,6 +32,8 @@ namespace Escape.Renderer.OpenGL {
 			windowOptions.TransparentFramebuffer = true;
 
 			Base = Silk.NET.Windowing.Window.Create(windowOptions);
+			
+			Base.FocusChanged += focus => HasFocus = focus;
 
 			// center window on main monitor
 			var mainMonitorBounds = Monitor.GetMainMonitor(Base).Bounds;
