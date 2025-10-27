@@ -52,7 +52,8 @@ public static class InputTest {
 		var fAction = inputMap.GetAction("f");
 
 		aAction.Down += action => {
-			Console.WriteLine(action.Name + " is down");
+			//Console.WriteLine(action.Name + " is down");
+			Console.WriteLine(window.GetMouse().Position);
 		};
 		
 		bAction.Released += action => {

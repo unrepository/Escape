@@ -26,6 +26,8 @@ namespace Escape.Renderer {
 
 		public Vector2D<int> Size => Base.FramebufferSize;
 		
+		public bool HasFocus { get; protected set; }
+		
 		public IPlatform Platform { get; }
 		public Framebuffer Framebuffer;
 		
