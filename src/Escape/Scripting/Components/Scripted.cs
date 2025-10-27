@@ -23,12 +23,19 @@ namespace Escape.Scripting.Components {
 			ConstructorTypes = types;
 			ConstructorArguments = arguments;
 
+			var t = this;
+			
 			try {
 				Script.Construct(ConstructorTypes, ConstructorArguments);
 			} catch(InvalidOperationException) {
 				ResourceScript = new(ResourceScript.Get().Duplicate());
 				Script.Construct(ConstructorTypes, ConstructorArguments);
 			}
+			
+			ResourceScript.Get().Reloaded += res => {
+				res.Value.Construct(t.ConstructorTypes, t.ConstructorArguments);
+				res.Value.Call(IScript.FunctionCall.OnInitialize, [ res.Value.World, res.Value.Owner ]);
+			};
 		}
 
 		public Scripted(IScript script) {

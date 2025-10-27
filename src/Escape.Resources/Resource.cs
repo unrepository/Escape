@@ -29,6 +29,7 @@ namespace Escape.Resources {
 		public TResource Value { get; set; }
 
 		protected bool WasConstructed { get; } = false;
+		protected List<Resource<TResource, TImportSettings>> Duplicates { get; } = [];
 		
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -59,7 +60,7 @@ namespace Escape.Resources {
 			Load(platform, filePath, stream, resourceAssembly, settings as TImportSettings);
 		}
 
-		public virtual void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, TImportSettings? settings) {
+		public virtual void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, TImportSettings? settings, bool reloading = false) {
 			settings ??= new();
 			
 			Platform = platform;
@@ -116,11 +117,16 @@ namespace Escape.Resources {
 
 			importSettings ??= new();
 			using var fileStream = new FileStream(FilePath, FileMode.Open);
-			Load(Platform, FilePath, fileStream, ResourceAssembly, importSettings);
+			Load(Platform, FilePath, fileStream, ResourceAssembly, importSettings, true);
 			
 			Reloaded?.Invoke(this);
 			
 			_logger.Debug("Finished reloading resource {Path}", FilePath);
+			
+			// reload duplicates
+			foreach(var duplicate in Duplicates) {
+				duplicate.Reload();
+			}
 			return true;
 		}
 

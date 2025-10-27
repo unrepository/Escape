@@ -24,8 +24,8 @@ namespace Escape.Renderer.Resources {
 			throw new NotImplementedException();
 		}
 
-		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings) {
-			base.Load(platform, filePath, stream, resourceAssembly, settings);
+		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings, bool reloading = false) {
+			base.Load(platform, filePath, stream, resourceAssembly, settings, reloading);
 
 			var file = JsonSerializer.Deserialize<File>(stream, ImportMetadata.DefaultSerializerOptions);
 			Debug.Assert(file is not null);
@@ -64,6 +64,7 @@ namespace Escape.Renderer.Resources {
 			var resource = new ShaderProgramResource();
 			resource.Load(Platform, FilePath, stream, ResourceAssembly, Settings);
 
+			Duplicates.Add(resource);
 			return resource;
 		}
 		

@@ -12,8 +12,8 @@ namespace Escape.Scripting.Resources {
 		public ScriptResource() { }
 		public ScriptResource(IPlatform platform, string? filePath, JavaScriptScript value, Import? settings = null) : base(platform, filePath, value, settings) { }
 
-		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings) {
-			base.Load(platform, filePath, stream, resourceAssembly, settings);
+		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings, bool reloading = false) {
+			base.Load(platform, filePath, stream, resourceAssembly, settings, reloading);
 
 			using var reader = new StreamReader(stream);
 			
@@ -22,7 +22,17 @@ namespace Escape.Scripting.Resources {
 					Value = new JavaScriptScript(filePath, reader.ReadToEnd());
 					break;
 				case ".cs":
-					Value = new CSharpScript(resourceAssembly, filePath, reader.ReadToEnd());
+					if(reloading) {
+						var prevWorld = Value.World;
+						var prevOwner = Value.Owner;
+						
+						Value = new CSharpScript(resourceAssembly, filePath, reader.ReadToEnd(), true);
+
+						Value.World = prevWorld;
+						Value.Owner = prevOwner;
+					} else {
+						Value = new CSharpScript(resourceAssembly, filePath, reader.ReadToEnd(), false);
+					}
 					break;
 				default:
 					throw new ArgumentException("Somehow, file doesn't have a valid extension", nameof(filePath));
@@ -45,6 +55,7 @@ namespace Escape.Scripting.Resources {
 			var resource = new ScriptResource();
 			resource.Load(Platform, FilePath, stream, ResourceAssembly, Settings);
 
+			Duplicates.Add(resource);
 			return resource;
 		}
 

@@ -19,9 +19,9 @@ namespace Escape.Scripting {
 		public Type Type { get; }
 		public object? Instance { get; private set; }
 
-		protected World World { get; private set; }
-		protected Entity Owner { get; private set; }
-		
+		public World World { get; set; }
+		public Entity Owner { get; set; }
+
 		protected Logger Logger { get; set; }
 
 		private static Assembly? _scriptsAssembly;
@@ -37,7 +37,7 @@ namespace Escape.Scripting {
 			Instance = this;
 		}
 		
-		public CSharpScript(Assembly? scriptAssembly, string name, string source) {
+		public CSharpScript(Assembly? scriptAssembly, string name, string source, bool reloading = false) {
 			Name = name;
 			Source = source;
 
@@ -95,9 +95,11 @@ namespace Escape.Scripting {
 			switch(call) {
 				case IScript.FunctionCall.OnInitialize:
 					script.OnInitialize((World) arguments[0], (Entity) arguments[1]);
+					if(!IsInternal) OnInitialize((World) arguments[0], (Entity) arguments[1]);
 					return null;
 				case IScript.FunctionCall.OnDeinitialize:
 					script.OnDeinitialize((World) arguments[0], (Entity) arguments[1]);
+					if(!IsInternal) OnDeinitialize((World) arguments[0], (Entity) arguments[1]);
 					return null;
 				case IScript.FunctionCall.OnUpdate:
 					script.OnUpdate((TimeSpan) arguments[0]);

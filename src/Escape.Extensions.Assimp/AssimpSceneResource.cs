@@ -29,7 +29,7 @@ namespace Escape.Extensions.Assimp {
 			throw new NotImplementedException();
 		}
 
-		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings) {
+		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings, bool reloading = false) {
 			base.Load(platform, filePath, stream, resourceAssembly, settings);
 
 			Scene = AssimpSceneLoader.Load(platform, filePath);
@@ -41,6 +41,7 @@ namespace Escape.Extensions.Assimp {
 			var resource = new AssimpSceneResource();
 			resource.Load(Platform, FilePath, stream, ResourceAssembly, Settings);
 
+			Duplicates.Add(resource);
 			return resource;
 		}
 

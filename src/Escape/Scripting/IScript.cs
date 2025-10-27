@@ -1,4 +1,5 @@
 using System.Reflection;
+using Arch.Core;
 
 namespace Escape.Scripting {
 	
@@ -6,6 +7,9 @@ namespace Escape.Scripting {
 		
 		public string Name { get; }
 		public string Source { get; }
+		
+		public World World { get; set; }
+		public Entity Owner { get; set; }
 		
 		//public Language Type { get; }
 

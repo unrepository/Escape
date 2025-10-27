@@ -17,13 +17,13 @@ public class SecondCSharpScript : CSharpScript {
 	public override void OnInitialize(World w, Entity e) {
 		base.OnInitialize(w, e);
 			
-		Console.WriteLine("External: I am " + e.Id);
+		Logger.Info("External: I am " + e.Id);
 	}
 		
 	public override void OnDeinitialize(World w, Entity e) {
 		base.OnDeinitialize(w, e);
 			
-		Console.WriteLine("External: I was " + e.Id);
+		Logger.Info("External: I was " + e.Id);
 	}
 
 	public override void OnUpdate(TimeSpan delta) {
