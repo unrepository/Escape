@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Escape.Renderer;
 using Escape.Renderer.Vulkan;
 using Hexa.NET.ImGui;
-using Escape;
+using Escape.Core;
 using Escape.Renderer.OpenGL;
 using HImGui = Hexa.NET.ImGui.ImGui;
 

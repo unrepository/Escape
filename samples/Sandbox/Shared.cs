@@ -2,19 +2,19 @@ using System.Numerics;
 using System.Reflection;
 using Arch.Core;
 using Arch.Core.Extensions;
-using Escape.Components;
+using Escape.Core.Components;
 using Escape.Extensions.Debugging;
 using Escape.Extensions.Debugging.Providers;
 using Escape.Renderer;
 using Escape.Renderer.Camera;
 using Escape.Renderer.Shader.Pipelines;
 using Escape.Renderer.Vulkan;
-using Escape.Systems;
+using Escape.Core.Systems;
 using Schedulers;
-using Escape;
+using Escape.Core;
 using Escape.Renderer.OpenGL;
 using Escape.Renderer.Shader;
-using Camera3D = Escape.Components.Camera3D;
+using Camera3D = Escape.Core.Components.Camera3D;
 
 public static class Shared {
 	

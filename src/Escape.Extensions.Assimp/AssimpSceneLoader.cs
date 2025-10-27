@@ -3,7 +3,7 @@ using System.Numerics;
 using System.Text;
 using Arch.Core;
 using Arch.Core.Extensions;
-using Escape.Components;
+using Escape.Core.Components;
 using Escape.Renderer;
 using Escape.Renderer.Resources;
 using Escape.Resources;

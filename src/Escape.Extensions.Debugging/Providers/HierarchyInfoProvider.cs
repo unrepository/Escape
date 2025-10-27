@@ -1,6 +1,7 @@
 using Arch.Core;
 using Arch.Core.Extensions;
-using Escape.Components;
+using Escape.Core;
+using Escape.Core.Components;
 using ImGui_ = Hexa.NET.ImGui.ImGui;
 
 namespace Escape.Extensions.Debugging.Providers {

@@ -4,13 +4,13 @@ using System.Diagnostics;
 using System.Numerics;
 using Arch.Core;
 using Arch.Core.Extensions;
-using Escape.Components;
+using Escape.Core.Components;
 using Escape.Extensions.CSharp;
 using Escape.Renderer;
 using Escape.UnitTypes;
 using Silk.NET.Core;
 using Silk.NET.Input;
-using Escape;
+using Escape.Core;
 
 public class OrbitCamera3D : IUpdater {
 

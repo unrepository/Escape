@@ -1,8 +1,8 @@
 using System;
 using Arch.Core;
 using Arch.Core.Extensions;
-using Escape.Components;
-using Escape.Scripting;
+using Escape.Core.Components;
+using Escape.Core.Scripting;
 
 [CSharpScript("scripts/test.cs")]
 public class ExternalCSharpScript : CSharpScript {

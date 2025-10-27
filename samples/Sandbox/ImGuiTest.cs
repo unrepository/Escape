@@ -1,7 +1,7 @@
 using System.Numerics;
 using Arch.Core.Extensions;
-using Escape;
-using Escape.Components;
+using Escape.Core;
+using Escape.Core.Components;
 using Escape.Extensions.ImGui;
 using Escape.Renderer;
 using Escape.Renderer.Shader.Pipelines;

@@ -1,7 +1,7 @@
 using Arch.Core;
 using Arch.Core.Extensions;
-using Escape;
-using Escape.Components;
+using Escape.Core;
+using Escape.Core.Components;
 using Escape.Extensions.Assimp;
 using Escape.Renderer;
 using Escape.Renderer.Shader;

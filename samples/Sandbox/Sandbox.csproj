@@ -24,7 +24,7 @@
       <ProjectReference Include="..\..\src\Escape.Renderer\Escape.Renderer.csproj" />
       <ProjectReference Include="..\..\src\Escape.Resources\Escape.Resources.csproj" />
       <ProjectReference Include="..\..\src\Escape.UnitTypes\Escape.UnitTypes.csproj" />
-      <ProjectReference Include="..\..\src\Escape\Escape.csproj" />
+      <ProjectReference Include="..\..\src\Escape.Core\Escape.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -47,6 +47,6 @@
 	</ItemGroup>
 	
 	<!-- scripts !-->
-	<Import Project="..\..\src\Escape\Script.targets"/>
+	<Import Project="..\..\src\Escape.Core\Script.targets"/>
 	
 </Project>

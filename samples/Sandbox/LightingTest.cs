@@ -1,8 +1,8 @@
 using System.Drawing;
 using System.Numerics;
 using Arch.Core.Extensions;
-using Escape;
-using Escape.Components;
+using Escape.Core;
+using Escape.Core.Components;
 using Escape.Extensions.Assimp;
 using Escape.Renderer;
 using Escape.Renderer.Camera;
@@ -11,7 +11,7 @@ using Escape.Renderer.Shader.Pipelines;
 using Escape.Resources;
 using Escape.UnitTypes;
 using static Shared;
-using Camera3D = Escape.Components.Camera3D;
+using Camera3D = Escape.Core.Components.Camera3D;
 using Color = Escape.Renderer.Color;
 
 public static class LightingTest {

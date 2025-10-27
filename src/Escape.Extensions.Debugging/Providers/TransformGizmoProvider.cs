@@ -1,7 +1,7 @@
 using System.Numerics;
 using Arch.Core;
 using Arch.Core.Extensions;
-using Escape.Components;
+using Escape.Core.Components;
 using Escape.Extensions.CSharp;
 using Hexa.NET.ImGui;
 using Hexa.NET.ImGuizmo;

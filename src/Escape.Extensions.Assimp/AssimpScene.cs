@@ -1,6 +1,7 @@
 using Arch.Core;
 using Arch.Core.Extensions;
-using Escape.Components;
+using Escape.Core;
+using Escape.Core.Components;
 using Escape.Renderer;
 
 namespace Escape.Extensions.Assimp {

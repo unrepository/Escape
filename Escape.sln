@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{7A1F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandbox", "samples\Sandbox\Sandbox.csproj", "{8063EAB4-8922-4B63-97DB-9D6B0F7DD131}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escape", "src\Escape\Escape.csproj", "{D6D5D7ED-A8A2-44AD-9408-4CB6A9466853}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escape.Core", "src\Escape.Core\Escape.Core.csproj", "{D6D5D7ED-A8A2-44AD-9408-4CB6A9466853}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Escape.UnitTypes", "src\Escape.UnitTypes\Escape.UnitTypes.csproj", "{1E0DB6E3-0EED-49DD-972E-840883AC50CC}"
 EndProject

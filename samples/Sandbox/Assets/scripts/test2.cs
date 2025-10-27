@@ -1,5 +1,5 @@
 using Arch.Core;
-using Escape.Scripting;
+using Escape.Core.Scripting;
 
 [CSharpScript("scripts/test2.cs")]
 public class Foo : CSharpScript {

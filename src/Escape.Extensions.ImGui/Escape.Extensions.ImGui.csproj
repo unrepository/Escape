@@ -18,7 +18,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Escape.Renderer\Escape.Renderer.csproj" />
-	  <ProjectReference Include="..\Escape\Escape.csproj" />
+	  <ProjectReference Include="..\Escape.Core\Escape.Core.csproj" />
 	</ItemGroup>
 
 </Project>

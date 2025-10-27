@@ -3,7 +3,7 @@ using Escape.Extensions.ImGui;
 using Escape.Renderer;
 using Hexa.NET.ImGui;
 using Silk.NET.Windowing;
-using Escape;
+using Escape.Core;
 using ImGui_ = Hexa.NET.ImGui.ImGui;
 using Window = Escape.Renderer.Window;
 

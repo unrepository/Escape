@@ -2,8 +2,8 @@ using System.Numerics;
 using System.Reflection;
 using Arch.Core;
 using Arch.Core.Extensions;
-using Escape;
-using Escape.Components;
+using Escape.Core;
+using Escape.Core.Components;
 using Escape.Extensions.Assimp;
 using Escape.Primitives;
 using Escape.Renderer;
@@ -11,14 +11,14 @@ using Escape.Renderer.Camera;
 using Escape.Renderer.OpenGL;
 using Escape.Renderer.Shader.Pipelines;
 using Escape.Resources;
-using Escape.Scripting;
-using Escape.Scripting.Components;
-using Escape.Scripting.Resources;
+using Escape.Core.Scripting;
+using Escape.Core.Scripting.Components;
+using Escape.Core.Scripting.Resources;
 using Escape.UnitTypes;
 using NLog;
 using Silk.NET.OpenGL;
 using static Shared;
-using Camera3D = Escape.Components.Camera3D;
+using Camera3D = Escape.Core.Components.Camera3D;
 
 public static class ScriptingTest {
 

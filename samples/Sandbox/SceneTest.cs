@@ -1,6 +1,6 @@
 using System.Numerics;
 using Arch.Core;
-using Escape;
+using Escape.Core;
 using Escape.Primitives;
 using Escape.Renderer;
 using Escape.Renderer.OpenGL;
