@@ -175,11 +175,18 @@ namespace Escape.Scripting {
 					SearchOption.AllDirectories
 				)
 			) {
+				var preprocessorSymbols = new string[] {
+					"SCRIPT"
+				#if DEBUG
+					, "DEBUG"
+				#endif
+				};
+				
 				var syntaxTree = CSharpSyntaxTree.ParseText(
 					File.ReadAllText(file),
 					CSharpParseOptions
 						.Default
-						.WithPreprocessorSymbols("SCRIPT")
+						.WithPreprocessorSymbols(preprocessorSymbols)
 						.WithLanguageVersion(LanguageVersion.Preview),
 					file
 				);
