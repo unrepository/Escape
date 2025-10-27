@@ -26,6 +26,8 @@ namespace Escape.Scripting {
 		private Thread? _engineThread;
 		
 		public JavaScriptScript(string name, string source) {
+			throw new NotImplementedException();
+			
 			Name = name;
 			Source = source;
 			
