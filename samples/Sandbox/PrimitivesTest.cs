@@ -5,7 +5,7 @@ using Arch.Core.Extensions;
 using Escape.Core;
 using Escape.Core.Components;
 using Escape.Extensions.Assimp;
-using Escape.Primitives;
+using Escape.Extensions.Primitives;
 using Escape.Renderer;
 using Escape.Renderer.Camera;
 using Escape.Renderer.OpenGL;

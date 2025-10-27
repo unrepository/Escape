@@ -155,7 +155,7 @@ namespace Escape.Core.Scripting {
 			TryAddReference("Escape.Extensions.CSharp");
 			TryAddReference("Escape.Extensions.Debugging");
 			TryAddReference("Escape.Extensions.ImGui");
-			TryAddReference("Escape.Primitives");
+			TryAddReference("Escape.Extensions.Primitives");
 			
 			// + the project assembly
 			TryAddReference(ESCAPE.ProjectAssembly.GetName().Name);

@@ -3,7 +3,7 @@ using Arch.Core;
 using Escape.Core.Components;
 using Escape.Renderer;
 
-namespace Escape.Primitives {
+namespace Escape.Extensions.Primitives {
 	
 	public static partial class Primitives3D {
 		

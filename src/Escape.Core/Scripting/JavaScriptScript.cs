@@ -101,7 +101,7 @@ namespace Escape.Core.Scripting {
 			TryLoadAssembly("Escape.Renderer");
 			TryLoadAssembly("Escape.Resources");
 			TryLoadAssembly("Escape.UnitTypes");
-			TryLoadAssembly("Escape.Primitives");
+			TryLoadAssembly("Escape.Extensions.Primitives");
 			TryLoadAssembly("Escape.Extensions.Scene");
 			TryLoadAssembly("Escape.Extensions.Debugging");
 			TryLoadAssembly("Escape.Extensions.ImGui");
