@@ -7,6 +7,13 @@ using Escape.Scripting;
 [CSharpScript("scripts/test1.cs")]
 public class SecondCSharpScript : CSharpScript {
 
+	public float SpeedFactor { get; }
+	
+	public SecondCSharpScript(float speedFactor = 1.0f) {
+		SpeedFactor = speedFactor;
+		Logger.Info("Speed factor: {SpeedFactor}", SpeedFactor);
+	}
+	
 	public override void OnInitialize(World w, Entity e) {
 		base.OnInitialize(w, e);
 			
@@ -20,6 +27,6 @@ public class SecondCSharpScript : CSharpScript {
 	}
 
 	public override void OnUpdate(TimeSpan delta) {
-		Owner.Get<Transform3D>().Translate(0, 0, 0.5f * (float) delta.TotalSeconds);
+		Owner.Get<Transform3D>().Translate(0, 0, 0.5f * (float) delta.TotalSeconds * SpeedFactor);
 	}
 }

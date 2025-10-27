@@ -8,8 +8,6 @@ namespace Escape.Resources {
 	public abstract class Resource<TResource, TImportSettings> : IResource
 		where TImportSettings : ImportMetadata, new()
 	{
-		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-		
 		public uint ReferenceCount { get; set; }
 		public bool IsValidObject { get; set; }
 		public event IRefCounted.FreedEventHandler? Freed;
@@ -31,9 +29,12 @@ namespace Escape.Resources {
 		public TResource Value { get; set; }
 
 		protected bool WasConstructed { get; } = false;
+		
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 		public Resource() { }
 		
+		// TODO is this constructor used anywhere?
 		public Resource(IPlatform platform, string? filePath, TResource value, TImportSettings? settings = null) {
 			Platform = platform;
 			FilePath = filePath;
@@ -123,6 +124,18 @@ namespace Escape.Resources {
 			return true;
 		}
 
+		/// <summary>
+		/// Loads the resource again as a new, unique instance
+		/// </summary>
+		/// <returns>The new instance of this resource</returns>
+		public abstract Resource<TResource, TImportSettings> Duplicate();
+
+		/// <summary>
+		/// Makes a new reference to this resource
+		/// </summary>
+		/// <returns>The reference</returns>
+		public Ref<Resource<TResource, TImportSettings>> MakeRef() => new Ref<Resource<TResource, TImportSettings>>(this);
+		
 		public void Dispose() {
 			GC.SuppressFinalize(this);
 

@@ -38,7 +38,16 @@ namespace Escape.Scripting.Resources {
 
 		public override bool Reload()
 			=> base.Reload();
-		
+
+		public override ScriptResource Duplicate() {
+			using var stream = new FileStream(FilePath, FileMode.Open);
+
+			var resource = new ScriptResource();
+			resource.Load(Platform, FilePath, stream, ResourceAssembly, Settings);
+
+			return resource;
+		}
+
 		public override void Dispose(bool reloading) {
 			Value.Dispose();
 			base.Dispose(reloading);

@@ -42,13 +42,19 @@ public static class ScriptingTest {
 		var cube1 = world.Create3DCube(new Color(255, 0, 0), Vector3.Zero, 0.5f, 0.5f, 0.5f);
 		cube1.Add(new Scripted(script));
 		
+		// constructor with default arguments
 		var cube2 = world.Create3DCube(new Color(100, 0, 255), Vector3.Zero, 0.5f, 0.5f, 0.5f);
-		cube2.Add(new Scripted(script1));
+		cube2.Add(new Scripted(script1, [ typeof(float) ], [ Type.Missing ]));
+		
+		// multiple entities with a single script
+		var cube3 = world.Create3DCube(new Color(20, 200, 120), Vector3.Zero, 0.5f, 0.5f, 0.5f);
+		cube3.Add(new Scripted(script1, 1.5f));
 
 		var fooScript = ResourceManager.Load<ScriptResource>(platform, "scripts/test2.cs")!;
 		
+		// custom constructor and accessing outside fields
 		var foo = world.Create();
-		foo.Add(new Scripted(fooScript));
+		foo.Add(new Scripted(fooScript, 123, "meow"));
 		
 		ESCAPE.Run();
 	}

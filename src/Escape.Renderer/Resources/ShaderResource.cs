@@ -28,6 +28,15 @@ namespace Escape.Renderer.Resources {
 			Shader = Renderer.Shader.Shader.Create(platform, Settings.Family, reader.ReadToEnd());
 		}
 
+		public override ShaderResource Duplicate() {
+			using var stream = new FileStream(FilePath, FileMode.Open);
+
+			var resource = new ShaderResource();
+			resource.Load(Platform, FilePath, stream, ResourceAssembly, Settings);
+
+			return resource;
+		}
+		
 		public override void Dispose(bool reloading) {
 			Shader?.Dispose();
 			base.Dispose(reloading);

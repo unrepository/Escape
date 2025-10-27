@@ -48,6 +48,10 @@ namespace Escape.Scripting {
 			_CreateEngine();
 		}
 
+		public void Construct(Type[] types, object?[] arguments) {
+			throw new NotImplementedException();
+		}
+
 		public object? Call(IScript.FunctionCall call, object?[] arguments) {
 			var function = call switch {
 				IScript.FunctionCall.OnInitialize => "init",

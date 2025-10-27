@@ -58,6 +58,15 @@ namespace Escape.Renderer.Resources {
 			);
 		}
 		
+		public override ShaderProgramResource Duplicate() {
+			using var stream = new FileStream(FilePath, FileMode.Open);
+
+			var resource = new ShaderProgramResource();
+			resource.Load(Platform, FilePath, stream, ResourceAssembly, Settings);
+
+			return resource;
+		}
+		
 		public override void Dispose(bool reloading) {
 			Program?.Dispose();
 

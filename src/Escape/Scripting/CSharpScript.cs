@@ -16,13 +16,13 @@ namespace Escape.Scripting {
 		//public IScript.Language Type => IScript.Language.CSharp;
 		public bool IsInternal { get; } = false;
 		
-		public Type Type { get; private set; }
+		public Type Type { get; }
 		public object? Instance { get; private set; }
 
 		protected World World { get; private set; }
 		protected Entity Owner { get; private set; }
 		
-		protected Logger Logger { get; }
+		protected Logger Logger { get; set; }
 
 		private static Assembly? _scriptsAssembly;
 		private static List<string> _loadedScripts = [];
@@ -40,10 +40,11 @@ namespace Escape.Scripting {
 		public CSharpScript(Assembly? scriptAssembly, string name, string source) {
 			Name = name;
 			Source = source;
-			Logger = LogManager.GetLogger(name);
 
 			if(scriptAssembly is null || string.IsNullOrWhiteSpace(name)) return;
 
+			Logger = LogManager.GetLogger(name.Replace(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? "", ""));
+			
 			if(_scriptsAssembly is null || !_loadedScripts.Contains(name)) {
 				RebuildScripts();
 			}
@@ -56,12 +57,11 @@ namespace Escape.Scripting {
 				
 				if(fullScriptPath == name) {
 					Type = type;
-					Instance = type.GetConstructor([]).Invoke(null);
+					break;
 				}
 			}
 			
 			Debug.Assert(Type is not null);
-			Debug.Assert(Instance is not null);
 		}
 
 		public virtual void OnInitialize(World w, Entity e) {
@@ -77,7 +77,54 @@ namespace Escape.Scripting {
 		public virtual void OnUpdate(TimeSpan delta) { }
 		public virtual void OnRender(TimeSpan delta, ObjectRenderer objectRenderer) { }
 
-		public void RebuildScripts() {
+		public void Construct(Type[] types, object?[] arguments) {
+			if(Instance is not null) throw new InvalidOperationException($"Script {Name} has already been constructed");
+			
+			var ctor = Type.GetConstructor(BindingFlags.Public | BindingFlags.Instance, types);
+			if(ctor is null) throw new InvalidDataException($"Script {Name} has no valid constructor for types [{string.Join(", ", types)}]");
+					
+			Instance = ctor.Invoke(arguments);
+
+			var loggerProperty = Type.GetProperty("Logger", BindingFlags.Instance | BindingFlags.NonPublic);
+			loggerProperty?.SetValue(Instance, Logger);
+		}
+		
+		public object? Call(IScript.FunctionCall call, object?[] arguments) {
+			var script = IsInternal ? this : (CSharpScript) Instance!;
+			
+			switch(call) {
+				case IScript.FunctionCall.OnInitialize:
+					script.OnInitialize((World) arguments[0], (Entity) arguments[1]);
+					return null;
+				case IScript.FunctionCall.OnDeinitialize:
+					script.OnDeinitialize((World) arguments[0], (Entity) arguments[1]);
+					return null;
+				case IScript.FunctionCall.OnUpdate:
+					script.OnUpdate((TimeSpan) arguments[0]);
+					return null;
+				case IScript.FunctionCall.OnRender:
+					script.OnRender((TimeSpan) arguments[0], (ObjectRenderer) arguments[1]);
+					return null;
+				default:
+					throw new NotImplementedException();
+			}
+		}
+		
+		public object? Call(string function, object?[] arguments) {
+			var method = Type.GetMethod(function, BindingFlags.Public | BindingFlags.IgnoreCase);
+			return method?.Invoke(Instance, arguments) ?? null;
+		}
+
+		public void Dispose() {
+			GC.SuppressFinalize(this);
+		}
+		
+		public static void RebuildScripts() {
+			var logger = LogManager.GetCurrentClassLogger();
+			
+			logger.Info("Rebuilding all external C# scripts...");
+			var sw = Stopwatch.StartNew();
+			
 			var references = new Dictionary<string, MetadataReference>();
 
 			void TryAddReference(string name) {
@@ -94,7 +141,7 @@ namespace Escape.Scripting {
 						TryAddReference(dependency.Name);
 					}
 				} catch(Exception e) {
-					Logger.Trace("Could not add reference to {Assembly}: {Exception}", name, e.Message);
+					logger.Trace("Could not add reference to {Assembly}: {Exception}", name, e.Message);
 				}
 			}
 
@@ -132,7 +179,7 @@ namespace Escape.Scripting {
 						.Default
 						.WithPreprocessorSymbols("SCRIPT")
 						.WithLanguageVersion(LanguageVersion.Preview),
-					Name
+					file
 				);
 
 				compilation = compilation.AddSyntaxTrees(syntaxTree);
@@ -150,36 +197,9 @@ namespace Escape.Scripting {
 
 			var assembly = Assembly.Load(output.ToArray());
 			_scriptsAssembly = assembly;
-		}
-		
-		public object? Call(IScript.FunctionCall call, object?[] arguments) {
-			var script = IsInternal ? this : (CSharpScript) Instance!;
 			
-			switch(call) {
-				case IScript.FunctionCall.OnInitialize:
-					script.OnInitialize((World) arguments[0], (Entity) arguments[1]);
-					return null;
-				case IScript.FunctionCall.OnDeinitialize:
-					script.OnDeinitialize((World) arguments[0], (Entity) arguments[1]);
-					return null;
-				case IScript.FunctionCall.OnUpdate:
-					script.OnUpdate((TimeSpan) arguments[0]);
-					return null;
-				case IScript.FunctionCall.OnRender:
-					script.OnRender((TimeSpan) arguments[0], (ObjectRenderer) arguments[1]);
-					return null;
-				default:
-					throw new NotImplementedException();
-			}
-		}
-
-		public object? Call(string function, object?[] arguments) {
-			var method = Type.GetMethod(function, BindingFlags.Public | BindingFlags.IgnoreCase);
-			return method?.Invoke(Instance, arguments) ?? null;
-		}
-
-		public void Dispose() {
-			GC.SuppressFinalize(this);
+			sw.Stop();
+			logger.Info("...Finished! in {Time}", sw.Elapsed);
 		}
 	}
 

@@ -34,6 +34,15 @@ namespace Escape.Extensions.Assimp {
 
 			Scene = AssimpSceneLoader.Load(platform, filePath);
 		}
+		
+		public override AssimpSceneResource Duplicate() {
+			using var stream = new FileStream(FilePath, FileMode.Open);
+
+			var resource = new AssimpSceneResource();
+			resource.Load(Platform, FilePath, stream, ResourceAssembly, Settings);
+
+			return resource;
+		}
 
 		public override void Dispose(bool reloading) {
 			Scene?.Dispose();

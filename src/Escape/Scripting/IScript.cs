@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace Escape.Scripting {
 	
 	public interface IScript : IDisposable {
@@ -7,6 +9,7 @@ namespace Escape.Scripting {
 		
 		//public Language Type { get; }
 
+		public void Construct(Type[] types, object?[] arguments);
 		public object? Call(string function, object?[] arguments);
 		public object? Call(FunctionCall call, object?[] arguments);
 

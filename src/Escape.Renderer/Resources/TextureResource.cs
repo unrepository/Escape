@@ -21,13 +21,22 @@ namespace Escape.Renderer.Resources {
 		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings) {
 			base.Load(platform, filePath, stream, resourceAssembly, settings);
 			
-			Texture = Renderer.Texture.Create(
+			Texture = Texture.Create(
 				platform,
 				stream,
 				Settings.Filter,
 				Settings.WrapMode,
 				Settings.Format
 			);
+		}
+		
+		public override TextureResource Duplicate() {
+			using var stream = new FileStream(FilePath, FileMode.Open);
+
+			var resource = new TextureResource();
+			resource.Load(Platform, FilePath, stream, ResourceAssembly, Settings);
+
+			return resource;
 		}
 
 		public override void Dispose(bool reloading) {
