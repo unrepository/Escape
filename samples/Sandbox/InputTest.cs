@@ -37,6 +37,7 @@ public static class InputTest {
 		var cAction = new InputAction("c");
 		var dAction = new InputAction("d");
 		var eAction = new InputAction("e");
+		var fAction = new InputAction("f");
 
 		aAction.Down += action => {
 			Console.WriteLine(action.Name + " is down");
@@ -58,6 +59,10 @@ public static class InputTest {
 			Console.WriteLine(action.Name + " was pressed");
 		};
 		
+		fAction.Pressed += action => {
+			Console.WriteLine(action.Name + " was pressed");
+		};
+		
 		UpdateManager.Add("input test", _ => {
 			if(bAction.WasPressed) {
 				Console.WriteLine("B was pressed");
@@ -72,8 +77,9 @@ public static class InputTest {
 			[[ new(Key.W) ]] = aAction,
 			[[ new(Key.ControlLeft, Key.ShiftLeft, Key.B) ]] = bAction,
 			[[ new(Key.ControlLeft, Key.B) ]] = cAction,
-			//[[ new(MouseButton.Left) ]] = dAction,
+			[[ new(MouseButton.Left) ]] = dAction,
 			[[ new(Key.W, Key.E) ]] = eAction,
+			[[ new(MouseScrollWheel.Up) ]] = fAction,
 		};
 
 		var inputMap = new InputMap(

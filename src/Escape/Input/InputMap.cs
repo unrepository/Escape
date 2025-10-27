@@ -12,6 +12,8 @@ namespace Escape.Input {
 		public Dictionary<InputCombo[], InputAction> Actions { get; set; }
 
 		private readonly List<Key> _currentKeyCombo = [];
+		private readonly List<MouseButton> _currentMouseButtonCombo = [];
+		private MouseScrollWheel? _currentScrollWheel = null;
 		
 		public InputMap(string id, Window window, Dictionary<InputCombo[], InputAction> actions) {
 			Id = id;
@@ -28,6 +30,12 @@ namespace Escape.Input {
 				keyboard.KeyUp += _KeyUpHandler;
 				keyboard.KeyDown += _KeyDownHandler;
 			}
+
+			foreach(var mouse in mice) {
+				mouse.MouseUp += _MouseUpHandler;
+				mouse.MouseDown += _MouseDownHandler;
+				mouse.Scroll += _MouseScrollHandler;
+			}
 			
 			UpdateManager.Add(this);
 		}
@@ -40,9 +48,24 @@ namespace Escape.Input {
 				bool anyComboDown = false;
 
 				foreach(var combo in combos) {
+					var keyCondition =
+						() =>
+							_currentKeyCombo.SequenceEqual(combo.Keys) 
+							|| (!combo.Strict && combo.Keys.All(k => _currentKeyCombo.Contains(k)));
+
+					var mouseButtonCondition =
+						() =>
+							_currentMouseButtonCombo.SequenceEqual(combo.MouseButtons)
+							|| (!combo.Strict && combo.MouseButtons.All(m => _currentMouseButtonCombo.Contains(m)));
+
+					var mouseScrollWhellCondition =
+						() =>
+							_currentScrollWheel == combo.MouseScrollWheel;
+					
 					if(
-						_currentKeyCombo.SequenceEqual(combo.Keys)
-						|| (!combo.Strict && combo.Keys.All(k => _currentKeyCombo.Contains(k)))
+						(combo.Keys.Length > 0 && keyCondition())
+						|| (combo.MouseButtons.Length > 0 && mouseButtonCondition())
+						|| (combo.MouseScrollWheel is not null && mouseScrollWhellCondition())
 					) {
 						anyComboDown = true;
 						break;
@@ -69,6 +92,8 @@ namespace Escape.Input {
 					action.OnUp();
 				}
 			}
+
+			_currentScrollWheel = null;
 		}
 		
 		public void Dispose() {
@@ -83,6 +108,12 @@ namespace Escape.Input {
 				keyboard.KeyUp -= _KeyUpHandler;
 				keyboard.KeyDown -= _KeyDownHandler;
 			}
+			
+			foreach(var mouse in mice) {
+				mouse.MouseUp -= _MouseUpHandler;
+				mouse.MouseDown -= _MouseDownHandler;
+				mouse.Scroll -= _MouseScrollHandler;
+			}
 		}
 
 		private void _KeyUpHandler(IKeyboard keyboard, Key key, int mod) {
@@ -91,6 +122,18 @@ namespace Escape.Input {
 		
 		private void _KeyDownHandler(IKeyboard keyboard, Key key, int mod) {
 			_currentKeyCombo.Add(key);
+		}
+		
+		private void _MouseUpHandler(IMouse mouse, MouseButton button) {
+			_currentMouseButtonCombo.Remove(button);
+		}
+		
+		private void _MouseDownHandler(IMouse mouse, MouseButton button) {
+			_currentMouseButtonCombo.Add(button);
+		}
+		
+		private void _MouseScrollHandler(IMouse mouse, ScrollWheel wheel) {
+			_currentScrollWheel = wheel.Y > 0 ? MouseScrollWheel.Up : MouseScrollWheel.Down;
 		}
 	}
 }
