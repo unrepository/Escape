@@ -2,7 +2,10 @@ using System.Diagnostics;
 using System.Reflection;
 using Arch.Core;
 using Escape.Renderer;
-using Microsoft.CodeAnalysis.Scripting;
+using Escape.Resources;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using NLog;
 
 namespace Escape.Scripting {
 	
@@ -10,75 +13,143 @@ namespace Escape.Scripting {
 
 		public string Name { get; }
 		public string Source { get; }
-		public IScript.Language Type => IScript.Language.CSharp;
+		//public IScript.Language Type => IScript.Language.CSharp;
 		public bool IsInternal { get; } = false;
 		
-		public Script? Script { get; private set; }
+		public Type Type { get; private set; }
 		public object? Instance { get; private set; }
 
+		protected World World { get; private set; }
 		protected Entity Owner { get; private set; }
+		
+		protected Logger Logger { get; }
 
-		private static readonly ScriptOptions DefaultEnvironment;
+		private static Assembly? _scriptsAssembly;
+		private static List<string> _loadedScripts = [];
 
-		static CSharpScript() {
-			var assemblies = new List<Assembly>();
-
-			void TryLoadAssembly(string name) {
-				try {
-					assemblies.Add(Assembly.Load(name));
-				} catch(Exception) { }
-			}
-			
-			TryLoadAssembly("System");
-			TryLoadAssembly("Escape");
-			TryLoadAssembly("Escape.Renderer");
-			TryLoadAssembly("Escape.Resources");
-			TryLoadAssembly("Escape.UnitTypes");
-			TryLoadAssembly("Escape.Primitives");
-			TryLoadAssembly("Escape.Extensions.Scene");
-			TryLoadAssembly("Escape.Extensions.Debugging");
-			TryLoadAssembly("Escape.Extensions.ImGui");
-			TryLoadAssembly("Escape.Extensions.Assimp");
-			TryLoadAssembly("Arch.Core");
-			TryLoadAssembly("Arch.Core.Extensions");
-			
-			DefaultEnvironment =
-				ScriptOptions
-					.Default
-					.AddImports("System", "Escape", "Escape.Scripting", "Escape.Components", "Escape.UnitTypes", "Escape.Resources", "Arch.Core")
-					.AddReferences(assemblies.ToArray());
-		}
-
-		public CSharpScript() {
+		public CSharpScript() : this(null, "", "##INTERNAL") {
 			Name = GetType().Name;
-			Source = "##INTERNAL";
 			IsInternal = true;
+
+			Logger = LogManager.GetCurrentClassLogger();
+
+			Type = GetType();
+			Instance = this;
 		}
 		
-		public CSharpScript(string name, string source) {
+		public CSharpScript(Assembly? scriptAssembly, string name, string source) {
 			Name = name;
 			Source = source;
+			Logger = LogManager.GetLogger(name);
 
-			Instance = Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScript.EvaluateAsync(
-				source,
-				DefaultEnvironment
-			).GetAwaiter().GetResult();
+			if(scriptAssembly is null || string.IsNullOrWhiteSpace(name)) return;
+
+			if(_scriptsAssembly is null || !_loadedScripts.Contains(name)) {
+				RebuildScripts();
+			}
+
+			foreach(var type in _scriptsAssembly!.GetExportedTypes()) {
+				var scriptAttribute = type.GetCustomAttribute<CSharpScriptAttribute>();
+				if(scriptAttribute is null) continue;
+				
+				var fullScriptPath = Path.Combine(ResourceManager.GetBaseDirectory(scriptAssembly), scriptAttribute.ScriptPath);
+				
+				if(fullScriptPath == name) {
+					Type = type;
+					Instance = type.GetConstructor([]).Invoke(null);
+				}
+			}
+			
+			Debug.Assert(Type is not null);
+			Debug.Assert(Instance is not null);
 		}
 
-		public virtual void OnInitialize(Entity e) {
+		public virtual void OnInitialize(World w, Entity e) {
+			World = w;
 			Owner = e;
 		}
 
-		public virtual void OnDeinitialize(Entity e) {
+		public virtual void OnDeinitialize(World w, Entity e) {
+			World = w;
 			Owner = default;
 		}
 		
 		public virtual void OnUpdate(TimeSpan delta) { }
 		public virtual void OnRender(TimeSpan delta, ObjectRenderer objectRenderer) { }
 
-		public void Compile() {
-			Script = Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScript.Create(Source, DefaultEnvironment);
-			Script.Compile();
+		public void RebuildScripts() {
+			var references = new Dictionary<string, MetadataReference>();
+
+			void TryAddReference(string name) {
+				if(references.ContainsKey(name)) return;
+				
+				try {
+					var assembly = Assembly.Load(name);
+					
+					// the assembly itself
+					references[name] = MetadataReference.CreateFromFile(assembly.Location);
+					
+					// + everything else it might reference (depend on)
+					foreach(var dependency in assembly.GetReferencedAssemblies()) {
+						TryAddReference(dependency.Name);
+					}
+				} catch(Exception e) {
+					Logger.Trace("Could not add reference to {Assembly}: {Exception}", name, e.Message);
+				}
+			}
+
+			// this assembly
+			TryAddReference(Assembly.GetExecutingAssembly().GetName().Name);
+			
+			// + optional extensions
+			TryAddReference("Escape.Extensions.Assimp");
+			TryAddReference("Escape.Extensions.CSharp");
+			TryAddReference("Escape.Extensions.Debugging");
+			TryAddReference("Escape.Extensions.ImGui");
+			TryAddReference("Escape.Primitives");
+			
+			// + the project assembly
+			TryAddReference(ESCAPE.ProjectAssembly.GetName().Name);
+			
+			var compilation = CSharpCompilation
+				.Create(ESCAPE.ProjectAssembly.GetName().Name)
+				.WithOptions(
+					new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+						.WithUsings("System", "Escape", "Escape.Components", "Escape.Scripting", "Escape.Resources", "Arch.Core")
+				)
+				.AddReferences(references.Values.ToArray());
+
+			foreach(
+				var file in Directory.EnumerateFiles(
+					ResourceManager.GetBaseDirectory(ESCAPE.ProjectAssembly), 
+					"*.cs",
+					SearchOption.AllDirectories
+				)
+			) {
+				var syntaxTree = CSharpSyntaxTree.ParseText(
+					File.ReadAllText(file),
+					CSharpParseOptions
+						.Default
+						.WithPreprocessorSymbols("SCRIPT")
+						.WithLanguageVersion(LanguageVersion.Preview),
+					Name
+				);
+
+				compilation = compilation.AddSyntaxTrees(syntaxTree);
+				_loadedScripts.Add(file);
+			}
+			
+			using var output = new MemoryStream();
+			var result = compilation.Emit(output);
+
+			if(!result.Success) {
+				throw new Exception($"Script compilation failed: {string.Join("\n", result.Diagnostics)}");
+			}
+
+			output.Seek(0, SeekOrigin.Begin);
+
+			var assembly = Assembly.Load(output.ToArray());
+			_scriptsAssembly = assembly;
 		}
 		
 		public object? Call(IScript.FunctionCall call, object?[] arguments) {
@@ -86,10 +157,10 @@ namespace Escape.Scripting {
 			
 			switch(call) {
 				case IScript.FunctionCall.OnInitialize:
-					script.OnInitialize((Entity) arguments[0]);
+					script.OnInitialize((World) arguments[0], (Entity) arguments[1]);
 					return null;
 				case IScript.FunctionCall.OnDeinitialize:
-					script.OnDeinitialize((Entity) arguments[0]);
+					script.OnDeinitialize((World) arguments[0], (Entity) arguments[1]);
 					return null;
 				case IScript.FunctionCall.OnUpdate:
 					script.OnUpdate((TimeSpan) arguments[0]);
@@ -102,11 +173,23 @@ namespace Escape.Scripting {
 			}
 		}
 
-		public object? Call(string function, object?[] arguments)
-			=> throw new NotImplementedException();
+		public object? Call(string function, object?[] arguments) {
+			var method = Type.GetMethod(function, BindingFlags.Public | BindingFlags.IgnoreCase);
+			return method?.Invoke(Instance, arguments) ?? null;
+		}
 
 		public void Dispose() {
 			GC.SuppressFinalize(this);
+		}
+	}
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class CSharpScriptAttribute : Attribute {
+		
+		public string ScriptPath { get; }
+
+		public CSharpScriptAttribute(string scriptPath) {
+			ScriptPath = scriptPath;
 		}
 	}
 }

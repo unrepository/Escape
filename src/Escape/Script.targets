@@ -1,0 +1,18 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<SourceDirectory>Assets</SourceDirectory>
+	</PropertyGroup>
+
+	<Target Name="SwitchScriptTargets" AfterTargets="PrepareForBuild" Condition="'$(Configuration)' != 'Debug'">
+		<ItemGroup>
+			<CSScripts Include="$(SourceDirectory)\**\*.cs" />
+		</ItemGroup>
+
+		<ItemGroup>
+			<Compile Remove="@(CSScripts)" />
+			<!--<ClCompile Include="@(CSScripts)" />-->
+		</ItemGroup>
+
+		<Message Text="Switched @(CSScripts) script targets." Importance="normal" />
+	</Target>
+</Project>

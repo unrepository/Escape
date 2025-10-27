@@ -11,6 +11,9 @@ namespace Escape {
 	// TODO separate update/fixedupdate cause forcing update to be threaded is sometimes funky
 	public static class ESCAPE {
 
+		public static string ProjectName { get; set; } = "Project";
+		public static Assembly ProjectAssembly { get; set; }
+		
 		public static int UpdatesPerSecond { get; set; } = 100;
 		
 		public static Thread UpdateThread { get; private set; }
@@ -26,10 +29,12 @@ namespace Escape {
 		private static Stopwatch _renderStopwatch = new();
 		
 		public delegate void CleanupEventHandler();
-		public static event CleanupEventHandler OnCleanup;
+		public static event CleanupEventHandler? OnCleanup;
 		
 		public static void Run() {
-			ComponentRegistry.AddAssembly(Assembly.GetExecutingAssembly());
+			Debug.Assert(ProjectAssembly is not null);
+			
+			ComponentRegistry.AddAssembly(ProjectAssembly);
 			ComponentRegistry.RegisterComponents();
 			
 			IsRunning = true;
@@ -46,7 +51,7 @@ namespace Escape {
 			//UpdateThread.Join(); // wait for update thread to finish
 			WorldEngine.SharedJobScheduler.Dispose();
 			
-			OnCleanup.Invoke();
+			OnCleanup?.Invoke();
 		}
 
 		private static void _UpdateLoop() {

@@ -9,12 +9,12 @@ namespace Escape.Scripting.Systems {
 		public ScriptTracker(World world) : base(world) {
 			world.SubscribeComponentAdded((in Entity e, ref Scripted s) => {
 				if(!Active) return;
-				s.Script.Call(IScript.FunctionCall.OnInitialize, [ e ]);
+				s.Script.Call(IScript.FunctionCall.OnInitialize, [ world, e ]);
 			});
 			
 			world.SubscribeComponentRemoved((in Entity e, ref Scripted s) => {
 				if(!Active) return;
-				s.Script.Call(IScript.FunctionCall.OnDeinitialize, [ e ]);
+				s.Script.Call(IScript.FunctionCall.OnDeinitialize, [ world, e ]);
 			});
 		}
 	}

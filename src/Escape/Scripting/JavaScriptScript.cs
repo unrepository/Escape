@@ -15,7 +15,7 @@ namespace Escape.Scripting {
 		public string Name { get; }
 		public string Source { get; }
 
-		public IScript.Language Type => IScript.Language.JavaScript;
+		//public IScript.Language Type => IScript.Language.JavaScript;
 
 		public Prepared<Script>? Script { get; private set; }
 		public ObjectInstance Module { get; private set; }

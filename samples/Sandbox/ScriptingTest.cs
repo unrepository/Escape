@@ -34,6 +34,7 @@ public static class ScriptingTest {
 		CreateOrbitalCamera(ref world, window, out var camera, out var orbitalCamera);
 		
 		var script = ResourceManager.Load<ScriptResource>(platform, "scripts/test.cs")!;
+		var script1 = ResourceManager.Load<ScriptResource>(platform, "scripts/test1.cs")!;
 		
 		var cube = world.Create3DCube(Color.White, Vector3.Zero, 1, 1, 1);
 		cube.Add(new Scripted(new InternalCSharpScript()));
@@ -41,19 +42,27 @@ public static class ScriptingTest {
 		var cube1 = world.Create3DCube(new Color(255, 0, 0), Vector3.Zero, 0.5f, 0.5f, 0.5f);
 		cube1.Add(new Scripted(script));
 		
+		var cube2 = world.Create3DCube(new Color(100, 0, 255), Vector3.Zero, 0.5f, 0.5f, 0.5f);
+		cube2.Add(new Scripted(script1));
+
+		var fooScript = ResourceManager.Load<ScriptResource>(platform, "scripts/test2.cs")!;
+		
+		var foo = world.Create();
+		foo.Add(new Scripted(fooScript));
+		
 		ESCAPE.Run();
 	}
 
 	private class InternalCSharpScript : CSharpScript {
 
-		public override void OnInitialize(Entity e) {
-			base.OnInitialize(e);
+		public override void OnInitialize(World w, Entity e) {
+			base.OnInitialize(w, e);
 			
 			Console.WriteLine("I am " + e.Id);
 		}
 		
-		public override void OnDeinitialize(Entity e) {
-			base.OnDeinitialize(e);
+		public override void OnDeinitialize(World w, Entity e) {
+			base.OnDeinitialize(w, e);
 			
 			Console.WriteLine("I was " + e.Id);
 		}

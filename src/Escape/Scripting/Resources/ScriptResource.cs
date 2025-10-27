@@ -22,7 +22,7 @@ namespace Escape.Scripting.Resources {
 					Value = new JavaScriptScript(filePath, reader.ReadToEnd());
 					break;
 				case ".cs":
-					Value = new CSharpScript(filePath, reader.ReadToEnd());
+					Value = new CSharpScript(resourceAssembly, filePath, reader.ReadToEnd());
 					break;
 				default:
 					throw new ArgumentException("Somehow, file doesn't have a valid extension", nameof(filePath));
