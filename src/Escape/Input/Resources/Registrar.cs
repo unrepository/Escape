@@ -7,7 +7,7 @@ namespace Escape.Input.Resources {
 
 		[ModuleInitializer]
 		public static void Register() {
-			ResourceRegistry.RegisterFormat<InputMap, InputMapResource, InputMapResource.Import>();
+			ResourceRegistry.RegisterFormat<Dictionary<InputCombo[], InputAction>, ActionMapResource, ActionMapResource.Import>();
 		}
 	}
 }

@@ -4,6 +4,7 @@ using Silk.NET.Input;
 
 namespace Escape.Input {
 	
+	// TODO gamepads
 	public class InputMap : IDisposable, IUpdater {
 		
 		public string Id { get; }
@@ -39,6 +40,10 @@ namespace Escape.Input {
 			
 			UpdateManager.Add(this);
 		}
+
+		public InputAction? GetAction(string name) {
+			return Actions.Values.SingleOrDefault(action => action.Name == name);
+		}
 		
 		public void Update(TimeSpan delta) {
 			foreach(var (combos, action) in Actions) {
@@ -48,24 +53,21 @@ namespace Escape.Input {
 				bool anyComboDown = false;
 
 				foreach(var combo in combos) {
-					var keyCondition =
-						() =>
-							_currentKeyCombo.SequenceEqual(combo.Keys) 
-							|| (!combo.Strict && combo.Keys.All(k => _currentKeyCombo.Contains(k)));
+					bool KeyCondition() => 
+						_currentKeyCombo.SequenceEqual(combo.Keys)
+						|| (!combo.Strict && combo.Keys.All(k => _currentKeyCombo.Contains(k)));
 
-					var mouseButtonCondition =
-						() =>
-							_currentMouseButtonCombo.SequenceEqual(combo.MouseButtons)
-							|| (!combo.Strict && combo.MouseButtons.All(m => _currentMouseButtonCombo.Contains(m)));
+					bool MouseButtonCondition() =>
+						_currentMouseButtonCombo.SequenceEqual(combo.MouseButtons)
+						|| (!combo.Strict && combo.MouseButtons.All(m => _currentMouseButtonCombo.Contains(m)));
 
-					var mouseScrollWhellCondition =
-						() =>
-							_currentScrollWheel == combo.MouseScrollWheel;
-					
+					bool MouseScrollWhellCondition() =>
+						_currentScrollWheel == combo.MouseScrollWheel;
+
 					if(
-						(combo.Keys.Length > 0 && keyCondition())
-						|| (combo.MouseButtons.Length > 0 && mouseButtonCondition())
-						|| (combo.MouseScrollWheel is not null && mouseScrollWhellCondition())
+						(combo.Keys?.Length > 0 && KeyCondition())
+						|| (combo.MouseButtons?.Length > 0 && MouseButtonCondition())
+						|| (combo.MouseScrollWheel is not null && MouseScrollWhellCondition())
 					) {
 						anyComboDown = true;
 						break;

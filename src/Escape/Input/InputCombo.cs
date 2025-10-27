@@ -4,17 +4,17 @@ namespace Escape.Input {
 	
 	public struct InputCombo {
 
-		public Key[] Keys {
+		public Key[]? Keys {
 			get => field;
 			set {
-				if(value.Length <= 1) Strict = false;
+				if(value?.Length <= 1) Strict = false;
 				else Strict = true;
 
 				field = value;
 			}
-		} = [];
+		} = null;
 		
-		public MouseButton[] MouseButtons { get; set; } = [];
+		public MouseButton[]? MouseButtons { get; set; } = null;
 		public MouseScrollWheel? MouseScrollWheel { get; set; } = null;
 
 		/// <summary>

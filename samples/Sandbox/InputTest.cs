@@ -1,10 +1,12 @@
 using System.Numerics;
 using Escape;
 using Escape.Input;
+using Escape.Input.Resources;
 using Escape.Primitives;
 using Escape.Renderer;
 using Escape.Renderer.OpenGL;
 using Escape.Renderer.Shader.Pipelines;
+using Escape.Resources;
 using NLog;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
@@ -32,12 +34,22 @@ public static class InputTest {
 
 		world.Create3DCube(Color.White, Vector3.Zero, 1, 1, 1);
 
-		var aAction = new InputAction("a");
+		var actionMap = ResourceManager.Load<ActionMapResource>(platform, "inputmap1.actionmap")!;
+		var inputMap = new InputMap("default", window, actionMap.Get());
+		
+		/*var aAction = new InputAction("a");
 		var bAction = new InputAction("b");
 		var cAction = new InputAction("c");
 		var dAction = new InputAction("d");
 		var eAction = new InputAction("e");
-		var fAction = new InputAction("f");
+		var fAction = new InputAction("f");*/
+
+		var aAction = inputMap.GetAction("a");
+		var bAction = inputMap.GetAction("b");
+		var cAction = inputMap.GetAction("c");
+		var dAction = inputMap.GetAction("d");
+		var eAction = inputMap.GetAction("e");
+		var fAction = inputMap.GetAction("f");
 
 		aAction.Down += action => {
 			Console.WriteLine(action.Name + " is down");
@@ -73,7 +85,7 @@ public static class InputTest {
 			}
 		});
 		
-		var inputActions = new Dictionary<InputCombo[], InputAction> {
+		/*var inputActions = new Dictionary<InputCombo[], InputAction> {
 			[[ new(Key.W) ]] = aAction,
 			[[ new(Key.ControlLeft, Key.ShiftLeft, Key.B) ]] = bAction,
 			[[ new(Key.ControlLeft, Key.B) ]] = cAction,
@@ -86,7 +98,7 @@ public static class InputTest {
 			"default",
 			window,
 			inputActions
-		);
+		);*/
 		
 		ESCAPE.Run();
 	}
