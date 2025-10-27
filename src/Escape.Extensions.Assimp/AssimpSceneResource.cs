@@ -4,7 +4,7 @@ using Escape.Resources;
 
 namespace Escape.Extensions.Assimp {
 	
-	public class AssimpSceneResource : Resource<AssimpSceneResource.Import> {
+	public class AssimpSceneResource : Resource<AssimpScene, AssimpSceneResource.Import> {
 
 		public override Type MetadataType => typeof(Import);
 		public override string[] FileExtensions => [
@@ -22,10 +22,27 @@ namespace Escape.Extensions.Assimp {
 		
 		public AssimpScene? Scene { get; private set; }
 
-		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings) {
+		public AssimpSceneResource() { }
+		public AssimpSceneResource(IPlatform platform, string? filePath, AssimpScene value, Import? settings = null) : base(platform, filePath, value, settings) { }
+		
+		public override void SaveNew() {
+			throw new NotImplementedException();
+		}
+
+		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings, bool reloading = false) {
 			base.Load(platform, filePath, stream, resourceAssembly, settings);
 
 			Scene = AssimpSceneLoader.Load(platform, filePath);
+		}
+		
+		public override AssimpSceneResource Duplicate() {
+			using var stream = new FileStream(FilePath, FileMode.Open);
+
+			var resource = new AssimpSceneResource();
+			resource.Load(Platform, FilePath, stream, ResourceAssembly, Settings);
+
+			Duplicates.Add(resource);
+			return resource;
 		}
 
 		public override void Dispose(bool reloading) {

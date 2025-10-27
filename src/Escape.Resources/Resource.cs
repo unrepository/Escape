@@ -5,16 +5,14 @@ using Escape.Renderer;
 
 namespace Escape.Resources {
 	
-	public abstract class Resource<TImportSettings> : IResource
+	public abstract class Resource<TResource, TImportSettings> : IResource
 		where TImportSettings : ImportMetadata, new()
 	{
-		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-		
 		public uint ReferenceCount { get; set; }
 		public bool IsValidObject { get; set; }
 		public event IRefCounted.FreedEventHandler? Freed;
 		
-		public delegate void ReloadedEventHandler(Resource<TImportSettings> sender);
+		public delegate void ReloadedEventHandler(Resource<TResource, TImportSettings> sender);
 		public event ReloadedEventHandler? Reloaded;
 
 		public abstract Type MetadataType { get; }
@@ -27,6 +25,27 @@ namespace Escape.Resources {
 		public Guid Id { get; protected set; }
 		public TImportSettings Settings { get; protected set; }
 		public List<IResource> Dependencies { get; protected set; } = [];
+		
+		public TResource Value { get; set; }
+
+		protected bool WasConstructed { get; } = false;
+		protected List<Resource<TResource, TImportSettings>> Duplicates { get; } = [];
+		
+		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+		public Resource() { }
+		
+		// TODO is this constructor used anywhere?
+		public Resource(IPlatform platform, string? filePath, TResource value, TImportSettings? settings = null) {
+			Platform = platform;
+			FilePath = filePath;
+			Value = value;
+			Settings = settings ?? new();
+			Id = Settings.Id;
+			ResourceAssembly = Assembly.GetCallingAssembly();
+
+			WasConstructed = true;
+		}
 		
 		// ~Resource() {
 		// 	Dispose(false);
@@ -41,7 +60,7 @@ namespace Escape.Resources {
 			Load(platform, filePath, stream, resourceAssembly, settings as TImportSettings);
 		}
 
-		public virtual void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, TImportSettings? settings) {
+		public virtual void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, TImportSettings? settings, bool reloading = false) {
 			settings ??= new();
 			
 			Platform = platform;
@@ -61,9 +80,20 @@ namespace Escape.Resources {
 				"Saved {Type} import settings to {Path}",
 				GetType().Name, Settings.Path
 			);
+
+			if(WasConstructed) {
+				SaveNew();
+				
+				_logger.Debug(
+					"Saved new resource {Type} to {Path}",
+					GetType().Name, Settings.Path
+				);
+			}
 			
 			return true;
 		}
+
+		public abstract void SaveNew();
 		
 		public virtual bool Reload() {
 			if(FilePath is null) return false;
@@ -87,14 +117,31 @@ namespace Escape.Resources {
 
 			importSettings ??= new();
 			using var fileStream = new FileStream(FilePath, FileMode.Open);
-			Load(Platform, FilePath, fileStream, ResourceAssembly, importSettings);
+			Load(Platform, FilePath, fileStream, ResourceAssembly, importSettings, true);
 			
 			Reloaded?.Invoke(this);
 			
 			_logger.Debug("Finished reloading resource {Path}", FilePath);
+			
+			// reload duplicates
+			foreach(var duplicate in Duplicates) {
+				duplicate.Reload();
+			}
 			return true;
 		}
 
+		/// <summary>
+		/// Loads the resource again as a new, unique instance
+		/// </summary>
+		/// <returns>The new instance of this resource</returns>
+		public abstract Resource<TResource, TImportSettings> Duplicate();
+
+		/// <summary>
+		/// Makes a new reference to this resource
+		/// </summary>
+		/// <returns>The reference</returns>
+		public Ref<Resource<TResource, TImportSettings>> MakeRef() => new Ref<Resource<TResource, TImportSettings>>(this);
+		
 		public void Dispose() {
 			GC.SuppressFinalize(this);
 
@@ -115,7 +162,8 @@ namespace Escape.Resources {
 			}
 		}
 		
-		public static implicit operator Resource<TImportSettings>(Ref<Resource<TImportSettings>> resource) => resource.Get();
+		public static implicit operator Resource<TResource, TImportSettings>(Ref<Resource<TResource, TImportSettings>> resource) => resource.Get();
+		public static implicit operator TResource(Resource<TResource, TImportSettings> resource) => resource.Value;
 	}
 
 	public interface IResource : IRefCounted, IReloadable {

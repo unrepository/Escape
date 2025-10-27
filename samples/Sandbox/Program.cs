@@ -1,1 +1,1 @@
-LightingTest.Start(args);
+ScriptingTest.Start(args);

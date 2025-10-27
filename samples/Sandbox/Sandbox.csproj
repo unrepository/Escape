@@ -46,4 +46,7 @@
 		<AssetLinkProject Include="..\..\src\Escape.Extensions.Debugging\Escape.Extensions.Debugging.csproj" />
 	</ItemGroup>
 	
+	<!-- scripts !-->
+	<Import Project="..\..\src\Escape\Script.targets"/>
+	
 </Project>

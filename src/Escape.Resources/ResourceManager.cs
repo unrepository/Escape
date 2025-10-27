@@ -75,7 +75,7 @@ namespace Escape.Resources {
 		{
 			assembly ??= Assembly.GetCallingAssembly();
 			
-			var @namespace = _GetNamespace(assembly);
+			var @namespace = GetNamespace(assembly);
 			var database = LoadDatabase(assembly);
 
 			if(database is null || !database.Entries.TryGetValue(id, out var entry)) {
@@ -111,14 +111,14 @@ namespace Escape.Resources {
 			// }
 
 			assembly ??= Assembly.GetCallingAssembly();
-			var @namespace = _GetNamespace(assembly);
+			var @namespace = GetNamespace(assembly);
 
 			if(@namespace == "unknown") {
 				_logger.Warn("Assembly has no name? Resource loading might break!");
 				_logger.Warn("Namespace set to \"unknown\"");
 			}
 
-			var baseDirectory = _GetBaseDirectory(assembly);
+			var baseDirectory = GetBaseDirectory(assembly);
 			
 			var fullPath = explicitPath ? path : baseDirectory + Path.DirectorySeparatorChar + path;
 			fullPath = Path.GetFullPath(fullPath); // resolve the real path
@@ -286,7 +286,7 @@ namespace Escape.Resources {
 		public static ResourceDatabase? LoadDatabase(Assembly assembly) {
 			if(_databases.TryGetValue(assembly, out var database)) return database;
 
-			var baseDirectory = _GetBaseDirectory(assembly);
+			var baseDirectory = GetBaseDirectory(assembly);
 			var dbFilePath = baseDirectory + Path.DirectorySeparatorChar + ResourceDatabase.FILE_NAME;
 			
 			// load existing database in debug only, as new resources don't get added automatically
@@ -369,12 +369,12 @@ namespace Escape.Resources {
 			return path;
 		}
 
-		private static string _GetNamespace(Assembly assembly) => assembly.GetName().Name ?? "unknown";
+		public static string GetNamespace(Assembly assembly) => assembly.GetName().Name ?? "unknown";
 
-		private static string _GetBaseDirectory(Assembly assembly) {
+		public static string GetBaseDirectory(Assembly assembly) {
 			var baseDirectory = Path.GetDirectoryName(assembly.Location)!;
 			baseDirectory += Path.DirectorySeparatorChar + ASSETS_DIRECTORY_NAME;
-			baseDirectory += Path.DirectorySeparatorChar + _GetNamespace(assembly);
+			baseDirectory += Path.DirectorySeparatorChar + GetNamespace(assembly);
 
 			return baseDirectory;
 		}

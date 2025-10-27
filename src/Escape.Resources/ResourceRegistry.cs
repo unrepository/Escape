@@ -8,8 +8,8 @@ namespace Escape.Resources {
 
 		private static Dictionary<string, (ConstructorInfo Constructor, MethodInfo LoadMethod, Type MetaType)> _formats = [];
 		
-		public static void RegisterFormat<TResource, TImportSettings>()
-			where TResource : Resource<TImportSettings>, new()
+		public static void RegisterFormat<TResourceValue, TResource, TImportSettings>()
+			where TResource : Resource<TResourceValue, TImportSettings>, new()
 			where TImportSettings : ImportMetadata, new()
 		{
 			var type = typeof(TResource);

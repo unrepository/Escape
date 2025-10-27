@@ -8,9 +8,6 @@ namespace Escape.Resources {
 		public delegate void FreedEventHandler(Ref<T> sender);
 		public event FreedEventHandler? Freed;
 
-		public delegate void ReloadedEventHandler(Ref<T> sender);
-		public event ReloadedEventHandler? Reloaded;
-
 		public Ref(T referencedObject) {
 			ReferencedObject = referencedObject;
 			referencedObject.NewReference();

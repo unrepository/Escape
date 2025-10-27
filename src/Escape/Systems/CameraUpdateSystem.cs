@@ -3,6 +3,8 @@ using System.Runtime.CompilerServices;
 using Arch.Core;
 using Arch.System;
 using Escape.Components;
+using Escape.Scripting;
+using Escape.Scripting.Components;
 
 namespace Escape.Systems {
 	
@@ -22,6 +24,11 @@ namespace Escape.Systems {
 		public static void Transform3D_Camera3D_Synchronize(ref Camera3D c3d, ref Transform3D t3d) {
 			c3d.Camera.Position = t3d.GlobalPosition;
 			c3d.Camera.Target = t3d.GlobalPosition + Vector3.Transform(Vector3.UnitZ, t3d.GlobalRotation);
+		}
+
+		[Query]
+		public static void Scripted_Update(ref Scripted scripted) {
+			scripted.Script.Call(IScript.FunctionCall.OnUpdate, [ ESCAPE.UpdateDelta ]);
 		}
 	}
 }

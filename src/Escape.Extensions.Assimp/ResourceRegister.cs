@@ -7,7 +7,7 @@ namespace Escape.Extensions.Assimp {
 
 		[ModuleInitializer]
 		public static void Initialize() {
-			ResourceRegistry.RegisterFormat<AssimpSceneResource, AssimpSceneResource.Import>();
+			ResourceRegistry.RegisterFormat<AssimpScene, AssimpSceneResource, AssimpSceneResource.Import>();
 		}
 	}
 }

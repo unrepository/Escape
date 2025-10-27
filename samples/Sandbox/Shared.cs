@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Reflection;
 using Arch.Core;
 using Arch.Core.Extensions;
 using Escape.Components;
@@ -81,6 +82,8 @@ public static class Shared {
 		out RenderQueue renderQueue,
 		out RenderPipeline renderPipeline
 	) where TShaderPipeline : IShaderPipeline {
+		ESCAPE.ProjectAssembly = Assembly.GetExecutingAssembly();
+		
 		platform = platformId switch {
 			Platform.Vulkan => new VkPlatform(),
 			Platform.OpenGL => new GLPlatform(),
