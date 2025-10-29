@@ -33,6 +33,8 @@ namespace Escape.Core.Scripting.Components {
 			}
 			
 			ResourceScript.Get().Reloaded += res => {
+				t.ResourceScript = new Ref<ScriptResource>((ScriptResource) res);
+				
 				res.Value.Construct(t.ConstructorTypes, t.ConstructorArguments);
 				res.Value.Call(IScript.FunctionCall.OnInitialize, [ res.Value.World, res.Value.Owner ]);
 			};

@@ -1,4 +1,4 @@
-using Escape.Extensions.ImGui;
+using Escape.Extensions.UI;
 using ImGui_ = Hexa.NET.ImGui.ImGui;
 
 namespace Escape.Extensions.Debugging.Providers {

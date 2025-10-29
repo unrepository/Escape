@@ -1,5 +1,5 @@
 using Escape.Extensions.Debugging.Providers;
-using Escape.Extensions.ImGui;
+using Escape.Extensions.UI;
 using Escape.Renderer;
 using Hexa.NET.ImGui;
 using Silk.NET.Windowing;

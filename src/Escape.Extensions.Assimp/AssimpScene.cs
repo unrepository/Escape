@@ -8,7 +8,9 @@ namespace Escape.Extensions.Assimp {
 	
 	public class AssimpScene : Scene {
 
-		public AssimpScene(string id, List<Node> nodes, RenderQueue? renderQueue) : base(id, null, renderQueue) {
+		public AssimpScene(IPlatform platform, string id, List<Node> nodes, RenderQueue? renderQueue)
+			: base(platform, id, null, renderQueue)
+		{
 			void ExportNode(World world, Entity parent, Node node) {
 				var entity = world.Create(node.Transform);
 				if(node.Model is not null) entity.Add(new RenderableObject(node.Model));

@@ -17,6 +17,8 @@ namespace Escape.Core {
 		public static int UpdatesPerSecond { get; set; } = 100;
 		
 		public static Thread UpdateThread { get; private set; }
+		public static Thread RenderThread { get; private set; }
+		
 		public static bool IsRunning { get; set; }
 		
 		public static TimeSpan LastUpdate { get; private set; }
@@ -41,6 +43,8 @@ namespace Escape.Core {
 			
 			// UpdateThread = new Thread(_UpdateLoop);
 			// UpdateThread.Start();
+			
+			RenderThread = Thread.CurrentThread;
 			
 			// render loop in main thread
 			_RenderLoop();

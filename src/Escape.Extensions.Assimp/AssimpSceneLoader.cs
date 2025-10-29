@@ -59,7 +59,7 @@ namespace Escape.Extensions.Assimp {
 			_ProcessNode(platform, ref nodes, null, aiScene->MRootNode, aiScene, baseDirectory);
 			_ai.ReleaseImport(aiScene);
 
-			return new AssimpScene("", nodes, null);
+			return new AssimpScene(platform, "", nodes, null);
 		}
 
 		private static void _ProcessNode(

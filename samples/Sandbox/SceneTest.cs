@@ -25,13 +25,13 @@ public static class SceneTest {
 		
 		CreateWindow(platform, "Scene Test", ref renderQueue, out var window);
 		
-		SceneEngine.SetScene(renderQueue, new TestScene(renderQueue, window));
+		SceneEngine.SetScene(renderQueue, new TestScene(platform, renderQueue, window));
 		ESCAPE.Run();
 	}
 
 	private class TestScene : Scene {
 
-		public TestScene(RenderQueue renderQueue, Window window) : base("test", null, renderQueue) {
+		public TestScene(IPlatform platform, RenderQueue renderQueue, Window window) : base(platform, "test", null, renderQueue) {
 			World.Create3DCube(Color.White, Vector3.Zero, 1, 1, 1);
 
 			var world = World;

@@ -2,7 +2,7 @@ using System.Numerics;
 using Arch.Core.Extensions;
 using Escape.Core;
 using Escape.Core.Components;
-using Escape.Extensions.ImGui;
+using Escape.Extensions.UI;
 using Escape.Renderer;
 using Escape.Renderer.Shader.Pipelines;
 using Hexa.NET.ImGui;

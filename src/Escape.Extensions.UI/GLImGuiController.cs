@@ -12,7 +12,7 @@ using Framebuffer = Escape.Renderer.Framebuffer;
 using HImGui = Hexa.NET.ImGui.ImGui;
 using VkDevice = Hexa.NET.ImGui.Backends.Vulkan.VkDevice;
 
-namespace Escape.Extensions.ImGui {
+namespace Escape.Extensions.UI {
 	
 	public class GLImGuiController : ImGuiController {
 		

@@ -5,17 +5,20 @@ namespace Escape.Core {
 	
 	public class Scene : IDisposable {
 		
+		public IPlatform Platform { get; }
+		
 		public string Id { get; }
 		public World World { get; }
 
 		public Entity Root => World.GetRootEntity();
 		
+		public RenderQueue? RenderQueue { get; }
+		
 		protected WorldUpdater WorldUpdater { get; }
 		protected WorldRenderer? WorldRenderer { get; }
-		
-		protected RenderQueue? RenderQueue { get; }
 
-		public Scene(string id, World? world, RenderQueue? renderQueue) {
+		public Scene(IPlatform platform, string id, World? world, RenderQueue? renderQueue) {
+			Platform = platform;
 			Id = id;
 			World = world ?? World.Create();
 
@@ -56,6 +59,11 @@ namespace Escape.Core {
 			
 			OnClose();
 		}
+
+		/*public Entity Instantiate(Scene scene, Entity? parent = null, bool doEvents = true) {
+			if(doEvents) scene.OnOpen();
+			return World.Instantiate(scene.World, parent);
+		}*/
 
 		public virtual void Dispose() {
 			GC.SuppressFinalize(this);

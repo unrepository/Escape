@@ -7,7 +7,7 @@ using Escape.Core;
 using Escape.Renderer.OpenGL;
 using HImGui = Hexa.NET.ImGui.ImGui;
 
-namespace Escape.Extensions.ImGui {
+namespace Escape.Extensions.UI {
 	
 	public abstract class ImGuiController : IDisposable {
 		

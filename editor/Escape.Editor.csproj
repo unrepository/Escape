@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\Escape.Core\Escape.Core.csproj" />
+    <ProjectReference Include="..\src\Escape.Extensions.UI\Escape.Extensions.UI.csproj" />
+  </ItemGroup>
+
+	<!-- asset (sym)linking !-->
+	<Import Project="..\src\Escape.Resources\LinkAssets.targets" />
+
+	<ItemGroup>
+		<AssetLinkProject Include="Escape.Editor.csproj" />
+		<AssetLinkProject Include="..\src\Escape.Renderer\Escape.Renderer.csproj" />
+		<AssetLinkProject Include="..\src\Escape.Extensions.Debugging\Escape.Extensions.Debugging.csproj" />
+	</ItemGroup>
+
+	<!-- scripts !-->
+	<Import Project="..\src\Escape.Core\Script.targets"/>
+
+</Project>
