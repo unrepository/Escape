@@ -4,7 +4,7 @@ using Escape.Resources;
 
 namespace Escape.Editor {
 	
-	public static class Resources {
+	public static class EditorResources {
 
 		public static Ref<ScriptResource> ProjectManagerScript; 
 		public static Ref<ScriptResource> ProjectEditorScript; 

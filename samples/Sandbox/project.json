@@ -1,0 +1,7 @@
+{
+  "name": "Sandbox",
+  "namespace": "Sandbox",
+  "main_assembly_name": "Sandbox",
+  "resources_directory": "Assets",
+  "output_directory": "bin/Debug/net9.0"
+}

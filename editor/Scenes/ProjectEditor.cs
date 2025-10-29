@@ -15,8 +15,8 @@ namespace Escape.Editor.Scenes {
 		public ProjectEditor(IPlatform platform, RenderQueue? renderQueue) : base(platform, "project_editor", null, renderQueue) {
 			Debug.Assert(renderQueue is not null);
 
-			World.GetRootEntity().Add(new Renderable(), new Scripted(Resources.ProjectEditorScript));
-			World.Create(new Renderable(), new Scripted(Resources.AssetBrowserScript), new State(name: "Asset Browser"));
+			World.GetRootEntity().Add(new Renderable(), new Scripted(EditorResources.ProjectEditorScript));
+			World.Create(new Renderable(), new Scripted(EditorResources.AssetBrowserScript), new State(name: "Asset Browser"));
 		}
 	}
 }

@@ -4,13 +4,13 @@
 	</PropertyGroup>
 
 	<Target Name="SymlinkAssetsFromProjects" AfterTargets="Build">
-		<MakeDir Directories="$(OutDir)assets" />
+		<MakeDir Directories="$(OutDir)Assets" />
 
 		<ItemGroup>
 			<AssetsToLink Include="@(AssetLinkProject)">
 				<AssemblyName>%(Filename)</AssemblyName>
 				<SourceDir>%(RootDir)%(Directory)$(AssetsSubDir)</SourceDir>
-				<LinkDir>$(OutDir)assets/%(Filename)</LinkDir>
+				<LinkDir>$(OutDir)Assets/%(Filename)</LinkDir>
 			</AssetsToLink>
 		</ItemGroup>
 

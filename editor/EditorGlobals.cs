@@ -1,4 +1,5 @@
 using Escape.Extensions.UI;
+using Escape.Resources;
 
 namespace Escape.Editor {
 	
@@ -6,7 +7,5 @@ namespace Escape.Editor {
 		
 		public static ImGuiController ImGuiController { get; internal set; }
 		public static bool SingleWindow { get; set; } = false;
-		
-		public static DirectoryInfo? ProjectDirectory { get; set; }
 	}
 }

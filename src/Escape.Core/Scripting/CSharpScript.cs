@@ -24,8 +24,8 @@ namespace Escape.Core.Scripting {
 
 		protected Logger Logger { get; set; }
 
-		private static Assembly? _scriptsAssembly;
-		private static List<string> _loadedScripts = [];
+		private static Dictionary<Assembly, Assembly> _scriptsAssemblies = [];
+		private static Dictionary<Assembly, List<string>> _loadedScripts = [];
 
 		public CSharpScript() : this(null, "", "##INTERNAL") {
 			Name = GetType().Name;
@@ -45,11 +45,18 @@ namespace Escape.Core.Scripting {
 
 			Logger = LogManager.GetLogger(name.Replace(Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? "", ""));
 			
-			if(_scriptsAssembly is null || !_loadedScripts.Contains(name)) {
-				RebuildScripts();
+			if(
+				!_scriptsAssemblies.TryGetValue(scriptAssembly, out var scriptsAssembly)
+				|| !_loadedScripts.TryGetValue(scriptAssembly, out var loadedScripts)
+				|| !loadedScripts.Contains(name)
+			) {
+				_loadedScripts[scriptAssembly] = [];
+				RebuildScripts(scriptAssembly);
 			}
 
-			foreach(var type in _scriptsAssembly!.GetExportedTypes()) {
+			scriptsAssembly = _scriptsAssemblies[scriptAssembly];
+
+			foreach(var type in scriptsAssembly.GetExportedTypes()) {
 				var scriptAttribute = type.GetCustomAttribute<CSharpScriptAttribute>();
 				if(scriptAttribute is null) continue;
 				
@@ -60,8 +67,15 @@ namespace Escape.Core.Scripting {
 					break;
 				}
 			}
-			
-			Debug.Assert(Type is not null);
+
+			if(Type is not null) {
+				Logger.Warn(
+					"Script {ScriptName} is not a CSharpScript; it will not be able to be called!",
+					name
+				);
+
+				Instance = new CSharpScript();
+			}
 		}
 
 		public virtual void OnInitialize(World w, Entity e) {
@@ -121,7 +135,7 @@ namespace Escape.Core.Scripting {
 			GC.SuppressFinalize(this);
 		}
 		
-		public static void RebuildScripts() {
+		public static void RebuildScripts(Assembly scriptAssembly) {
 			var logger = LogManager.GetCurrentClassLogger();
 			
 			logger.Info("Rebuilding all external C# scripts...");
@@ -160,8 +174,11 @@ namespace Escape.Core.Scripting {
 			// + the project assembly
 			TryAddReference(ESCAPE.ProjectAssembly.GetName().Name);
 			
+			// + the script assembly
+			TryAddReference(scriptAssembly.GetName().Name);
+			
 			var compilation = CSharpCompilation
-				.Create(ESCAPE.ProjectAssembly.GetName().Name)
+				.Create(scriptAssembly.GetName().Name)
 				.WithOptions(
 					new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
 						.WithUsings("System", "Escape.Core", "Escape.Core.Components", "Escape.Core.Scripting", "Escape.Resources", "Arch.Core")
@@ -170,7 +187,7 @@ namespace Escape.Core.Scripting {
 
 			foreach(
 				var file in Directory.EnumerateFiles(
-					ResourceManager.GetBaseDirectory(ESCAPE.ProjectAssembly), 
+					ResourceManager.GetBaseDirectory(scriptAssembly), 
 					"*.cs",
 					SearchOption.AllDirectories
 				)
@@ -192,7 +209,7 @@ namespace Escape.Core.Scripting {
 				);
 
 				compilation = compilation.AddSyntaxTrees(syntaxTree);
-				_loadedScripts.Add(file);
+				_loadedScripts[scriptAssembly].Add(file);
 			}
 			
 			using var output = new MemoryStream();
@@ -205,7 +222,7 @@ namespace Escape.Core.Scripting {
 			output.Seek(0, SeekOrigin.Begin);
 
 			var assembly = Assembly.Load(output.ToArray());
-			_scriptsAssembly = assembly;
+			_scriptsAssemblies[scriptAssembly] = assembly;
 			
 			sw.Stop();
 			logger.Info("...Finished! in {Time}", sw.Elapsed);

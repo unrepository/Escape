@@ -21,7 +21,7 @@ var platform = new GLPlatform();
 platform.Initialize();
 
 logger.Info("Loading resources");
-Resources.Load(platform);
+EditorResources.Load(platform);
 
 logger.Info("Initializing pipeline");
 

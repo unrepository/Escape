@@ -17,7 +17,7 @@ namespace Escape.Editor.Scenes {
 		public ProjectManager(IPlatform platform, RenderQueue? renderQueue) : base(platform, "project_manager", null, renderQueue) {
 			Debug.Assert(renderQueue is not null);
 			
-			World.GetRootEntity().Add(new Renderable(), new Scripted(Resources.ProjectManagerScript));
+			World.GetRootEntity().Add(new Renderable(), new Scripted(EditorResources.ProjectManagerScript));
 		}
 	}
 }

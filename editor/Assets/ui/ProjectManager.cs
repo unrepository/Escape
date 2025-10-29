@@ -1,6 +1,9 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Numerics;
+using System.Reflection;
+using System.Runtime.Loader;
 using Escape.Core;
 using Escape.Core.Scripting;
 using Escape.Editor;
@@ -44,7 +47,40 @@ public class ProjectManager : CSharpScript {
 
 		if(_openProjectPrompt?.Prompt() == true) {
 			if(_openProjectPrompt.Result is null) return;
-			EditorGlobals.ProjectDirectory = new DirectoryInfo(_openProjectPrompt.Result);
+			
+			// load project
+			ProjectGlobals.ProjectDirectory = new DirectoryInfo(_openProjectPrompt.Result);
+			ProjectGlobals.ProjectInfo = ProjectInfo.Load(Path.Combine(ProjectGlobals.ProjectDirectory.FullName, ProjectInfo.FILE_NAME));
+			
+			Debug.Assert(ProjectGlobals.ProjectInfo is not null);
+
+		#region Load assemblies
+			var loadContext = new AssemblyLoadContext("ProjectLoadContext", true);
+			loadContext.Resolving += (context, assemblyName) => {
+				string assemblyPath = Path.Combine(ProjectGlobals.OutputDirectory!.FullName, assemblyName + ".dll");
+
+				if(!File.Exists(assemblyPath)) {
+					Logger.Warn(
+						"{ProjectName}: Could not resolve assembly for {AssemblyName}",
+						ProjectGlobals.ProjectInfo.Name, assemblyName
+					);
+				} else {
+					Logger.Info(
+						"{ProjectName}: Resolved assembly {AssemblyName} to {AssemblyPath}",
+						ProjectGlobals.ProjectInfo.Name, assemblyName, assemblyPath
+					);
+				}
+
+				using var stream = new FileStream(assemblyPath, FileMode.Open, FileAccess.Read);
+				return context.LoadFromStream(stream);
+			};
+			
+			// TODO !!! extensions and dependencies are not being loaded
+			ProjectGlobals.ProjectAssembly =
+				loadContext.LoadFromAssemblyPath(Path.Combine(ProjectGlobals.OutputDirectory!.FullName, ProjectGlobals.ProjectInfo.MainAssemblyName + ".dll"));
+		#endregion
+			
+			ProjectResources.Load(queue.Platform, ProjectGlobals.ResourcesDirectory!);
 			
 			ESCAPE.RenderThread.ScheduleAction(() => {
 				SceneEngine.SetScene(queue, new Escape.Editor.Scenes.ProjectEditor(queue.Platform, queue));
