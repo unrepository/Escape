@@ -26,8 +26,10 @@ namespace Escape.Core.Systems {
 			c3d.Camera.Target = t3d.GlobalPosition + Vector3.Transform(Vector3.UnitZ, t3d.GlobalRotation);
 		}
 
+		// TODO WHY IS THIS IN CAMERA UPDATE SYSTEM
 		[Query]
-		public static void Scripted_Update(ref Scripted scripted) {
+		public static void Scripted_Update(in Entity e, ref Scripted scripted) {
+			if(e.IsDisabled()) return;
 			scripted.Script.Call(IScript.FunctionCall.OnUpdate, [ ESCAPE.UpdateDelta ]);
 		}
 	}

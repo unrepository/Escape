@@ -13,16 +13,9 @@ using Hexa.NET.ImGui;
 [CSharpScript("ui/ProjectManager.cs")]
 public class ProjectManager : CSharpScript {
 
-	private readonly Scene _parent;
 	private FilePrompt? _openProjectPrompt;
-
-	public ProjectManager(Scene parent) {
-		_parent = parent;
-	}
 	
-	public override void OnRender(TimeSpan delta, ObjectRenderer objectRenderer) {
-		base.OnRender(delta, objectRenderer);
-		
+	public override void OnRender(RenderQueue queue, TimeSpan delta) {
 	#if DEBUG
 		ImGui.ShowDemoWindow();
 	#endif
@@ -54,7 +47,7 @@ public class ProjectManager : CSharpScript {
 			EditorGlobals.ProjectDirectory = new DirectoryInfo(_openProjectPrompt.Result);
 			
 			ESCAPE.RenderThread.ScheduleAction(() => {
-				SceneEngine.SetScene(_parent.RenderQueue!, new Escape.Editor.Scenes.ProjectEditor(_parent.Platform, _parent.RenderQueue));
+				SceneEngine.SetScene(queue, new Escape.Editor.Scenes.ProjectEditor(queue.Platform, queue));
 			});
 		}
 	}

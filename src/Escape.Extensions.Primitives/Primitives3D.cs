@@ -24,7 +24,7 @@ namespace Escape.Extensions.Primitives {
 				]
 			};
 
-			return world.Create3DObject(new RenderableObject(model), t3d);
+			return world.Create3DObject(new Renderable(model), t3d);
 		}
 	}
 }

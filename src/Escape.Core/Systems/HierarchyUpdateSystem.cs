@@ -17,6 +17,8 @@ namespace Escape.Core.Systems {
 
 		public override void Update(in TimeSpan delta) {
 			void ProcessEntity(Entity parent, Entity entity, bool parentDirty, int depth) {
+				if(entity.IsDisabled()) return;
+				
 			#if DEBUG
 				if(DebugPrintHierarchy) {
 					Console.Write(new string(' ', depth * 2));
@@ -37,7 +39,7 @@ namespace Escape.Core.Systems {
 				
 				bool isDirty = parentDirty;
 
-				if (entity.Has<Transform3D>()) {
+				if(entity.Has<Transform3D>()) {
 					ref var t3d = ref entity.Get<Transform3D>();
 
 					// entity is dirty if it itself is dirty OR its parent was dirty

@@ -14,12 +14,12 @@ namespace Escape.Renderer.Vulkan {
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-		private readonly Dictionary<RenderableObject, ObjectDrawData> _drawData = [];
+		private readonly Dictionary<Renderable, ObjectDrawData> _drawData = [];
 		//private readonly List<RenderableObject> _objects = [];
 
 		public VkObjectRenderer(string id, IShaderPipeline shaderPipeline) : base(id, shaderPipeline) { }
 
-		public unsafe override bool AddObject(RenderableObject obj, Matrix4x4? matrix = null) {
+		public unsafe override bool AddObject(Renderable obj, Matrix4x4? matrix = null, Action<RenderQueue, TimeSpan>? renderCallback = null) {
 			matrix ??= Matrix4x4.Identity;
 
 			var model = obj.Model;
@@ -49,13 +49,13 @@ namespace Escape.Renderer.Vulkan {
 			return true;
 		}
 
-		public unsafe override bool SetMatrix(RenderableObject obj, Matrix4x4 matrix) {
+		public unsafe override bool SetMatrix(Renderable obj, Matrix4x4 matrix) {
 			ShaderPipeline.MatrixData.Write((uint) _drawData[obj].MatrixIndex, [ matrix ]);
 			return true;
 		}
 
 		// TODO broken under stupid circumstances
-		public override bool RemoveObject(RenderableObject obj) {
+		public override bool RemoveObject(Renderable obj) {
 			if(!_drawData.TryGetValue(obj, out var data)) return false;
 
 			if(!ShaderPipeline.VertexData.Remove(data.VertexIndex, data.VertexCount)) return false;

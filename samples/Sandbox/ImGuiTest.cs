@@ -33,7 +33,7 @@ public static class ImGuiTest {
 		
 		world.Create(
 			new Transform3D(),
-			new RenderableObject(CubeModel)
+			new Renderable(CubeModel)
 		);
 		
 		ESCAPE.Run();

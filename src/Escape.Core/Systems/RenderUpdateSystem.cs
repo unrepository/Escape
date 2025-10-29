@@ -19,13 +19,15 @@ namespace Escape.Core.Systems {
 
 		[Query]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void Transform3D_Update(ref RenderableObject obj, ref Transform3D t3d) {
+		public void Transform3D_Update(in Entity e, ref Renderable obj, ref Transform3D t3d) {
+			if(e.IsDisabled()) return;
 			_objectRenderer.SetMatrix(obj, t3d.GlobalMatrix);
 		}
 		
-		[Query]
-		public void Scripted_Render(ref Scripted scripted) {
+		/*[Query]
+		public void Scripted_Render(in Entity e, ref Scripted scripted) {
+			if(e.IsDisabled() || !e.IsVisible()) return;
 			scripted.Script.Call(IScript.FunctionCall.OnRender, [ ESCAPE.RenderDelta, _objectRenderer ]);
-		}
+		}*/
 	}
 }

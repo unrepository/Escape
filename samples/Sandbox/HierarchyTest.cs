@@ -31,10 +31,10 @@ public static class HierarchyTest {
 		var e1 = world.Create();
 		var t3d1 = world.Create(new Transform3D());
 		var e2 = world.Create();
-		var t3d2 = world.Create(new Transform3D(new Vector3(2, 0, 0), Quaternion.Identity, Vector3.One), new RenderableObject(m1));
-		var t3d3 = world.Create(new Transform3D(new Vector3(-2, 0, 0), Quaternion.Identity, Vector3.One), new RenderableObject(m2));
-		var t3d4 = world.Create(new Transform3D(new Vector3(0, 0, 0), Quaternion.Identity, Vector3.One), new RenderableObject(m3));
-		var t3d5 = world.Create(new Transform3D(new Vector3(0, 0, 2), Quaternion.Identity, Vector3.One), new RenderableObject(m4));
+		var t3d2 = world.Create(new Transform3D(new Vector3(2, 0, 0), Quaternion.Identity, Vector3.One), new Renderable(m1));
+		var t3d3 = world.Create(new Transform3D(new Vector3(-2, 0, 0), Quaternion.Identity, Vector3.One), new Renderable(m2));
+		var t3d4 = world.Create(new Transform3D(new Vector3(0, 0, 0), Quaternion.Identity, Vector3.One), new Renderable(m3));
+		var t3d5 = world.Create(new Transform3D(new Vector3(0, 0, 2), Quaternion.Identity, Vector3.One), new Renderable(m4));
 		
 		e1.MakeParentOf(t3d1, t3d4);
 		

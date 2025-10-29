@@ -21,6 +21,12 @@
 		<AssetLinkProject Include="..\src\Escape.Extensions.Debugging\Escape.Extensions.Debugging.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="nlog.config">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 	<!-- scripts !-->
 	<Import Project="..\src\Escape.Core\Script.targets"/>
 

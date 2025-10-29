@@ -8,7 +8,7 @@ using Escape.Extensions.UI.Dialog;
 using Escape.Renderer;
 using Hexa.NET.ImGui;
 
-[CSharpScript("scripts/EditorUI.cs")]
+[CSharpScript("ui/AssetBrowser.cs")]
 public class AssetBrowser : CSharpScript {
 
 	private FilePrompt? _assetsOpenPrompt;
@@ -16,9 +16,7 @@ public class AssetBrowser : CSharpScript {
 	
 	public AssetBrowser() { }
 	
-	public override void OnRender(TimeSpan delta, ObjectRenderer objectRenderer) {
-		base.OnRender(delta, objectRenderer);
-		
+	public override void OnRender(RenderQueue queue, TimeSpan delta) {
 		ImGui.ShowDemoWindow();
 		
 		ImGui.Begin("Resource Editor", ImGuiWindowFlags.MenuBar);

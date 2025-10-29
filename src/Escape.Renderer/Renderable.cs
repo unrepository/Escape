@@ -4,16 +4,17 @@ using System.Text;
 
 namespace Escape.Renderer {
 	
-	public struct RenderableObject : IEquatable<RenderableObject> {
+	// TODO why do we need all this hash and equation shit (we don't)
+	public struct Renderable : IEquatable<Renderable> {
 		
 		public Guid Id { get; init; } = Guid.NewGuid();
-		public Model Model { get; set; }
-
+		public Model? Model { get; set; }
+		
 		private static readonly SHA1 _hash = SHA1.Create();
 		
-		public RenderableObject(ulong id, Model model) : this(id.ToString(), model) { }
+		public Renderable(ulong id, Model? model) : this(id.ToString(), model) { }
 
-		public RenderableObject(string id, Model model) : this(model) {
+		public Renderable(string id, Model? model) : this(model) {
 			byte[] idBytes = Encoding.UTF8.GetBytes(id);
 			byte[] hashBytes = _hash.ComputeHash(idBytes);
 			byte[] guidBytes = new byte[16];
@@ -29,19 +30,21 @@ namespace Escape.Renderer {
 			Id = new Guid(guidBytes);
 		}
 		
-		public RenderableObject(Guid id, Model model) : this(model) {
+		public Renderable(Guid id, Model? model) : this(model) {
 			Id = id;
 		}
 		
-		public RenderableObject(Model model) {
+		public Renderable(Model? model) {
 			Model = model;
 		}
+		
+		public Renderable() { }
 
-		public override bool Equals([NotNullWhen(true)] object? o) => o is RenderableObject obj && obj.Id == Id;
-		public bool Equals(RenderableObject other) => Id.Equals(other.Id);
+		public override bool Equals([NotNullWhen(true)] object? o) => o is Renderable obj && obj.Id == Id;
+		public bool Equals(Renderable other) => Id.Equals(other.Id);
 
-		public static bool operator ==(RenderableObject a, RenderableObject b) => a.Equals(b);
-		public static bool operator !=(RenderableObject a, RenderableObject b) => !(a == b);
+		public static bool operator ==(Renderable a, Renderable b) => a.Equals(b);
+		public static bool operator !=(Renderable a, Renderable b) => !(a == b);
 		
 		public override int GetHashCode() => Id.GetHashCode();
 		

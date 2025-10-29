@@ -12,18 +12,18 @@ namespace Escape.Renderer.OpenGL {
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 		private readonly GLPlatform _platform;
-		private readonly Dictionary<RenderableObject, ObjectDrawData> _objectData = [];
+		private readonly Dictionary<Renderable, ObjectDrawData> _objectData = [];
 
 		public GLObjectRenderer(string id, IShaderPipeline shaderPipeline) : base(id, shaderPipeline) {
 			_platform = (GLPlatform) shaderPipeline.Platform;
 		}
 
-		public unsafe override bool AddObject(RenderableObject obj, Matrix4x4? matrix = null) {
+		public unsafe override bool AddObject(Renderable obj, Matrix4x4? matrix = null, Action<RenderQueue, TimeSpan>? renderCallback = null) {
 			if(_objectData.TryGetValue(obj, out var drawData)) {
 				drawData.Dispose(_platform);
 			}
 			
-			var meshes = obj.Model.Meshes;
+			var meshes = obj.Model?.Meshes ?? [];
 			var vaos = new uint[meshes.Count];
 			var vbos = new uint[meshes.Count * 2];
 			
@@ -99,19 +99,20 @@ namespace Escape.Renderer.OpenGL {
 			_objectData[obj] = new ObjectDrawData {
 				Matrix = matrix.GetValueOrDefault(Matrix4x4.Identity),
 				VAOs = vaos,
-				VBOs = vbos
+				VBOs = vbos,
+				RenderCallback = renderCallback
 			};
 			
 			return true;
 		}
 
-		public override bool SetMatrix(RenderableObject obj, Matrix4x4 matrix) {
+		public override bool SetMatrix(Renderable obj, Matrix4x4 matrix) {
 			if(!_objectData.TryGetValue(obj, out var drawData)) return false;
 			drawData.Matrix = matrix;
 			return true;
 		}
 
-		public override bool RemoveObject(RenderableObject obj) {
+		public override bool RemoveObject(Renderable obj) {
 			if(!_objectData.TryGetValue(obj, out var drawData)) return false;
 			drawData.Dispose(_platform);
 			_objectData.Remove(obj);
@@ -128,7 +129,9 @@ namespace Escape.Renderer.OpenGL {
 			ShaderPipeline.SpotLightData.Push();
 
 			foreach(var (obj, data) in _objectData) {
-				for(int i = 0; i < obj.Model.Meshes.Count; i++) {
+				data.RenderCallback?.Invoke(queue, delta);
+				
+				for(int i = 0; i < obj.Model?.Meshes.Count; i++) {
 					var mesh = obj.Model.Meshes[i];
 					
 					// bind textures
@@ -189,6 +192,8 @@ namespace Escape.Renderer.OpenGL {
 			public Matrix4x4 Matrix { get; set; }
 			public uint[] VBOs { get; set; }
 			public uint[] VAOs { get; set; }
+			
+			public Action<RenderQueue, TimeSpan>? RenderCallback { get; set; }
 
 			public unsafe void Dispose(GLPlatform platform) {
 				fixed(uint* vboPtr = VBOs) {

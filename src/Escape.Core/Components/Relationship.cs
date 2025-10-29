@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics;
 using Arch.Core;
 using Arch.Core.Extensions;
@@ -83,6 +84,25 @@ namespace Escape.Core.Components {
 		public static IReadOnlyList<Entity> GetChildren(this Entity entity) {
 			if(!entity.Has<Parent>()) return [];
 			return entity.Get<Parent>().Children;
+		}
+
+		public static IEnumerable<Entity> GetAllChildren(this Entity entity) {
+			if(!entity.Has<Parent>()) yield break;
+
+			var stack = new Stack<Entity>();
+
+			foreach(var child in entity.GetChildren().Reverse()) {
+				stack.Push(child);
+			}
+			
+			while(stack.Count > 0) {
+				var current = stack.Pop();
+				yield return current;
+
+				foreach(var child in current.GetChildren().Reverse()) {
+					stack.Push(child);
+				}
+			}
 		}
 
 		public static Entity GetChild(this Entity entity, int id = -1, int index = -1) {

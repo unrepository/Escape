@@ -60,22 +60,22 @@ public static class WorldSandbox {
 		_logger.Info("Create entities");
 		var cube1 = world.Create(
 			new Transform3D(Vector3.Zero, Quaternion.Zero, Vector3.One),
-			new RenderableObject(model1)
+			new Renderable(model1)
 		);
 		
 		var cube2 = world.Create(
 			new Transform3D(new Vector3(0, 2, 0), Quaternion.Zero, Vector3.One),
-			new RenderableObject(model2)
+			new Renderable(model2)
 		);
 		
 		var cube3 = world.Create(
 			new Transform3D(new Vector3(-2, 2, 0), Quaternion.Zero, Vector3.One),
-			new RenderableObject(model3)
+			new Renderable(model3)
 		);
 		
 		var cube4 = world.Create(
 			new Transform3D(new Vector3(-2, 0, 0), Quaternion.Zero, Vector3.One),
-			new RenderableObject(model4)
+			new Renderable(model4)
 		);
 		
 		UpdateManager.Add(new TestRotationUpdater("test rotation", world, cube1));
@@ -197,7 +197,7 @@ public static class WorldSandbox {
 			_time += delta;
 
 			if(_time.TotalSeconds > 3.0) {
-				_entity.Set(new RenderableObject(_newModel));
+				_entity.Set(new Renderable(_newModel));
 				_done = true;
 			}
 		}

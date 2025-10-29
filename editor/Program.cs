@@ -6,14 +6,24 @@ using Escape.Extensions.UI;
 using Escape.Renderer;
 using Escape.Renderer.OpenGL;
 using Escape.Renderer.Shader.Pipelines;
+using NLog;
 using Silk.NET.Windowing;
 using Window = Escape.Renderer.Window;
+
+var logger = LogManager.GetCurrentClassLogger();
 
 ESCAPE.ProjectName = "Escape Editor";
 ESCAPE.ProjectAssembly = Assembly.GetExecutingAssembly();
 
+logger.Info("Initializing platform");
+
 var platform = new GLPlatform();
 platform.Initialize();
+
+logger.Info("Loading resources");
+Resources.Load(platform);
+
+logger.Info("Initializing pipeline");
 
 var shaderPipeline = new DefaultUnshadedShaderPipeline(platform);
 var renderQueue = RenderQueueManager.Create(platform, "main");

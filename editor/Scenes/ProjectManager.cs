@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Arch.Core;
+using Arch.Core.Extensions;
 using Escape.Core;
 using Escape.Core.Scripting.Components;
 using Escape.Core.Scripting.Resources;
@@ -15,9 +16,8 @@ namespace Escape.Editor.Scenes {
 
 		public ProjectManager(IPlatform platform, RenderQueue? renderQueue) : base(platform, "project_manager", null, renderQueue) {
 			Debug.Assert(renderQueue is not null);
-
-			var uiScript = ResourceManager.Load<ScriptResource>(platform, "ui/ProjectManager.cs")!;
-			World.Create(new Scripted(uiScript, this));
+			
+			World.GetRootEntity().Add(new Renderable(), new Scripted(Resources.ProjectManagerScript));
 		}
 	}
 }

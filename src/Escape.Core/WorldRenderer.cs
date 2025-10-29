@@ -4,6 +4,8 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Arch.System;
 using Escape.Core.Components;
+using Escape.Core.Scripting;
+using Escape.Core.Scripting.Components;
 using Escape.Core.Systems;
 using Escape.Extensions.CSharp;
 using Escape.Renderer;
@@ -27,7 +29,7 @@ namespace Escape.Core {
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		
-		private readonly Dictionary<Entity, RenderableObject> _entityRenderableMap = [];
+		private readonly Dictionary<Entity, Renderable> _entityRenderableMap = [];
 		
 		private readonly QueryDescription _camera3DQuery = new QueryDescription().WithAll<Camera3D>();
 		private readonly QueryDescription _directionalLightQuery = new QueryDescription().WithAll<Transform3D, Components.DirectionalLight>();
@@ -46,15 +48,27 @@ namespace Escape.Core {
 			
 			_primarySystem = new RenderUpdateSystem(world, objectRenderer);
 			
-			World.SubscribeComponentAdded((in Entity e, ref RenderableObject obj) => {
+			World.SubscribeComponentAdded((in Entity e, ref Renderable obj) => {
 				if(!Active) return;
 
 				_logger.Trace("(ecs observer) RenderableObject/Add");
 				_entityRenderableMap[e] = obj;
-				ObjectRenderer.AddObject(obj);
+
+				Action<RenderQueue, TimeSpan>? renderCallback = null;
+				
+				if(e.TryGet(out Scripted scripted)) {
+					var ee = e;
+
+					renderCallback = (queue, delta) => {
+						if(ee.IsDisabled() || !ee.IsVisible()) return;
+						scripted.Script.Call(IScript.FunctionCall.OnRender, [queue, delta]);
+					};
+				}
+				
+				ObjectRenderer.AddObject(obj, null, renderCallback);
 			});
 			
-			World.SubscribeComponentSet((in Entity e, ref RenderableObject obj) => {
+			World.SubscribeComponentSet((in Entity e, ref Renderable obj) => {
 				if(!Active) return;
 
 				_logger.Trace("(ecs observer) RenderableObject/Set");
@@ -66,11 +80,22 @@ namespace Escape.Core {
 				
 				_logger.Trace("(ecs observer) RenderableObject/Set - AddObject");
 				
-				ObjectRenderer.AddObject(obj);
+				Action<RenderQueue, TimeSpan>? renderCallback = null;
+				
+				if(e.TryGet(out Scripted scripted)) {
+					var ee = e;
+
+					renderCallback = (queue, delta) => {
+						if(ee.IsDisabled() || !ee.IsVisible()) return;
+						scripted.Script.Call(IScript.FunctionCall.OnRender, [queue, delta]);
+					};
+				}
+				
+				ObjectRenderer.AddObject(obj, null, renderCallback);
 				_entityRenderableMap[e] = obj;
 			});
 			
-			World.SubscribeComponentRemoved((in Entity e, ref RenderableObject obj) => {
+			World.SubscribeComponentRemoved((in Entity e, ref Renderable obj) => {
 				if(!Active) return;
 
 				_logger.Trace("(ecs observer) RenderableObject/Remove");

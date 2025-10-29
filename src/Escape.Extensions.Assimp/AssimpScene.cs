@@ -13,7 +13,7 @@ namespace Escape.Extensions.Assimp {
 		{
 			void ExportNode(World world, Entity parent, Node node) {
 				var entity = world.Create(node.Transform);
-				if(node.Model is not null) entity.Add(new RenderableObject(node.Model));
+				if(node.Model is not null) entity.Add(new Renderable(node.Model));
 
 				entity.MakeChildOf(parent);
 				

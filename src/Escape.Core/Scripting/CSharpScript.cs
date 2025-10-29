@@ -75,7 +75,7 @@ namespace Escape.Core.Scripting {
 		}
 		
 		public virtual void OnUpdate(TimeSpan delta) { }
-		public virtual void OnRender(TimeSpan delta, ObjectRenderer objectRenderer) { }
+		public virtual void OnRender(RenderQueue queue, TimeSpan delta) { }
 
 		public void Construct(Type[] types, object?[] arguments) {
 			if(Instance is not null) throw new InvalidOperationException($"Script {Name} has already been constructed");
@@ -105,7 +105,7 @@ namespace Escape.Core.Scripting {
 					script.OnUpdate((TimeSpan) arguments[0]);
 					return null;
 				case IScript.FunctionCall.OnRender:
-					script.OnRender((TimeSpan) arguments[0], (ObjectRenderer) arguments[1]);
+					script.OnRender((RenderQueue) arguments[0], (TimeSpan) arguments[1]);
 					return null;
 				default:
 					throw new NotImplementedException();

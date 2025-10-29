@@ -19,23 +19,46 @@ namespace Escape.Core {
 				return root;
 			}
 
-			var entity = world.Create();
-			_rootEntities[world.Id] = entity;
-			return entity;
+			throw new InvalidDataException("World has no root entity");
+
+			//var entity = world.Create();
+			//_rootEntities[world.Id] = entity;
+			//return entity;
 		}
 
 		public static void SetRootEntity(this World world, Entity root) {
 			_rootEntities[world.Id] = root;
 		}
+
+		public static IEnumerable<Entity> GetEntities(this World world) {
+			/*var query = world.Query(new QueryDescription().WithNone<Empty>());
+
+			while(query.GetChunkIterator().GetEnumerator().MoveNext()) {
+				var chunk = query.GetChunkIterator().GetEnumerator().Current;
+				if(chunk.Count <= 0) continue;
+				
+				foreach(var entity in chunk.Entities) {
+					yield return entity;
+				}
+			}*/
+
+			var query = new QueryDescription().WithNone<Empty>();
+			var entities = new List<Entity>();
+
+			world.Query(query, entity => {
+				entities.Add(entity);
+			});
+
+			return entities;
+		}
 		
 		public static Entity Instantiate(this World world, World source, Entity? parent = null) {
-			var allQuery = new QueryDescription().WithNone<Empty>();
 			var rootEntity = source.GetRootEntity();
 
 			var cloneMap = new Dictionary<Entity, Entity>();
 			
 			// copy components
-			source.Query(allQuery, sourceEntity => {
+			foreach(var sourceEntity in source.GetEntities()) {
 				var clonedEntity = world.Create();
 				cloneMap[sourceEntity] = clonedEntity;
 				
@@ -45,7 +68,7 @@ namespace Escape.Core {
 					
 					clonedEntity.Add(component);
 				}
-			});
+			}
 			
 			// recreate tree
 			if(parent is not null) {
@@ -53,9 +76,9 @@ namespace Escape.Core {
 			} else {
 				cloneMap[rootEntity].MakeChildOf(world.GetRootEntity());
 			}
-			
-			source.Query(allQuery, sourceEntity => {
-				if(sourceEntity == rootEntity) return;
+
+			foreach(var sourceEntity in source.GetEntities()) {
+				if(sourceEntity == rootEntity) continue;
 				var clonedEntity = cloneMap[sourceEntity];
 				
 				if(sourceEntity.HasParent()) {
@@ -65,16 +88,16 @@ namespace Escape.Core {
 				foreach(var child in sourceEntity.GetChildren()) {
 					cloneMap[child].MakeChildOf(clonedEntity);
 				}
-			});
+			}
 
 			return cloneMap[rootEntity];
 		}
 
-		public static Entity Create3DObject(this World world, RenderableObject obj, Transform3D t3d) {
+		public static Entity Create3DObject(this World world, Renderable obj, Transform3D t3d) {
 			return world.Create(obj, t3d);
 		}
 
-		public static Entity Create3DObject(this World world, RenderableObject obj, Vector3 position, Quaternion? rotation, Vector3? scale) {
+		public static Entity Create3DObject(this World world, Renderable obj, Vector3 position, Quaternion? rotation, Vector3? scale) {
 			return world.Create3DObject(
 				obj,
 				new Transform3D(position, rotation ?? Quaternion.Identity, scale ?? Vector3.One)
@@ -83,7 +106,7 @@ namespace Escape.Core {
 
 		public static Entity Create3DObject(
 			this World world,
-			RenderableObject obj,
+			Renderable obj,
 			Vector3 position,
 			Rotation<float>? yaw, Rotation<float>? pitch, Rotation<float>? roll,
 			Vector3? scale

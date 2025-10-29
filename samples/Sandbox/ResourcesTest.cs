@@ -51,32 +51,32 @@ public static class ResourcesTest {
 		// create entities
 		world.Create(
 			new Transform3D(new Vector3(0, 0, 0), Quaternion.Zero, Vector3.One),
-			new RenderableObject(model1)
+			new Renderable(model1)
 		);
 		
 		world.Create(
 			new Transform3D(new Vector3(-2, 0, 0), Quaternion.Zero, Vector3.One),
-			new RenderableObject(model2)
+			new Renderable(model2)
 		);
 		
 		world.Create(
 			new Transform3D(new Vector3(2, 0, 0), Quaternion.Zero, Vector3.One),
-			new RenderableObject(model3)
+			new Renderable(model3)
 		);
 		
 		world.Create(
 			new Transform3D(new Vector3(0, 2, 0), Quaternion.Zero, Vector3.One),
-			new RenderableObject(model4)
+			new Renderable(model4)
 		);
 		
 		world.Create(
 			new Transform3D(new Vector3(-2, 2, 0), Quaternion.Zero, Vector3.One),
-			new RenderableObject(model5)
+			new Renderable(model5)
 		);
 		
 		world.Create(
 			new Transform3D(new Vector3(2, 2, 0), Quaternion.Zero, Vector3.One),
-			new RenderableObject(model6)
+			new Renderable(model6)
 		);
 		
 		// create camera entity

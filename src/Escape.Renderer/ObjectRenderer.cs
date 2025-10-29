@@ -18,9 +18,9 @@ namespace Escape.Renderer {
 			ShaderPipeline = shaderPipeline;
 		}
 
-		public abstract bool AddObject(RenderableObject @object, Matrix4x4? matrix = null);
-		public abstract bool SetMatrix(RenderableObject @object, Matrix4x4 matrix);
-		public abstract bool RemoveObject(RenderableObject @object);
+		public abstract bool AddObject(Renderable obj, Matrix4x4? matrix = null, Action<RenderQueue, TimeSpan>? renderCallback = null);
+		public abstract bool SetMatrix(Renderable obj, Matrix4x4 matrix);
+		public abstract bool RemoveObject(Renderable obj);
 		
 		public abstract void Render(RenderQueue queue, TimeSpan delta);
 		public abstract void Reset();
