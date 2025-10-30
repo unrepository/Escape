@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Arch.Core;
 using Escape.Core;
+using Escape.Core.Resources;
 using Escape.Core.Scripting.Components;
-using Escape.Core.Scripting.Resources;
 using Escape.Extensions.UI;
 using Escape.Renderer;
 using Escape.Renderer.OpenGL;

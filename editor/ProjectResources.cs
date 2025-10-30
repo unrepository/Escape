@@ -8,7 +8,7 @@ namespace Escape.Editor {
 	
 	public static class ProjectResources {
 
-		public static Dictionary<FileInfo, dynamic> AllResources { get; } = [];
+		public static Dictionary<string, dynamic> AllResources { get; } = [];
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		
@@ -60,7 +60,7 @@ namespace Escape.Editor {
 						continue;
 					}
 
-					AllResources[file] = resource;
+					AllResources[file.FullName] = resource;
 				}
 			//}
 		}

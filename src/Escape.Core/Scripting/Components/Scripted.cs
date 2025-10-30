@@ -1,5 +1,5 @@
 using Escape.Core.Components;
-using Escape.Core.Scripting.Resources;
+using Escape.Core.Resources;
 using Escape.Resources;
 
 namespace Escape.Core.Scripting.Components {

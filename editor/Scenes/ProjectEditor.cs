@@ -4,7 +4,6 @@ using Arch.Core.Extensions;
 using Escape.Core;
 using Escape.Core.Components;
 using Escape.Core.Scripting.Components;
-using Escape.Core.Scripting.Resources;
 using Escape.Renderer;
 using Escape.Resources;
 

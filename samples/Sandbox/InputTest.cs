@@ -1,7 +1,7 @@
 using System.Numerics;
 using Escape.Core;
 using Escape.Core.Input;
-using Escape.Core.Input.Resources;
+using Escape.Core.Resources;
 using Escape.Extensions.Primitives;
 using Escape.Renderer;
 using Escape.Renderer.OpenGL;

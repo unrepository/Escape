@@ -3,7 +3,6 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Escape.Core;
 using Escape.Core.Scripting.Components;
-using Escape.Core.Scripting.Resources;
 using Escape.Extensions.UI;
 using Escape.Renderer;
 using Escape.Renderer.OpenGL;

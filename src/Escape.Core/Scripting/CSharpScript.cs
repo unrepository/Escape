@@ -60,15 +60,22 @@ namespace Escape.Core.Scripting {
 				var scriptAttribute = type.GetCustomAttribute<CSharpScriptAttribute>();
 				if(scriptAttribute is null) continue;
 				
-				var fullScriptPath = Path.Combine(ResourceManager.GetBaseDirectory(scriptAssembly), scriptAttribute.ScriptPath);
+				//var fullScriptPath = Path.Combine(ResourceManager.GetBaseDirectory(scriptAssembly), scriptAttribute.ScriptPath);
+				//var fullName = name.Replace(ResourceManager.GetBaseDirectory(scriptAssembly), Directory.ResolveLinkTarget())
 				
-				if(fullScriptPath == name) {
+				// dumb fucking shit
+				var fullName = name
+					.Replace(ResourceManager.GetBaseDirectory(scriptAssembly), "")
+					.Replace(Directory.ResolveLinkTarget(ResourceManager.GetBaseDirectory(scriptAssembly), true)?.FullName ?? "$$$", "")
+					.TrimStart('/');
+				
+				if(scriptAttribute.ScriptPath.TrimStart('/') == fullName) {
 					Type = type;
 					break;
 				}
 			}
 
-			if(Type is not null) {
+			if(Type is null) {
 				Logger.Warn(
 					"Script {ScriptName} is not a CSharpScript; it will not be able to be called!",
 					name

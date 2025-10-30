@@ -1,8 +1,9 @@
 using System.Reflection;
+using Escape.Core.Scripting;
 using Escape.Renderer;
 using Escape.Resources;
 
-namespace Escape.Core.Scripting.Resources {
+namespace Escape.Core.Resources {
 	
 	public class ScriptResource : Resource<IScript, ScriptResource.Import> {
 

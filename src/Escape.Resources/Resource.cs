@@ -81,18 +81,20 @@ namespace Escape.Resources {
 				GetType().Name, Settings.Path
 			);
 
-			if(WasConstructed) {
+			/*if(WasConstructed) {
 				SaveNew();
 				
 				_logger.Debug(
 					"Saved new resource {Type} to {Path}",
 					GetType().Name, Settings.Path
 				);
-			}
+			}*/
 			
 			return true;
 		}
 
+		// TODO this is unneeded
+		[Obsolete]
 		public abstract void SaveNew();
 		
 		public virtual bool Reload() {

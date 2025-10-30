@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Arch.Core;
 using Escape.Renderer;
 
@@ -7,7 +8,10 @@ namespace Escape.Core {
 		
 		public IPlatform Platform { get; }
 		
+		[JsonInclude]
 		public string Id { get; }
+		
+		[JsonInclude]
 		public World World { get; }
 
 		public Entity Root => World.GetRootEntity();

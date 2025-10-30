@@ -1,9 +1,10 @@
 using System.Reflection;
 using System.Text.Json;
+using Escape.Core.Input;
 using Escape.Renderer;
 using Escape.Resources;
 
-namespace Escape.Core.Input.Resources {
+namespace Escape.Core.Resources {
 	
 	public class ActionMapResource : Resource<Dictionary<InputCombo[], InputAction>, ActionMapResource.Import> {
 

@@ -3,7 +3,7 @@
 		<SourceDirectory>Assets</SourceDirectory>
 	</PropertyGroup>
 
-	<Target Name="SwitchScriptTargets" AfterTargets="PrepareForBuild" Condition="'$(Configuration)' != 'Debug'">
+	<Target Name="SwitchScriptTargets" AfterTargets="PrepareForBuild">
 		<ItemGroup>
 			<CSScripts Include="$(SourceDirectory)\**\*.cs" />
 		</ItemGroup>

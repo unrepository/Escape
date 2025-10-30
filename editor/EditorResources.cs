@@ -1,4 +1,4 @@
-using Escape.Core.Scripting.Resources;
+using Escape.Core.Resources;
 using Escape.Renderer;
 using Escape.Resources;
 

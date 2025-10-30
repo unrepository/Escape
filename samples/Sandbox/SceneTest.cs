@@ -29,7 +29,7 @@ public static class SceneTest {
 		ESCAPE.Run();
 	}
 
-	private class TestScene : Scene {
+	public class TestScene : Scene {
 
 		public TestScene(IPlatform platform, RenderQueue renderQueue, Window window) : base(platform, "test", null, renderQueue) {
 			World.Create3DCube(Color.White, Vector3.Zero, 1, 1, 1);

@@ -6,7 +6,14 @@ namespace Escape.Resources {
 	
 	public static class ResourceRegistry {
 
-		private static readonly Dictionary<string, (string[] FileExtensions, ConstructorInfo Constructor, MethodInfo LoadMethod, Type ResourceType, Type MetaType)> _formats = [];
+		public static
+			Dictionary<string,
+				(string[] FileExtensions,
+				ConstructorInfo Constructor,
+				MethodInfo LoadMethod,
+				Type ResourceType, Type ResourceValueType,
+				Type MetaType)
+			> Formats { get; } = [];
 		
 		public static void RegisterFormat<TResourceValue, TResource, TImportSettings>()
 			where TResource : Resource<TResourceValue, TImportSettings>, new()
@@ -25,19 +32,19 @@ namespace Escape.Resources {
 			var importMeta = new TImportSettings();
 			var defaultResource = (TResource) defaultCtor.Invoke(null);
 			
-			_formats[importMeta.FormatId] = (defaultResource.FileExtensions, defaultCtor, loadMethod!, type, typeof(TImportSettings));
+			Formats[importMeta.FormatId] = (defaultResource.FileExtensions, defaultCtor, loadMethod, type, typeof(TResourceValue), typeof(TImportSettings));
 		}
 
-		public static (string[] FileExtensions, ConstructorInfo Constructor, MethodInfo LoadMethod, Type ResourceType, Type MetaType)? GetFormat(string type) {
-			if(_formats.TryGetValue(type, out var format)) {
+		public static (string[] FileExtensions, ConstructorInfo Constructor, MethodInfo LoadMethod, Type ResourceType, Type ResourceValueType, Type MetaType)? GetFormat(string type) {
+			if(Formats.TryGetValue(type, out var format)) {
 				return format;
 			}
 
 			return null;
 		}
 		
-		public static (string[] FileExtensions, ConstructorInfo Constructor, MethodInfo LoadMethod, Type ResourceType, Type MetaType)? GetFormatByExtension(string fileExtension) {
-			foreach(var (_, format) in _formats) {
+		public static (string[] FileExtensions, ConstructorInfo Constructor, MethodInfo LoadMethod, Type ResourceType, Type ResourceValueType, Type MetaType)? GetFormatByExtension(string fileExtension) {
+			foreach(var (_, format) in Formats) {
 				if(format.FileExtensions.Contains(fileExtension)) return format;
 			}
 
