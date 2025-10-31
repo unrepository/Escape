@@ -3,6 +3,7 @@ using Arch.Core.Extensions;
 using Escape.Core.Components;
 using Escape.Core.Scripting.Systems;
 using Escape.Core.Systems;
+using Escape.Renderer;
 
 namespace Escape.Core {
 	
@@ -17,7 +18,7 @@ namespace Escape.Core {
 		public ScriptTracker ScriptTracker { get; }
 		public StateTracker StateTracker { get; }
 		
-		public WorldUpdater(string id, World world) {
+		public WorldUpdater(IPlatform platform, string id, World world) {
 			Id = id;
 			World = world;
 
@@ -29,7 +30,7 @@ namespace Escape.Core {
 			world.SetRootEntity(rootEntity);
 
 			RelationshipTracker = new RelationshipTracker(world);
-			ScriptTracker = new ScriptTracker(world);
+			ScriptTracker = new ScriptTracker(platform, world);
 			StateTracker = new StateTracker(world);
 			
 			CameraSystem = new CameraUpdateSystem(world);

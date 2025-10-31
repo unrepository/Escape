@@ -3,6 +3,7 @@ using Arch.Core;
 using Arch.Core.Extensions;
 using Escape.Core.Components;
 using Escape.Core.Scripting;
+using Escape.Renderer;
 
 [CSharpScript("scripts/test1.cs")]
 public class SecondCSharpScript : CSharpScript {
@@ -14,14 +15,14 @@ public class SecondCSharpScript : CSharpScript {
 		Logger.Info("Speed factor: {SpeedFactor}", SpeedFactor);
 	}
 	
-	public override void OnInitialize(World w, Entity e) {
-		base.OnInitialize(w, e);
+	public override void OnInitialize(IPlatform p, World w, Entity e) {
+		base.OnInitialize(p, w, e);
 			
 		Logger.Info("External: I am " + e.Id);
 	}
 		
-	public override void OnDeinitialize(World w, Entity e) {
-		base.OnDeinitialize(w, e);
+	public override void OnDeinitialize(IPlatform p, World w, Entity e) {
+		base.OnDeinitialize(p, w, e);
 			
 		Logger.Info("External: I was " + e.Id);
 	}

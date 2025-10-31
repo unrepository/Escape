@@ -5,7 +5,7 @@ namespace Escape.Extensions.UI.Dialog {
 	
 	public class ListPrompt : IPromptDialog<string> {
 
-		public bool IsOpen { get; private set; }
+		public bool IsOpen { get; set; }
 		public string Result { get; private set; }
 
 		private readonly string _title;
@@ -18,8 +18,6 @@ namespace Escape.Extensions.UI.Dialog {
 			_title = title;
 			_label = label;
 			_choices = choices;
-
-			IsOpen = true;
 		}
 		
 		public bool Prompt(bool popup = true) {

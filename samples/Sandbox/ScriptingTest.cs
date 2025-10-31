@@ -61,14 +61,14 @@ public static class ScriptingTest {
 
 	private class InternalCSharpScript : CSharpScript {
 
-		public override void OnInitialize(World w, Entity e) {
-			base.OnInitialize(w, e);
+		public override void OnInitialize(IPlatform p, World w, Entity e) {
+			base.OnInitialize(p, w, e);
 			
 			Console.WriteLine("I am " + e.Id);
 		}
 		
-		public override void OnDeinitialize(World w, Entity e) {
-			base.OnDeinitialize(w, e);
+		public override void OnDeinitialize(IPlatform p, World w, Entity e) {
+			base.OnDeinitialize(p, w, e);
 			
 			Console.WriteLine("I was " + e.Id);
 		}

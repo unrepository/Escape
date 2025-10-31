@@ -12,11 +12,11 @@ namespace Escape.Editor {
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		
-		public static void Load(IPlatform platform, DirectoryInfo assetsDirectory) {
+		public static void Load(IPlatform platform, DirectoryInfo assetsDirectory, bool clear = true) {
 			Debug.Assert(ProjectGlobals.ProjectInfo is not null);
 			Debug.Assert(ProjectGlobals.OutputDirectory is not null);
 			
-			AllResources.Clear();
+			if(clear) AllResources.Clear();
 
 			var resourceLoad = typeof(ResourceManager).GetMethod(
 				"Load",
@@ -33,6 +33,7 @@ namespace Escape.Editor {
 				foreach(var file in assetsDirectory.EnumerateFiles("*", SearchOption.AllDirectories)) {
 					if(file.Name.EndsWith(".meta.json")) continue;
 					if(file.Name.StartsWith('.')) continue;
+					if(AllResources.ContainsKey(file.FullName)) continue;
 
 					var extension = file.Extension;
 					var format = ResourceRegistry.GetFormatByExtension(extension);

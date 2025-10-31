@@ -121,7 +121,7 @@ namespace Escape.Resources {
 			var baseDirectory = GetBaseDirectory(assembly);
 			
 			var fullPath = explicitPath ? path : baseDirectory + Path.DirectorySeparatorChar + path;
-			fullPath = Path.GetFullPath(fullPath); // resolve the real path
+			fullPath = PathExtensions.GetRealPath(fullPath); // resolve the real path
 
 			var metaPath = fullPath + ImportMetadata.FILE_EXTENSION;
 			

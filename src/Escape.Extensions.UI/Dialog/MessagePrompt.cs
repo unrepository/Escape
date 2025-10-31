@@ -5,7 +5,7 @@ namespace Escape.Extensions.UI.Dialog {
 	
 	public class MessagePrompt : IPromptDialog<MessagePromptResult> {
 		
-		public bool IsOpen { get; private set; }
+		public bool IsOpen { get; set; }
 		public MessagePromptResult Result { get; private set; }
 
 		private readonly string _title;
@@ -16,8 +16,6 @@ namespace Escape.Extensions.UI.Dialog {
 			_title = title;
 			_message = message;
 			_buttons = buttons;
-
-			IsOpen = true;
 		}
 		
 		public bool Prompt(bool popup = true) {

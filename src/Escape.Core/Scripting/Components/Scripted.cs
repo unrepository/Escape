@@ -36,7 +36,7 @@ namespace Escape.Core.Scripting.Components {
 				t.ResourceScript = new Ref<ScriptResource>((ScriptResource) res);
 				
 				res.Value.Construct(t.ConstructorTypes, t.ConstructorArguments);
-				res.Value.Call(IScript.FunctionCall.OnInitialize, [ res.Value.World, res.Value.Owner ]);
+				res.Value.Call(IScript.FunctionCall.OnInitialize, [ res.Platform, res.Value.World, res.Value.Owner ]);
 			};
 		}
 

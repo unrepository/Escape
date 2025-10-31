@@ -25,9 +25,10 @@ namespace Escape.Core.Resources {
 			}
 		}
 
-		public override bool Save() {
-			if(!base.Save()) return false;
-
+		public override bool Save(bool metadataOnly = true) {
+			if(!base.Save(metadataOnly)) return false;
+			if(metadataOnly) return true;
+			
 			var dict = new Dictionary<string, InputCombo[]>();
 
 			foreach(var (combos, action) in Value) {

@@ -44,6 +44,10 @@ namespace Escape.Resources {
 			Id = Settings.Id;
 			ResourceAssembly = Assembly.GetCallingAssembly();
 
+			if(filePath is not null) {
+				Settings.Path = filePath + ImportMetadata.FILE_EXTENSION;
+			}
+			
 			WasConstructed = true;
 		}
 		
@@ -72,7 +76,7 @@ namespace Escape.Resources {
 			Dependencies = [];
 		}
 
-		public virtual bool Save() {
+		public virtual bool Save(bool metadataOnly = true) {
 			if(FilePath is null) return false;
 			Settings.Save(typeof(TImportSettings));
 			

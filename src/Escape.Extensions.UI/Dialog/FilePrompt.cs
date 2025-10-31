@@ -26,8 +26,6 @@ namespace Escape.Extensions.UI.Dialog {
 			_title = title;
 			_currentDirectory = startingDirectory ?? new(Directory.GetCurrentDirectory());
 			_filters = filters ?? [ "*" ];
-			
-			IsOpen = true;
 		}
 		
 		public bool Prompt(bool popup = false) {

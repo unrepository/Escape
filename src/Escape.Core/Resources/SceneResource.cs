@@ -26,10 +26,11 @@ namespace Escape.Core.Resources {
 			Value = scene ?? throw new InvalidDataException("Failed to deserialize scene");
 		}
 
-		public override bool Save() {
-			if(!base.Save()) return false;
+		public override bool Save(bool metadataOnly = true) {
+			if(!base.Save(metadataOnly)) return false;
+			if(metadataOnly) return true;
 
-			using var stream = new FileStream(FilePath!, FileMode.OpenOrCreate, FileAccess.Write);
+			using var stream = new FileStream(FilePath!, FileMode.Create, FileAccess.Write);
 			JsonSerializer.Serialize(stream, Value, _serializerOptions);
 
 			return true;

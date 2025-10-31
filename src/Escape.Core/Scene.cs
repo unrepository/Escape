@@ -6,27 +6,24 @@ namespace Escape.Core {
 	
 	public class Scene : IDisposable {
 		
-		public IPlatform Platform { get; }
+		[JsonIgnore] public IPlatform Platform { get; }
 		
-		[JsonInclude]
 		public string Id { get; }
-		
-		[JsonInclude]
 		public World World { get; }
 
-		public Entity Root => World.GetRootEntity();
+		[JsonIgnore] public Entity Root => World.GetRootEntity();
 		
-		public RenderQueue? RenderQueue { get; }
+		[JsonIgnore] public RenderQueue? RenderQueue { get; }
 		
-		protected WorldUpdater WorldUpdater { get; }
-		protected WorldRenderer? WorldRenderer { get; }
+		[JsonIgnore] protected WorldUpdater WorldUpdater { get; }
+		[JsonIgnore] protected WorldRenderer? WorldRenderer { get; }
 
 		public Scene(IPlatform platform, string id, World? world, RenderQueue? renderQueue) {
 			Platform = platform;
 			Id = id;
 			World = world ?? World.Create();
 
-			WorldUpdater = new WorldUpdater(id + "#world", World);
+			WorldUpdater = new WorldUpdater(platform, id + "#world", World);
 
 			if(renderQueue is not null) {
 				WorldRenderer = new WorldRenderer(id + "#world", World, ObjectRenderer.Create(renderQueue.Platform, renderQueue.Pipeline!.ShaderPipeline));

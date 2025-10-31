@@ -5,7 +5,7 @@ namespace Escape.Extensions.UI.Dialog {
 	
 	public class TextPrompt : IPromptDialog<string> {
 
-		public bool IsOpen { get; private set; }
+		public bool IsOpen { get; set; }
 		public string? Result { get; private set; }
 
 		private readonly string _title;
@@ -14,8 +14,6 @@ namespace Escape.Extensions.UI.Dialog {
 		public TextPrompt(string title, string hint) {
 			_title = title;
 			_hint = hint;
-
-			IsOpen = true;
 		}
 		
 		public bool Prompt(bool popup = true) {
@@ -41,6 +39,11 @@ namespace Escape.Extensions.UI.Dialog {
 					   ImGuiInputTextFlags.EnterReturnsTrue))
 				{
 					Result = result;
+					IsOpen = false;
+				}
+
+				if(ImGui.Button("Cancel")) {
+					Result = null;
 					IsOpen = false;
 				}
 				

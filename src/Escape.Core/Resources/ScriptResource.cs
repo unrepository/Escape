@@ -11,7 +11,7 @@ namespace Escape.Core.Resources {
 		public override string[] FileExtensions => [ ".js", ".cs" ];
 		
 		public ScriptResource() { }
-		public ScriptResource(IPlatform platform, string? filePath, JavaScriptScript value, Import? settings = null) : base(platform, filePath, value, settings) { }
+		public ScriptResource(IPlatform platform, string? filePath, IScript value, Import? settings = null) : base(platform, filePath, value, settings) { }
 
 		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings, bool reloading = false) {
 			base.Load(platform, filePath, stream, resourceAssembly, settings, reloading);
@@ -39,9 +39,14 @@ namespace Escape.Core.Resources {
 					throw new ArgumentException("Somehow, file doesn't have a valid extension", nameof(filePath));
 			}
 		}
-		
-		public override bool Save()
-			=> base.Save();
+
+		public override bool Save(bool metadataOnly = true) {
+			if(!base.Save(metadataOnly)) return false;
+			if(metadataOnly) return true;
+
+			File.WriteAllText(FilePath!, Value.Source);
+			return true;
+		}
 
 		public override void SaveNew() {
 			throw new NotImplementedException();

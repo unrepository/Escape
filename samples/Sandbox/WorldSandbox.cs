@@ -78,9 +78,9 @@ public static class WorldSandbox {
 			new Renderable(model4)
 		);
 		
-		UpdateManager.Add(new TestRotationUpdater("test rotation", world, cube1));
-		UpdateManager.Add(new TestKiller("test killer", world, cube4));
-		UpdateManager.Add(new TestSwitcher("test model switcher", world, cube2, model1));
+		UpdateManager.Add(new TestRotationUpdater(platform, "test rotation", world, cube1));
+		UpdateManager.Add(new TestKiller(platform, "test killer", world, cube4));
+		UpdateManager.Add(new TestSwitcher(platform, "test model switcher", world, cube2, model1));
 		
 		_logger.Info("Create camera entity");
 		var camera = world.Create(
@@ -138,7 +138,7 @@ public static class WorldSandbox {
 		private TimeSpan _time = TimeSpan.Zero;
 		private Entity _entity;
 
-		public TestRotationUpdater(string id, World world, Entity entity) : base(id, world) {
+		public TestRotationUpdater(IPlatform platform, string id, World world, Entity entity) : base(platform, id, world) {
 			_entity = entity;
 		}
 
@@ -163,7 +163,7 @@ public static class WorldSandbox {
 		private Entity _entity;
 		private bool _done;
 
-		public TestKiller(string id, World world, Entity entity) : base(id, world) {
+		public TestKiller(IPlatform platform, string id, World world, Entity entity) : base(platform, id, world) {
 			_entity = entity;
 		}
 
@@ -186,7 +186,7 @@ public static class WorldSandbox {
 		private Model _newModel;
 		private bool _done;
 
-		public TestSwitcher(string id, World world, Entity entity, Model newModel) : base(id, world) {
+		public TestSwitcher(IPlatform platform, string id, World world, Entity entity, Model newModel) : base(platform, id, world) {
 			_entity = entity;
 			_newModel = newModel;
 		}

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using Arch.Core;
+using Escape.Extensions.CSharp;
 using Escape.Renderer;
 using Escape.Resources;
 using Microsoft.CodeAnalysis;
@@ -19,6 +20,7 @@ namespace Escape.Core.Scripting {
 		public Type Type { get; }
 		public object? Instance { get; private set; }
 
+		public IPlatform Platform { get; set; }
 		public World World { get; set; }
 		public Entity Owner { get; set; }
 
@@ -85,13 +87,15 @@ namespace Escape.Core.Scripting {
 			}
 		}
 
-		public virtual void OnInitialize(World w, Entity e) {
-			World = w;
-			Owner = e;
+		public virtual void OnInitialize(IPlatform platform, World world, Entity owner) {
+			Platform = platform;
+			World = world;
+			Owner = owner;
 		}
 
-		public virtual void OnDeinitialize(World w, Entity e) {
-			World = w;
+		public virtual void OnDeinitialize(IPlatform platform, World world, Entity owner) {
+			Platform = default;
+			World = default;
 			Owner = default;
 		}
 		
@@ -115,12 +119,12 @@ namespace Escape.Core.Scripting {
 			
 			switch(call) {
 				case IScript.FunctionCall.OnInitialize:
-					script.OnInitialize((World) arguments[0], (Entity) arguments[1]);
-					if(!IsInternal) OnInitialize((World) arguments[0], (Entity) arguments[1]);
+					script.OnInitialize((IPlatform) arguments[0], (World) arguments[1], (Entity) arguments[2]);
+					if(!IsInternal) OnInitialize((IPlatform) arguments[0], (World) arguments[1], (Entity) arguments[2]);
 					return null;
 				case IScript.FunctionCall.OnDeinitialize:
-					script.OnDeinitialize((World) arguments[0], (Entity) arguments[1]);
-					if(!IsInternal) OnDeinitialize((World) arguments[0], (Entity) arguments[1]);
+					script.OnDeinitialize((IPlatform) arguments[0], (World) arguments[1], (Entity) arguments[2]);
+					if(!IsInternal) OnDeinitialize((IPlatform) arguments[0], (World) arguments[1], (Entity) arguments[2]);
 					return null;
 				case IScript.FunctionCall.OnUpdate:
 					script.OnUpdate((TimeSpan) arguments[0]);
@@ -216,7 +220,7 @@ namespace Escape.Core.Scripting {
 				);
 
 				compilation = compilation.AddSyntaxTrees(syntaxTree);
-				_loadedScripts[scriptAssembly].Add(file);
+				_loadedScripts[scriptAssembly].Add(PathExtensions.GetRealPath(file));
 			}
 			
 			using var output = new MemoryStream();

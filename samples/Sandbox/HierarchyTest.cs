@@ -54,7 +54,7 @@ public static class HierarchyTest {
 		var cameraPivot = world.Create(new Transform3D());
 		cameraPivot.MakeParentOf(camera);
 		
-		UpdateManager.Add(new TestUpdater("test", world) {
+		UpdateManager.Add(new TestUpdater(platform, "test", world) {
 			A = t3d1,
 			B = t3d2,
 			C = t3d3,
@@ -75,7 +75,7 @@ public static class HierarchyTest {
 		public required Entity E { get; set; }
 		public required Entity CameraPivot { get; set; }
 
-		public TestUpdater(string id, World world) : base(id, world) { }
+		public TestUpdater(IPlatform platform, string id, World world) : base(platform, id, world) { }
 
 		public override void Update(TimeSpan delta) {
 			var fd = (float) delta.TotalSeconds;

@@ -14,7 +14,7 @@ namespace Escape.Core {
 				if(_worldRenderer is not null && _renderQueue is not null) RenderManager.Remove(_renderQueue, _worldRenderer);
 
 				if(value is not null) {
-					_worldUpdater = new WorldUpdater("main_engine", value);
+					_worldUpdater = new WorldUpdater(_platform, "main_engine", value);
 					UpdateManager.Add(_worldUpdater);
 
 					if(_renderQueue is not null) {
@@ -34,6 +34,7 @@ namespace Escape.Core {
 
 		public static JobScheduler SharedJobScheduler { get; }
 
+		private static IPlatform _platform;
 		private static RenderQueue? _renderQueue;
 		
 		private static WorldUpdater? _worldUpdater;
@@ -55,6 +56,7 @@ namespace Escape.Core {
 				RenderManager.Remove(_renderQueue, _worldRenderer);
 			}
 
+			_platform = platform;
 			_renderQueue = renderQueue;
 
 			if(World is not null) {

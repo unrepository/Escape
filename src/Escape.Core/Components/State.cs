@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Arch.Core;
 using Arch.Core.Extensions;
 
@@ -6,6 +7,7 @@ namespace Escape.Core.Components {
 	[Component]
 	public struct State {
 		
+		[JsonIgnore]
 		public Entity Owner { get; internal set; }
 
 		public string? Name {
