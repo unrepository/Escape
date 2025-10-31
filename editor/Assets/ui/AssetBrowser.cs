@@ -5,6 +5,7 @@ using System.Reflection;
 using Escape.Core;
 using Escape.Core.Resources;
 using Escape.Core.Scripting;
+using Escape.Core.Scripting.Components;
 using Escape.Editor;
 using Escape.Extensions.UI;
 using Escape.Extensions.UI.Dialog;
@@ -18,7 +19,7 @@ using Hexa.NET.ImGui;
 public class AssetBrowser : CSharpScript {
 
 	private FileInfo? _selectedFile;
-	private bool _viewExternal = true;
+	private bool _viewExternal = false;
 
 	private TextPrompt? _newResourcePrompt;
 	private string? _newResourcePath;
@@ -51,7 +52,7 @@ public class AssetBrowser : CSharpScript {
 
 			ImGui.Columns(2, true);
 			
-			if(_viewExternal) {
+			if(!_viewExternal) {
 				void DrawDirectoryTree(DirectoryInfo directory) {
 					ImGui.Selectable(directory.Name);
 
@@ -84,6 +85,9 @@ public class AssetBrowser : CSharpScript {
 
 					foreach(var file in directory.EnumerateFiles()) {
 						if(file.Name.EndsWith(ImportMetadata.FILE_EXTENSION)) continue;
+						if(!ProjectResources.AllResources.ContainsKey(file.FullName)) continue;
+
+						var resource = ProjectResources.AllResources[file.FullName];
 
 						if(ImGui.Selectable(file.Name)) {
 							_selectedFile = file;
@@ -91,7 +95,13 @@ public class AssetBrowser : CSharpScript {
 
 						if(ImGui.BeginPopupContextItem()) {
 							if(ImGui.Selectable("Open in editor")) {
-								// file editor
+								switch(resource.Get().Value) {
+									case Scene scene:
+										World.Create(new Renderable(), new Scripted(EditorResources.SceneEditorScript, Platform, scene));
+										break;
+									default:
+										throw new NotImplementedException();
+								}
 							}
 
 							ImGui.EndPopup();

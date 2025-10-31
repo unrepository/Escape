@@ -17,7 +17,8 @@ namespace Escape.Renderer.OpenGL {
 		public override void Initialize() { }
 
 		public override bool Begin() {
-			if(RenderTarget is null) return false;
+			if(Queue.Count == 0) return true;
+			if(RenderTarget is null) return true;
 			
 			Debug.Assert(RenderTarget is GLFramebuffer);
 			
@@ -68,7 +69,8 @@ namespace Escape.Renderer.OpenGL {
 		}
 
 		public override bool End() {
-			if(RenderTarget is null) return false;
+			if(Queue.Count == 0) return true;
+			if(RenderTarget is null) return true;
 			
 			if(RenderTarget is GLWindow.WindowFramebuffer windowFramebuffer) {
 				var window = windowFramebuffer.Window.Base;

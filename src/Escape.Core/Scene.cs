@@ -6,28 +6,41 @@ namespace Escape.Core {
 	
 	public class Scene : IDisposable {
 		
-		[JsonIgnore] public IPlatform Platform { get; }
+		public IPlatform Platform { get; }
 		
 		public string Id { get; }
 		public World World { get; }
 
-		[JsonIgnore] public Entity Root => World.GetRootEntity();
+		public Entity Root => World.GetRootEntity();
+
+		public RenderQueue? RenderQueue {
+			get => field;
+			set {
+				if(value is not null) {
+					if(WorldRenderer is not null) {
+						WorldRenderer.ObjectRenderer = ObjectRenderer.Create(Platform, value.Pipeline!.ShaderPipeline);
+					} else {
+						WorldRenderer = new WorldRenderer(Id + "#world", World, ObjectRenderer.Create(Platform, value.Pipeline!.ShaderPipeline));
+					}
+				}
+
+				field = value;
+			}
+		}
 		
-		[JsonIgnore] public RenderQueue? RenderQueue { get; }
-		
-		[JsonIgnore] protected WorldUpdater WorldUpdater { get; }
-		[JsonIgnore] protected WorldRenderer? WorldRenderer { get; }
+		public WorldUpdater WorldUpdater { get; private set; }
+		public WorldRenderer? WorldRenderer { get; private set; }
 
 		public Scene(IPlatform platform, string id, World? world, RenderQueue? renderQueue) {
 			Platform = platform;
 			Id = id;
 			World = world ?? World.Create();
-
-			WorldUpdater = new WorldUpdater(platform, id + "#world", World);
-
-			if(renderQueue is not null) {
-				WorldRenderer = new WorldRenderer(id + "#world", World, ObjectRenderer.Create(renderQueue.Platform, renderQueue.Pipeline!.ShaderPipeline));
-			}
+			
+			WorldUpdater = new WorldUpdater(Platform, Id + "#world", World);
+			
+			// if(RenderQueue is not null) {
+			// 	WorldRenderer = new WorldRenderer(Id + "#world", World, ObjectRenderer.Create(Platform, RenderQueue.Pipeline!.ShaderPipeline));
+			// }
 			
 			RenderQueue = renderQueue;
 
@@ -56,6 +69,7 @@ namespace Escape.Core {
 			
 			if(RenderQueue is not null && WorldRenderer is not null) {
 				RenderManager.Remove(RenderQueue, WorldRenderer);
+				WorldRenderer.Dispose();
 			}
 			
 			OnClose();

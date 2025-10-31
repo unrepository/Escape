@@ -18,7 +18,7 @@ namespace Escape.Core {
 			if(_rootEntities.TryGetValue(world.Id, out var root)) {
 				return root;
 			}
-
+			
 			throw new InvalidDataException("World has no root entity");
 
 			//var entity = world.Create();
@@ -28,6 +28,15 @@ namespace Escape.Core {
 
 		public static void SetRootEntity(this World world, Entity root) {
 			_rootEntities[world.Id] = root;
+		}
+
+		public static void CreateRootEntity(this World world) {
+			var rootEntity = world.Create();
+			rootEntity.Add(new State {
+				Owner = rootEntity
+			});
+
+			world.SetRootEntity(rootEntity);
 		}
 
 		public static IEnumerable<Entity> GetEntities(this World world) {

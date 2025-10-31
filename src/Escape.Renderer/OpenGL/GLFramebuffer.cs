@@ -61,7 +61,31 @@ namespace Escape.Renderer.OpenGL {
 		}
 
 		public override void CreateAttachment(AttachmentType type) {
-			throw new NotImplementedException();
+			_platform.API.BindFramebuffer(FramebufferTarget.Framebuffer, (uint) Handle);
+			
+			switch(type) {
+				case AttachmentType.Color:
+					var texture = new GLTexture(
+						_platform,
+						Size,
+						Texture.TextureFilter.Linear,
+						Texture.TextureWrapMode.ClampToEdge,
+						Texture.TextureFormat.RGB8
+					);
+					
+					_platform.API.FramebufferTexture2D(
+						FramebufferTarget.Framebuffer,
+						FramebufferAttachment.ColorAttachment0 + TextureAttachments.Count,
+						TextureTarget.Texture2D,
+						texture.Id,
+						0
+					);
+					
+					TextureAttachments.Add(texture);
+					break;
+				default:
+					throw new NotImplementedException();
+			}
 		}
 
 		public override void Resize(Vector2D<int> size) {

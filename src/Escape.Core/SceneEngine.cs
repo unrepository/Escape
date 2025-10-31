@@ -6,8 +6,8 @@ namespace Escape.Core {
 
 		private static readonly Dictionary<RenderQueue, Scene> _scenes = [];
 
-		public static void SetScene(RenderQueue renderQueue, Scene? scene) {
-			if(_scenes.TryGetValue(renderQueue, out var openScene)) {
+		public static void SetScene(RenderQueue renderQueue, Scene? scene, bool doEvents = true) {
+			if(_scenes.TryGetValue(renderQueue, out var openScene) && doEvents) {
 				openScene.Close();
 			}
 
@@ -17,7 +17,7 @@ namespace Escape.Core {
 			}
 
 			_scenes[renderQueue] = scene;
-			scene.Open();
+			if(doEvents) scene.Open();
 		}
 
 		public static Scene? GetScene(RenderQueue renderQueue) {

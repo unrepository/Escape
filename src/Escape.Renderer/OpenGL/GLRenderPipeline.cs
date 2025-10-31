@@ -21,7 +21,9 @@ namespace Escape.Renderer.OpenGL {
 		
 		public override bool Begin() {
 			Debug.Assert(Queue is GLRenderQueue);
-			Debug.Assert(Queue.RenderTarget is not null);
+			if(Queue.GetQueue().Count == 0) return true;
+
+			//Debug.Assert(Queue.RenderTarget is not null);
 
 			if(!Queue.Begin()) return false;
 			Program.Get().Program!.Bind(this);
@@ -41,7 +43,7 @@ namespace Escape.Renderer.OpenGL {
 		}
 
 		public override bool End() {
-			return Queue.End();
+			return Queue.GetQueue().Count == 0 || Queue.End();
 		}
 		
 		public override void Dispose() {

@@ -22,12 +22,11 @@ namespace Escape.Core {
 			Id = id;
 			World = world;
 
-			var rootEntity = world.Create();
-			rootEntity.Add(new State {
-				Owner = rootEntity
-			});
-
-			world.SetRootEntity(rootEntity);
+			try {
+				world.GetRootEntity();
+			} catch(InvalidDataException) {
+				world.CreateRootEntity();
+			}
 
 			RelationshipTracker = new RelationshipTracker(world);
 			ScriptTracker = new ScriptTracker(platform, world);

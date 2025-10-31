@@ -3,12 +3,35 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Arch.Core;
 using Arch.Core.Extensions;
+using Escape.Core.Components;
 
 namespace Escape.Core {
 	
 	public class EntityConverter : JsonConverter<Entity> {
 		
 		public required World? World { get; set; }
+		
+		public Entity Read(JsonElement root, JsonSerializerOptions options) {
+			Debug.Assert(World is not null);
+			
+			var e = this.World.Create();
+
+			foreach(var component in root.GetProperty("components").EnumerateArray()) {
+				var type = Type.GetType(component.GetProperty("type").GetString());
+				if(type is null) throw new TypeUnloadedException();
+				
+				var componentObj = component.GetProperty("value").Deserialize(type, options);
+				if(componentObj is null) throw new InvalidDataException();
+
+				if(componentObj is State state) {
+					state.Owner = e;
+				}
+				
+				e.Add(componentObj);
+			}
+
+			return e;
+		}
 
 		public override Entity Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
 			Debug.Assert(World is not null);

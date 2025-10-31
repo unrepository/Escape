@@ -128,7 +128,7 @@ namespace Escape.Renderer.OpenGL {
 			ShaderPipeline.PointLightData.Push();
 			ShaderPipeline.SpotLightData.Push();
 
-			foreach(var (obj, data) in _objectData) {
+			foreach(var (obj, data) in new Dictionary<Renderable, ObjectDrawData>(_objectData)) {
 				data.RenderCallback?.Invoke(queue, delta);
 				
 				for(int i = 0; i < obj.Model?.Meshes.Count; i++) {

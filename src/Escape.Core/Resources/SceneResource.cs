@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+using Arch.Core;
 using Escape.Renderer;
 using Escape.Resources;
 
@@ -10,6 +11,10 @@ namespace Escape.Core.Resources {
 		public override Type MetadataType => typeof(Import);
 		public override string[] FileExtensions => [ ".scene" ];
 
+		private static readonly JsonDocumentOptions _documentOptions = new() {
+			CommentHandling = JsonCommentHandling.Skip
+		};
+		
 		private static readonly JsonSerializerOptions _serializerOptions = new(ImportMetadata.DefaultSerializerOptions);
 
 		static SceneResource() {
@@ -22,8 +27,13 @@ namespace Escape.Core.Resources {
 		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings, bool reloading = false) {
 			base.Load(platform, filePath, stream, resourceAssembly, settings, reloading);
 			
-			var scene = JsonSerializer.Deserialize<Scene>(stream, _serializerOptions);
-			Value = scene ?? throw new InvalidDataException("Failed to deserialize scene");
+			var document = JsonDocument.Parse(stream, _documentOptions);
+			var root = document.RootElement;
+
+			var id = root.GetProperty("id").GetString();
+			var world = root.GetProperty("world").Deserialize<World>(_serializerOptions);
+
+			Value = new Scene(platform, id ?? "", world, null);
 		}
 
 		public override bool Save(bool metadataOnly = true) {
@@ -31,8 +41,14 @@ namespace Escape.Core.Resources {
 			if(metadataOnly) return true;
 
 			using var stream = new FileStream(FilePath!, FileMode.Create, FileAccess.Write);
-			JsonSerializer.Serialize(stream, Value, _serializerOptions);
+			var writer = new Utf8JsonWriter(stream);
 
+			writer.WriteStartObject();
+			writer.WriteString("id", Value.Id);
+			writer.WritePropertyName("world");
+			new WorldConverter().Write(writer, Value.World, _serializerOptions);
+			writer.WriteEndObject();
+			
 			return true;
 		}
 

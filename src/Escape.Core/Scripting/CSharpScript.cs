@@ -193,6 +193,7 @@ namespace Escape.Core.Scripting {
 				.WithOptions(
 					new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
 						.WithUsings("System", "Escape.Core", "Escape.Core.Components", "Escape.Core.Scripting", "Escape.Resources", "Arch.Core")
+						.WithAllowUnsafe(true)
 				)
 				.AddReferences(references.Values.ToArray());
 

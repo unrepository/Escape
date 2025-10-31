@@ -7,15 +7,6 @@ namespace Escape.Core {
 	
 	public class WorldConverter : JsonConverter<World> {
 
-		public static JsonSerializerOptions SerializerOptions { get; set; } = new() {
-			IndentCharacter = '\t',
-			IndentSize = 1,
-			WriteIndented = true,
-			PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-			ReadCommentHandling = JsonCommentHandling.Skip,
-			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-		};
-
 		private static readonly EntityConverter _entityConverter = new EntityConverter() {
 			World = default
 		};
@@ -28,7 +19,7 @@ namespace Escape.Core {
 			var root = document.RootElement;
 
 			foreach(var entity in root.GetProperty("entities").EnumerateArray()) {
-				_entityConverter.Read(ref reader, typeof(Entity), options);
+				_entityConverter.Read(entity, options);
 			}
 
 			return w;
@@ -42,7 +33,7 @@ namespace Escape.Core {
 				writer.WriteStartArray("entities");
 				
 				foreach(var entity in value.GetEntities()) {
-					_entityConverter.Write(writer, entity, SerializerOptions);
+					_entityConverter.Write(writer, entity, options);
 				}
 				
 				writer.WriteEndArray();

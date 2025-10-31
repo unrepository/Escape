@@ -15,7 +15,6 @@ namespace Escape.Renderer {
 		public delegate void ResizeEventHandler(Vector2D<int> newSize);
 		public event ResizeEventHandler? Resized;
 		
-		[Obsolete]
 		protected List<Texture> TextureAttachments { get; } = [];
 
 		protected Framebuffer(IPlatform platform, RenderQueue queue, Vector2D<uint> size) {
@@ -24,9 +23,7 @@ namespace Escape.Renderer {
 			Size = size;
 		}
 
-		[Obsolete]
-		public IReadOnlyList<Texture> GetTextureAttachments()
-			=> TextureAttachments;
+		public IReadOnlyList<Texture> GetTextureAttachments() => TextureAttachments;
 		
 		[Obsolete("Use framebuffer as parameter in RenderPipeline.Begin()")]
 		public abstract void Bind();

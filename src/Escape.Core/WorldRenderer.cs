@@ -25,7 +25,7 @@ namespace Escape.Core {
 		public string Id { get; }
 		public int Priority { get; init; }
 		
-		public ObjectRenderer ObjectRenderer { get; }
+		public ObjectRenderer ObjectRenderer { get; set; }
 
 		private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 		

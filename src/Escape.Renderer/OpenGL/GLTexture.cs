@@ -19,6 +19,7 @@ namespace Escape.Renderer.OpenGL {
 			_platform = platform;
 
 			Id = platform.API.GenTexture();
+			Handle = Id;
 			Bind();
 
 			unsafe {

@@ -1,0 +1,21 @@
+{
+	"id": "meow",
+	"world": {
+		"root_entity": 0,
+		"entities": [
+			{
+				"id": 0,
+				"world_id": 2,
+				"components": [
+					{
+						"type": "Escape.Core.Components.State",
+						"value": {
+	"visible": true,
+	"disabled": false
+}
+					}
+				]
+			}
+		]
+	}
+}

@@ -27,9 +27,9 @@ namespace Escape.Core {
 					Debug.Assert(queue is VkRenderQueue);
 					pipeline = new VkRenderPipeline(vkPlatform, (VkRenderQueue) queue, shaderPipeline);
 					break;
-				case GLPlatform glPlatfom:
+				case GLPlatform glPlatform:
 					Debug.Assert(queue is GLRenderQueue);
-					pipeline = new GLRenderPipeline(glPlatfom, (GLRenderQueue) queue, shaderPipeline);
+					pipeline = new GLRenderPipeline(glPlatform, (GLRenderQueue) queue, shaderPipeline);
 					break;
 				default:
 					throw new NotImplementedException("PlatformImpl");
