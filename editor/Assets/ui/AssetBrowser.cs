@@ -19,9 +19,7 @@ public class AssetBrowser : CSharpScript {
 
 	private TextPrompt? _newResourcePrompt;
 	private string? _newResourcePath;
-	// TODO this fucking sucks; make a separate struct or class or something
-	private (string[] FileExtensions, ConstructorInfo Constructor, MethodInfo LoadMethod, Type ResourceType, Type ResourceValueType, Type MetaType)?
-		_newResourceFormat;
+	private ResourceRegistry.Format? _newResourceFormat;
 	
 	public override void OnRender(RenderQueue queue, TimeSpan delta) {
 		if(ImGui.Begin("Resource Editor", ImGuiWindowFlags.MenuBar)) {
@@ -55,6 +53,9 @@ public class AssetBrowser : CSharpScript {
 					if(ImGui.BeginPopupContextItem()) {
 						if(ImGui.BeginMenu("New...")) {
 							foreach(var (formatId, format) in ResourceRegistry.Formats) {
+								if(format.NewConstructor is null) continue;
+								if(format.ValueConstructor is null) continue;
+								
 								if(ImGui.MenuItem(formatId)) {
 									_newResourcePrompt = new TextPrompt("New resource...", string.Join(", ", format.FileExtensions));
 									_newResourcePath = directory.FullName;
@@ -97,7 +98,7 @@ public class AssetBrowser : CSharpScript {
 			} else {
 				foreach(var (formatId, format) in ResourceRegistry.Formats) {
 					foreach(var type in ProjectGlobals.ProjectAssembly!.GetExportedTypes()) {
-						if(type.IsAssignableTo(format.ResourceValueType)) {
+						if(type.IsAssignableTo(format.ValueType)) {
 							ImGui.Text(type.Name);
 						}
 					}
@@ -118,15 +119,8 @@ public class AssetBrowser : CSharpScript {
 					var filePath = Path.Combine(_newResourcePath!, _newResourcePrompt.Result);
 					
 					var format = _newResourceFormat!.Value;
-					var resourceCtor = format.ResourceType.GetConstructor(
-						BindingFlags.Public | BindingFlags.Instance,
-						[typeof(IPlatform), typeof(string), format.ResourceValueType, format.MetaType]
-					);
-
-					var valueCtor = format.ResourceValueType.GetConstructor(
-						BindingFlags.Public | BindingFlags.Instance,
-						[]
-					);
+					var resourceCtor = format.NewConstructor;
+					var valueCtor = format.ValueConstructor;
 
 					Debug.Assert(resourceCtor is not null);
 					Debug.Assert(valueCtor is not null);

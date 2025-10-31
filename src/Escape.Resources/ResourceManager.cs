@@ -205,7 +205,7 @@ namespace Escape.Resources {
 				return null;
 			}
 
-			var instance = format.Value.Constructor.Invoke(null);
+			var instance = format.Value.DefaultConstructor.Invoke(null);
 
 			try {
 				format.Value.LoadMethod.Invoke(
@@ -339,7 +339,7 @@ namespace Escape.Resources {
 					}
 					
 					// now we can read the actual type
-					var importMeta = ImportMetadata.Load(metaFilePath, format.Value.MetaType);
+					var importMeta = ImportMetadata.Load(metaFilePath, format.Value.MetadataType);
 					Debug.Assert(importMeta is not null, "This should never happen actually");
 
 					database.Entries[importMeta.Id] = new ResourceDatabase.Entry {

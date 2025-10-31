@@ -10,7 +10,7 @@
 
 		<ItemGroup>
 			<Compile Remove="@(CSScripts)" />
-			<!--<ClCompile Include="@(CSScripts)" />-->
+			<ClCompile Include="@(CSScripts)" />
 		</ItemGroup>
 
 		<Message Text="Switched @(CSScripts) script targets." Importance="normal" />

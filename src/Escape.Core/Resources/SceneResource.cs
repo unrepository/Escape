@@ -16,6 +16,9 @@ namespace Escape.Core.Resources {
 			_serializerOptions.Converters.Add(new WorldConverter());
 		}
 		
+		public SceneResource() { }
+		public SceneResource(IPlatform platform, string? filePath, Scene value, Import? settings = null) : base(platform, filePath, value, settings) { }
+
 		public override void Load(IPlatform platform, string filePath, Stream stream, Assembly resourceAssembly, Import? settings, bool reloading = false) {
 			base.Load(platform, filePath, stream, resourceAssembly, settings, reloading);
 			
